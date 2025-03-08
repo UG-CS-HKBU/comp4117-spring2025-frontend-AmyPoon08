@@ -1,12 +1,20 @@
 <script setup>
 // imports
-import { ref } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 
 // credentials
 const credentials = ref({
     email: '',
     password: ''
 });
+
+const { hideNav } = inject('navControls')
+
+// Hide nav when component is mounted
+onMounted(() => {
+  hideNav()
+})
+
 
 // methods
 const login = async () => {
@@ -34,14 +42,19 @@ const login = async () => {
         alert(error);
     }
 }
+onMounted(() => {
+    if (hideNav) {
+        hideNav();
+    }
+});
 </script>
 
 
 <template>
     <main>
         <div class="container-fluid mt-5">
-            <div class="card" style="width: 30rem;">
-                <div class="card-body" style="width: 30rem;">
+            <div class="card">
+                <div class="card-body" >
                     <h5 class="card-title" >Login</h5>
                     <form @submit.prevent="login">
                         <div class="mb-5">
@@ -67,9 +80,15 @@ main {
     background-image: url('@/images/login.png');
     background-size: cover;
     background-position: center;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    height: 100vh;
+}
+.card {
+    width: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    margin: 0 auto;
 }
 </style>

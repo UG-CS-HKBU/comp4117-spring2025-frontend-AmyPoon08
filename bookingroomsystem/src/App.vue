@@ -1,17 +1,33 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 
 const userName = ref('User Name') // Replace with actual user name logic
 const showMenu = ref(false)
+const showNav = ref(true) // New ref to control nav visibility
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value
 }
+
+const hideNav = () => {
+  showNav.value = false
+}
+
+const showNavBar = () => {
+  showNav.value = true
+}
+
+// Provide both functions to child components
+provide('navControls', {
+  hideNav,
+  showNavBar
+})
+
 </script>
 
 <template>
-  <nav>
+  <nav v-if="showNav">
     <ul>
       <li><a href="#home">BookingRoomSystem</a></li>
       <li style="float: right; position: relative;">
