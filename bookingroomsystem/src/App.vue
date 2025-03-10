@@ -1,8 +1,45 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import { ref, provide } from 'vue'
+import { ref, provide, onMounted } from 'vue'
 
-const userName = ref('User Name') // Replace with actual user name logic
+
+const userName = ref('') 
+
+const fetchName = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+
+        const response = await fetch('/api/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Pass the token in the Authorization header
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Unauthorized: Please log in again.');
+            } else if (response.status === 403) {
+                throw new Error('Forbidden: Invalid token.');
+            } else if (response.status === 404) {
+                throw new Error('User profile not found.');
+            } else {
+                throw new Error('Failed to fetch profile. Server responded with status: ' + response.status);
+            }
+        }
+
+        const data = await response.json();
+        userName.value = data; 
+        console.log('userName fetched successfully:', data);
+    } catch (error) {
+        console.error('Error fetching profile:', error.message);
+    }
+};
+
 //const showMenu = ref(false)
 const showNav = ref(true) // New ref to control nav visibility
 
@@ -24,6 +61,9 @@ provide('navControls', {
   showNavBar
 })
 
+onMounted(() => {
+    fetchName();
+});
 </script>
 
 <template>
@@ -32,7 +72,7 @@ provide('navControls', {
             <a href="/" @click="goToHome">Room Booking System</a>
         </div>
         <div class="right">
-            <span>{{ userName }}</span>
+            <span>{{ userName.username }}</span>
             <br>
             <div class="dropdown">
                 <button class="dropbtn"><span>&#9776;</span></button>

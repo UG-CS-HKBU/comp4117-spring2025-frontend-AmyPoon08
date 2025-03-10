@@ -2,11 +2,11 @@
     import { ref, onMounted } from 'vue';
 
     const profile = ref({
-    company: '',
-    username: '',
-    email: '',
-    mobile: '',
-    department: ''
+        company: '',
+        username: '',
+        email: '',
+        mobile: '',
+        department: ''
     });
 
     const isEditing = ref(false);
