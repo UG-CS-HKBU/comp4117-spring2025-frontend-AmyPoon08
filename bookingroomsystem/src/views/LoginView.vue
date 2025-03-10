@@ -28,10 +28,19 @@ const login = async () => {
             body: JSON.stringify(credentials.value)
         });
 
+
+        console.log('Response:', response);
+        console.log('Response Text:', await response.clone().text());
+
         // response
+        if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+          throw new Error('Empty response from server');
+        }
+    
         const data = await response.json();
 
         if (!response.ok) {
+            console.log("login failed");
             throw new Error(data.message);
         }
 
@@ -42,6 +51,7 @@ const login = async () => {
         alert(error);
     }
 }
+
 onMounted(() => {
     if (hideNav) {
         hideNav();
@@ -60,11 +70,11 @@ onMounted(() => {
                         <div class="mb-5">
                             <label for="email" class="form-label">Email: </label>
                             <input type="email" class="form-control" v-model="credentials.email" id="email"
-                                aria-describedby="emailHelp" >
+                                aria-describedby="emailHelp" required>
                         </div>
                         <div class="mb-5">
                             <label for="password" class="form-label">Password: </label>
-                            <input type="password"  class="form-control" v-model="credentials.password" id="password">
+                            <input type="password"  class="form-control" v-model="credentials.password" id="password" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
