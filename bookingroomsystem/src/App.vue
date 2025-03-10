@@ -29,7 +29,7 @@ provide('navControls', {
 <template>
     <nav  v-if="showNav" class="menubar">
         <div class="left">
-            <a href="#" @click="goToHome">Room Booking System</a>
+            <a href="/" @click="goToHome">Room Booking System</a>
         </div>
         <div class="right">
             <span>{{ userName }}</span>
@@ -37,7 +37,7 @@ provide('navControls', {
             <div class="dropdown">
                 <button class="dropbtn"><span>&#9776;</span></button>
                 <div class="dropdown-content">
-                    <a href="#">Profile</a>
+                    <a href="/profile">Profile</a>
                     <a href="#">Bookings</a>
                     <a href="#">Booking Record</a>
                     <a href="#">About us</a>
