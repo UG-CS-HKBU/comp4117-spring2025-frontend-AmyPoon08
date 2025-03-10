@@ -1,82 +1,101 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import { ref, provide } from 'vue'
+import { ref } from 'vue'
 
-const userName = ref('User Name') // Replace with actual user name logic
-const showMenu = ref(false)
-const showNav = ref(true) // New ref to control nav visibility
+const userName = ref('Demo User') // Replace with actual user data
 
-const toggleMenu = () => {
-  showMenu.value = !showMenu.value
+function goToHome() {
+    // Logic to navigate to home page
 }
 
-const hideNav = () => {
-  showNav.value = false
+function logout() {
+    // Logic to handle logout
 }
-
-const showNavBar = () => {
-  showNav.value = true
-}
-
-// Provide both functions to child components
-provide('navControls', {
-  hideNav,
-  showNavBar
-})
-
 </script>
 
 <template>
-  <nav v-if="showNav">
-    <ul>
-      <li><a href="#home">BookingRoomSystem</a></li>
-      <li style="float: right; position: relative;">
-        <a href="#more-options" @click.prevent="toggleMenu">&#9776;</a>
-        <ul :style="{ display: showMenu ? 'block' : 'none', position: 'absolute', right: '0', backgroundColor: '#333', listStyleType: 'none', padding: '0', margin: '0' }">
-          <li><a href="#profile">Profile</a></li>
-          <li><a href="#bookings">Bookings</a></li>
-          <li><a href="#booking-record">Booking Record</a></li>
-          <li><a href="#about-us">About us</a></li>
-          <li><a href="#logout">Logout</a></li>
-        </ul>
-      </li>
-      <li style="float: right;"><span>{{ userName }}</span></li>
-    </ul>
-  </nav>
-  <router-view />
+    <nav class="menubar">
+        <div class="left">
+            <a href="#" @click="goToHome">Room Booking System</a>
+        </div>
+        <div class="right">
+            <span>{{ userName }}</span>
+            <br>
+            <div class="dropdown">
+                <button class="dropbtn"><span>&#9776;</span></button>
+                <div class="dropdown-content">
+                    <a href="#">Profile</a>
+                    <a href="#">Bookings</a>
+                    <a href="#">Booking Record</a>
+                    <a href="#">About us</a>
+                    <a href="#" @click="logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <RouterView />
 </template>
 
-<style scoped>
-nav {
-  background-color: #333;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0; 
-  width: 100%;
-  z-index: 1000; 
+<style>
+.menubar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #333;
+    color: white;
 }
 
-nav ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
+.menubar .left a {
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
 }
 
-nav ul li {
-  float: left;
+.menubar .right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }
 
-nav ul li a, nav ul li span {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
+.menubar .right .dropdown {
+    position: relative;
+    display: inline-block;
 }
 
-nav ul li a:hover, nav ul li span:hover {
-  background-color: #111;
+.menubar .right .dropdown .dropbtn {
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.menubar .right .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 10px; 
+}
+
+.menubar .right .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.menubar .right .dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.menubar .right .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.menubar .right .dropdown:hover .dropbtn {
+    background-color: #555;
 }
 </style>
