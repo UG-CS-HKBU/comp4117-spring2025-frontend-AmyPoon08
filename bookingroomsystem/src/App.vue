@@ -1,20 +1,33 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 
-const userName = ref('Demo User') // Replace with actual user data
+const userName = ref('User Name') // Replace with actual user name logic
+//const showMenu = ref(false)
+const showNav = ref(true) // New ref to control nav visibility
 
-function goToHome() {
-    // Logic to navigate to home page
+// const toggleMenu = () => {
+//   showMenu.value = !showMenu.value
+// }
+
+const hideNav = () => {
+  showNav.value = false
 }
 
-function logout() {
-    // Logic to handle logout
+const showNavBar = () => {
+  showNav.value = true
 }
+
+// Provide both functions to child components
+provide('navControls', {
+  hideNav,
+  showNavBar
+})
+
 </script>
 
 <template>
-    <nav class="menubar">
+    <nav  v-if="showNav" class="menubar">
         <div class="left">
             <a href="#" @click="goToHome">Room Booking System</a>
         </div>
