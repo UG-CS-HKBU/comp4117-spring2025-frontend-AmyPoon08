@@ -65,11 +65,11 @@ export default {
       },
       {
         id: 3,
-        name: 'Room 2',
+        name: 'Room 3',
         events: [
           {
             id: 4,
-            title: 'Meeting 2',
+            title: 'Meeting 3',
             start: '2025-03-08T10:00:00',
             end: '2025-03-08T11:00:00'
           },
