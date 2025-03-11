@@ -1,6 +1,7 @@
 <script setup>
 // imports
 import { ref, inject, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 // credentials
 const credentials = ref({
@@ -8,13 +9,14 @@ const credentials = ref({
     password: ''
 });
 
-const { hideNav } = inject('navControls')
+const { hideNav, showNavBar } = inject('navControls');
+const router = useRouter();
+const showPassword = ref(false);
 
 // Hide nav when component is mounted
 onMounted(() => {
   hideNav()
-})
-
+});
 
 // methods
 const login = async () => {
@@ -28,16 +30,28 @@ const login = async () => {
             body: JSON.stringify(credentials.value)
         });
 
-
         console.log('Response:', response);
         console.log('Response Text:', await response.clone().text());
 
         // response
         if (response.status === 204 || response.headers.get('Content-Length') === '0') {
-          throw new Error('Empty response from server');
+          console.warn('Empty response from server');
+          localStorage.setItem('token', ''); // Assuming token is empty
+          showNavBar(); // Show nav bar after login
+          router.push('/home');
+          return;
         }
     
-        const data = await response.json();
+        const text = await response.text();
+        if (!text) {
+            console.warn('Empty response body');
+            localStorage.setItem('token', ''); // Assuming token is empty
+            showNavBar(); // Show nav bar after login
+            router.push('/home');
+            return;
+        }
+
+        const data = JSON.parse(text);
 
         if (!response.ok) {
             console.log("login failed");
@@ -46,11 +60,15 @@ const login = async () => {
 
         // save token to local storage
         localStorage.setItem('token', data.token);
-        window.location.href = '/';
+        router.push('/home');
     } catch (error) {
         alert(error);
     }
-}
+};
+
+const togglePasswordVisibility = () => {
+    showPassword.value = !showPassword.value;
+};
 
 onMounted(() => {
     if (hideNav) {
@@ -59,13 +77,11 @@ onMounted(() => {
 });
 </script>
 
-
 <template>
     <main>
         <div class="container-fluid mt-5">
             <div class="card">
                 <div class="card-body" >
-                    <h5 class="card-title" >Login</h5>
                     <form @submit.prevent="login">
                         <div class="mb-5">
                             <label for="email" class="form-label">Email: </label>
@@ -74,7 +90,12 @@ onMounted(() => {
                         </div>
                         <div class="mb-5">
                             <label for="password" class="form-label">Password: </label>
-                            <input type="password"  class="form-control" v-model="credentials.password" id="password" required>
+                            <div class="input-group">
+                                <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="credentials.password" id="password" required>
+                                <button type="button" class="btn btn-outline-secondary" @click="togglePasswordVisibility">
+                                    {{ showPassword ? 'Hide' : 'Show' }}
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
@@ -83,7 +104,6 @@ onMounted(() => {
         </div>
     </main>
 </template>
-
 
 <style scoped>
 main {
