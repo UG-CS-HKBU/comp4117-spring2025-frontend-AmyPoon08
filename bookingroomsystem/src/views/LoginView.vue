@@ -66,9 +66,9 @@ const login = async () => {
     }
 };
 
-const togglePasswordVisibility = () => {
-    showPassword.value = !showPassword.value;
-};
+// const togglePasswordVisibility = () => {
+//     showPassword.value = !showPassword.value;
+// };
 
 onMounted(() => {
     if (hideNav) {
@@ -92,9 +92,6 @@ onMounted(() => {
                             <label for="password" class="form-label">Password: </label>
                             <div class="input-group">
                                 <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="credentials.password" id="password" required>
-                                <button type="button" class="btn btn-outline-secondary" @click="togglePasswordVisibility">
-                                    {{ showPassword ? 'Hide' : 'Show' }}
-                                </button>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
