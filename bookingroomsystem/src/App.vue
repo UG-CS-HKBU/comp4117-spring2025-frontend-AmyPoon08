@@ -78,9 +78,9 @@ onMounted(() => {
                 <button class="dropbtn"><span>&#9776;</span></button>
                 <div class="dropdown-content">
                     <a href="/profile">Profile</a>
-                    <a href="#">Bookings</a>
-                    <a href="#">Booking Record</a>
-                    <a href="#">About us</a>
+                    <a href="/Bookings">Bookings</a>
+                    <a href="/BookingRecord">Booking Record</a>
+                    <a href="/AboutUs">About us</a>
                     <a href="#" @click="logout">Logout</a>
                 </div>
             </div>
