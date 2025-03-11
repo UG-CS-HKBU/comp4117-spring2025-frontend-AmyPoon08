@@ -69,10 +69,10 @@ onMounted(() => {
 <template>
     <nav  v-if="showNav" class="menubar">
         <div class="left">
-            <a href="/" @click="goToHome">Room Booking System</a>
+            <a href="/home" @click="goToHome">Room Booking System</a>
         </div>
         <div class="right">
-            <span>{{ userName.username }}</span>
+            <span>{{ userName.username }}</span> 
             <br>
             <div class="dropdown">
                 <button class="dropbtn"><span>&#9776;</span></button>
