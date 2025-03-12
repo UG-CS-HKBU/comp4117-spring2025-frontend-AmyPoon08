@@ -26,17 +26,17 @@ const router = createRouter({
       component: ProfileView,
     },
     {
-      path: '/AboutUs',
+      path: '/aboutus',
       name: 'AboutUs',
       component: AboutUsView,
     },
     {
-      path: '/Bookings',
+      path: '/bookings',
       name: 'Bookings',
       component: BookingsView,
     },
     {
-      path: '/CreateRoom',
+      path: '/createRoom',
       name: 'CreateNewRoom',
       component: CreateNewRoomView,
     },

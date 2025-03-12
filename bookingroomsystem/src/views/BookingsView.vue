@@ -1,28 +1,58 @@
 <script>
 import { ref } from 'vue';
-import DatePicker from 'vue-datepicker-next';
+// import DatePicker from 'vue-datepicker-next';
 
 export default {
-    components: {
-        DatePicker
-    },
+    // components: {
+    //     DatePicker
+    // },
     setup() {
-        const startDate = ref(null);
-        const endDate = ref(null);
-        const startTime = ref('');
-        const endTime = ref('');
-        const showTimeOptions = ref(false);
-        const timeOptions = [
-            { label: 'All time range', value: '00:00 - 23:59' },
-            { label: 'Working hours', value: '09:00 - 19:00' },
-            { label: 'Morning', value: '09:00 - 12:00' },
-            { label: 'Afternoon', value: '12:00 - 16:00' },
-            { label: 'Evening', value: '16:00 - 22:00' }
-        ];
+        const dateRange = ref([null, null]);
+        const timeRange = ref([null, null]);
 
-        const setTimeRange = (range) => {
-            [startTime.value, endTime.value] = range.split(' - ');
+        const generateTimeOptions = () => {
+        const options = [];
+            for (let hour = 0; hour < 24; hour++) {
+                const formattedHour = hour.toString().padStart(2, '0') + ':00';
+                options.push(formattedHour);
+            }
+            return options;
         };
+
+        const timeOptions = ref(generateTimeOptions());
+
+        const handleTimeRangeChange = (event) => {
+            const [start, end] = event.target.value.split(' to ');
+            if (start && end && start !== end) {
+                timeRange.value = [start, end];
+            }
+        };
+
+        // const handleDateRangeChange = (event) => {
+        //     const [start, end] = event.target.value.split(' to ');
+        //     dateRange.value = [start, end];
+        // };
+        
+        const handleDateRangeChange = (start, end) => {
+            dateRange.value = [start, end];
+        };
+
+        // const startDate = ref(null);
+        // const endDate = ref(null);
+        // const startTime = ref('');
+        // const endTime = ref('');
+        // const showTimeOptions = ref(false);
+        // const timeOptions = [
+        //     { label: 'All time range', value: '00:00 - 23:59' },
+        //     { label: 'Working hours', value: '09:00 - 19:00' },
+        //     { label: 'Morning', value: '09:00 - 12:00' },
+        //     { label: 'Afternoon', value: '12:00 - 16:00' },
+        //     { label: 'Evening', value: '16:00 - 22:00' }
+        // ];
+
+        // const setTimeRange = (range) => {
+        //     [startTime.value, endTime.value] = range.split(' - ');
+        // };
 
         const roomOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
@@ -169,10 +199,12 @@ export default {
 
 
         return {
-            startDate,
-            endDate,
-            startTime,
-            endTime,
+            // startDate,
+            // endDate,
+            // startTime,
+            // endTime,
+            dateRange,
+            timeRange,
             timeOptions,
             roomOptions,
             categoryOptions,
@@ -180,14 +212,16 @@ export default {
             participantOptions,
             priceOptions,
             availabilityOptions,
-            setTimeRange,
+            // setTimeRange,
+            handleTimeRangeChange,
+            handleDateRangeChange,
             handleRoomOptionChange,
             handleCategoryOptionChange,
             handleCapacityOptionChange,
             handleParticipantOptionChange,
             handlePriceOptionChange,
             handleAvailabilityOptionChange,
-            showTimeOptions
+            // showTimeOptionsx
         };
     }
 };
@@ -198,33 +232,58 @@ export default {
         <div class="text-center mb-4">
             <h1>Book for all desires</h1>
         </div>
-        <div class="row mb-3">
-            <div class="col-md-6 col-lg-3 mb-3">
-                <label for="start-date" class="form-label">Start Date:</label>
-                <DatePicker v-model="startDate" id="start-date" class="form-control" />
+        
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <label class="form-label">Date Range:</label>
             </div>
-            <div class="col-md-6 col-lg-3 mb-3">
-                <label for="end-date" class="form-label">End Date:</label>
-                <DatePicker v-model="endDate" id="end-date" class="form-control" />
-            </div>
-            <div class="col-md-6 col-lg-3 mb-3">
-                <label for="start-time" class="form-label">Start Time:</label>
-                <input type="text" v-model="startTime" id="start-time" class="form-control"
-                    @focus="showTimeOptions = true" />
-                <div v-if="showTimeOptions" class="mt-2">
-                    <div v-for="option in timeOptions" :key="option.value" class="form-check">
-                        <input type="checkbox" :id="option.value" :value="option.value" class="form-check-input"
-                            @change="setTimeRange(option.value)" />
-                        <label :for="option.value" class="form-check-label">{{ option.label }}</label>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3 mb-3">
-                <label for="end-time" class="form-label">End Time:</label>
-                <input type="text" v-model="endTime" id="end-time" class="form-control"
-                    @focus="showTimeOptions = true" />
+            <div class="col-md-6">
+                <label class="form-label">Time Range:</label>
             </div>
         </div>
+
+        <div class="row mb-3">
+            <!-- Date Range -->
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        v-model="dateRange[0]"
+                    />
+                    <span class="mx-2">to</span>
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        v-model="dateRange[1]"
+                    />
+                </div>
+            </div>
+
+            <!-- Time Range -->
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <select 
+                        v-model="timeRange[0]" 
+                        class="form-control"
+                    >
+                        <option v-for="time in timeOptions" :key="time" :value="time">
+                            {{ time }}
+                        </option>
+                    </select>
+                    <span class="mx-2">to</span>
+                    <select 
+                        v-model="timeRange[1]" 
+                        class="form-control"
+                    >
+                        <option v-for="time in timeOptions" :key="time" :value="time">
+                            {{ time }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-2">
                 <label class="form-label">Room Type Options:</label>
