@@ -36,7 +36,7 @@ const login = async () => {
         // response
         if (response.status === 204 || response.headers.get('Content-Length') === '0') {
           console.warn('Empty response from server');
-          localStorage.setItem('token', ''); // Assuming token is empty
+          localStorage.setItem('token', ''); 
           showNavBar(); // Show nav bar after login
           router.push('/home');
           return;
