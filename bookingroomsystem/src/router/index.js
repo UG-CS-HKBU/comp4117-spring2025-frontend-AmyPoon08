@@ -3,8 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import AboutUsView from '../views/AboutUsView.vue'
-import CreateNewRoomView from '@/views/CreateNewRoomView.vue'
-import BookingsView from '@/views/BookingsView.vue'
+import CreateNewRoomView from '../views/CreateNewRoomView.vue'
+import BookingsView from '../views/BookingsView.vue'
 
 
 const router = createRouter({
