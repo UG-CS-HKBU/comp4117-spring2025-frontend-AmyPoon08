@@ -1,8 +1,35 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import { ref, provide, onMounted } from 'vue'
 
+const router = useRouter();
 
+const logout = async () =>{
+    try{
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+        const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+        });
+
+        if (!response.ok) {
+        throw new Error('Failed to logout');
+        }
+
+        // Remove the token from local storage
+        localStorage.removeItem('token');
+
+        // Redirect to the login page
+        router.push('/');
+    } catch (error) {
+    console.error('Error during logout:', error.message);
+  }
+};
 const userName = ref('') 
 
 const fetchName = async () => {

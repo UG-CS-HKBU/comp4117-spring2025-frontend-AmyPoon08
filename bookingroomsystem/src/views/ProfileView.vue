@@ -91,7 +91,7 @@
 <template>
 
   <div>
-    <h1>Profile</h1>
+    <h1> User Profile</h1>
 
     <div v-if="isEditing">
       <div>
@@ -129,3 +129,6 @@
   </div>
 
 </template>
+
+
+  
