@@ -8,7 +8,7 @@ export default {
         const timeRange = ref([null, null]);
 
         const generateTimeOptions = () => {
-        const options = [];
+            const options = [];
             for (let hour = 0; hour < 24; hour++) {
                 const formattedHour = hour.toString().padStart(2, '0') + ':00';
                 options.push(formattedHour);
@@ -436,18 +436,21 @@ export default {
                 <div class="row">
                     <div class="col-md-4 mb-4" v-for="room in rooms" :key="room._id">
                         <div class="card h-200">
-                        <img 
-                            v-if="room.imageUrl || room.sasUrl" 
-                            :src="room.imageUrl || room.sasUrl" 
-                            :alt="room.name"
-                            class="room-image"
-                            @error="handleImageError"
-                        />
-                        <div class="card-body">
-                            <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
-                            <p class="card-text">{{ room.description }}</p>
-                            <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
-                        </div>
+                            <img 
+                                v-if="room.imageUrl || room.sasUrl" 
+                                :src="room.imageUrl || room.sasUrl" 
+                                :alt="room.name"
+                                class="room-image"
+                                @error="handleImageError"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
+                                <p class="card-text">{{ room.description }}</p>
+                                <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
+                                <a :href="`/bookings/book/${room._id}`">
+                                    <button id="Edit" class="btn btn-primary">Book Now!</button>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import ProfileView from '../views/ProfileView.vue'
 import AboutUsView from '../views/AboutUsView.vue'
 import CreateNewRoomView from '../views/CreateNewRoomView.vue'
 import BookingsView from '../views/BookingsView.vue'
+import BookView from '../views/BookView.vue'
 
 
 const router = createRouter({
@@ -39,6 +40,11 @@ const router = createRouter({
       path: '/createRoom',
       name: 'CreateNewRoom',
       component: CreateNewRoomView,
+    },
+    {
+      path: '/bookings/book/:id',
+      name: 'RoomBooking',
+      component: BookView,
     },
 
   ],
