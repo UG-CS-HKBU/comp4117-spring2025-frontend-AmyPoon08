@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 // import DatePicker from 'vue-datepicker-next';
 
 export default {
@@ -175,6 +175,21 @@ export default {
         const searchQuery = ref('');
         const rooms = ref([]);
 
+        let searchDebounceTimeout;
+
+        watch(searchQuery, (newQuery) => {
+            // Add debounce to prevent too many API calls
+            if (searchDebounceTimeout) {
+                clearTimeout(searchDebounceTimeout);
+            }
+            searchDebounceTimeout = setTimeout(() => {
+                const query = newQuery ? `?name=${encodeURIComponent(newQuery)}` : '';
+                fetchRooms(query);
+            }, 10); // Wait 10ms after user stops typing
+        });
+
+        
+        
         const fetchRooms = async (query = '') => {
             try {
                 const response = await fetch(`/api/rooms${query}`);
@@ -191,10 +206,10 @@ export default {
             fetchRooms();
         });
 
-        const handleSearch = () => {
-            const query = searchQuery.value ? `?name=${encodeURIComponent(searchQuery.value)}` : '';
-            fetchRooms(query);
-        };
+        // const handleSearch = () => {
+        //     const query = searchQuery.value ? `?name=${encodeURIComponent(searchQuery.value)}` : '';
+        //     fetchRooms(query);
+        // };
 
         return {
             dateRange,
@@ -214,7 +229,7 @@ export default {
             handleParticipantOptionChange,
             handlePriceOptionChange,
             handleAvailabilityOptionChange,
-            handleSearch,
+            // handleSearch,
             searchQuery,
             rooms
         };
@@ -395,12 +410,22 @@ export default {
         </div>
 
         <!-- Search -->
-        <div class="row mt-3">
+        <!-- <div class="row mt-3">
             <div class="col-10">
                 <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
             </div>
             <div class="col-2">
                 <button @click="handleSearch" class="btn btn-primary w-100">Search</button>
+            </div>
+        </div> -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <input 
+                    type="text" 
+                    v-model="searchQuery" 
+                    class="form-control" 
+                    placeholder="Search..."
+                />
             </div>
         </div>
 
