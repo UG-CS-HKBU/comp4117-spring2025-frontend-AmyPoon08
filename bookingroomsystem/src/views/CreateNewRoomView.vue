@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 
+const fileInput = ref(null);
+
 const initialRoomState = {
   room_number: '',
   name: '',
@@ -14,7 +16,7 @@ const initialRoomState = {
   price: '',
   description: '',
   highlight: false,
-  image: null
+  image: null,
 };
 
 const room = ref({ ...initialRoomState });
@@ -27,6 +29,7 @@ const handleFileChange = (event) => {
   }
 };
 
+
 const createRoom = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -35,11 +38,17 @@ const createRoom = async () => {
     }
 
     const formData = new FormData();
-    for (const key in room.value) {
-      formData.append(key, room.value[key]);
-    }
+    Object.keys(room.value).forEach(key => {
+      if (key === 'image' && room.value[key]) {
+        formData.append('image', room.value[key]);
+      } else if (typeof room.value[key] === 'boolean') {
+        formData.append(key, room.value[key].toString());
+      } else if (room.value[key] !== null && room.value[key] !== undefined) {
+        formData.append(key, room.value[key]);
+      }
+    });
 
-    const response = await fetch('/api/rooms', {
+    const response = await fetch('/api/rooms', {  
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -48,14 +57,19 @@ const createRoom = async () => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create room');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create room');
     }
 
     const data = await response.json();
     console.log('Room created successfully:', data);
 
-    // Reset the form
+    //reset the form
     room.value = { ...initialRoomState };
+    if (fileInput.value) {
+      fileInput.value.value = ''; // clear the file input
+    }
+    
   } catch (error) {
     console.error('Error creating room:', error.message);
   }
@@ -111,7 +125,7 @@ const createRoom = async () => {
       </div>
       <div>
         <label>Room Image:</label>
-        <input type="file" @change="handleFileChange" />
+        <input type="file" @change="handleFileChange" accept="image/*" ref="fileInput"  />
       </div>
       <div>
         <label>Description:</label>

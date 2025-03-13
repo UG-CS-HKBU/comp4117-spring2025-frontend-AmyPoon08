@@ -1,11 +1,8 @@
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 // import DatePicker from 'vue-datepicker-next';
 
 export default {
-    // components: {
-    //     DatePicker
-    // },
     setup() {
         const dateRange = ref([null, null]);
         const timeRange = ref([null, null]);
@@ -27,32 +24,10 @@ export default {
                 timeRange.value = [start, end];
             }
         };
-
-        // const handleDateRangeChange = (event) => {
-        //     const [start, end] = event.target.value.split(' to ');
-        //     dateRange.value = [start, end];
-        // };
         
         const handleDateRangeChange = (start, end) => {
             dateRange.value = [start, end];
         };
-
-        // const startDate = ref(null);
-        // const endDate = ref(null);
-        // const startTime = ref('');
-        // const endTime = ref('');
-        // const showTimeOptions = ref(false);
-        // const timeOptions = [
-        //     { label: 'All time range', value: '00:00 - 23:59' },
-        //     { label: 'Working hours', value: '09:00 - 19:00' },
-        //     { label: 'Morning', value: '09:00 - 12:00' },
-        //     { label: 'Afternoon', value: '12:00 - 16:00' },
-        //     { label: 'Evening', value: '16:00 - 22:00' }
-        // ];
-
-        // const setTimeRange = (range) => {
-        //     [startTime.value, endTime.value] = range.split(' - ');
-        // };
 
         const roomOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
@@ -197,12 +172,31 @@ export default {
             }
         };
 
+        const searchQuery = ref('');
+        const rooms = ref([]);
+
+        const fetchRooms = async (query = '') => {
+            try {
+                const response = await fetch(`/api/rooms${query}`);
+                if (!response.ok) {
+                throw new Error('Failed to fetch rooms');
+                }
+                rooms.value = await response.json();
+            } catch (error) {
+                console.error('Error fetching rooms:', error.message);
+            }
+        };
+
+        onMounted(() => {
+            fetchRooms();
+        });
+
+        const handleSearch = () => {
+            const query = searchQuery.value ? `?name=${encodeURIComponent(searchQuery.value)}` : '';
+            fetchRooms(query);
+        };
 
         return {
-            // startDate,
-            // endDate,
-            // startTime,
-            // endTime,
             dateRange,
             timeRange,
             timeOptions,
@@ -212,7 +206,6 @@ export default {
             participantOptions,
             priceOptions,
             availabilityOptions,
-            // setTimeRange,
             handleTimeRangeChange,
             handleDateRangeChange,
             handleRoomOptionChange,
@@ -221,7 +214,9 @@ export default {
             handleParticipantOptionChange,
             handlePriceOptionChange,
             handleAvailabilityOptionChange,
-            // showTimeOptionsx
+            handleSearch,
+            searchQuery,
+            rooms
         };
     }
 };
@@ -398,5 +393,48 @@ export default {
                 </div>
             </div>
         </div>
+
+        <!-- Search -->
+        <div class="row mt-3">
+            <div class="col-10">
+                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
+            </div>
+            <div class="col-2">
+                <button @click="handleSearch" class="btn btn-primary w-100">Search</button>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <h2>Search Results</h2>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4" v-for="room in rooms" :key="room._id">
+                        <div class="card h-200">
+                        <img 
+                            v-if="room.imageUrl || room.sasUrl" 
+                            :src="room.imageUrl || room.sasUrl" 
+                            :alt="room.name"
+                            class="room-image"
+                            @error="handleImageError"
+                        />
+                        <div class="card-body">
+                            <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
+                            <p class="card-text">{{ room.description }}</p>
+                            <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+    .room-image {
+    max-width: 300px;
+    height: auto;
+    }
+</style>
