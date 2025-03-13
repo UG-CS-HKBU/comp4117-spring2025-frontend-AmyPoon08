@@ -1,8 +1,9 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { ref, provide, onMounted } from 'vue'
+import { ref, provide, onMounted, watch } from 'vue'
 
 const router = useRouter();
+const isAuthenticated = ref(false)
 
 const logout = async () =>{
     try{
@@ -23,6 +24,8 @@ const logout = async () =>{
 
         // Remove the token from local storage
         localStorage.removeItem('token');
+
+        isAuthenticated.value = false;
 
         // Redirect to the login page
         router.push('/');
@@ -82,19 +85,31 @@ const showNavBar = () => {
   showNav.value = true
 }
 
-// Provide both functions to child components
-provide('navControls', {
+provide('auth', {
+  isAuthenticated,
   hideNav,
   showNavBar
 })
 
+watch(isAuthenticated, (newValue) => {
+  if (newValue) {
+    showNavBar()
+  } else {
+    hideNav()
+  }
+})
+
 onMounted(() => {
-    fetchName();
+    const token = localStorage.getItem('token');
+    isAuthenticated.value = !!token;
+    if (isAuthenticated.value) {
+        fetchName();
+    }
 });
 </script>
 
 <template>
-    <nav  v-if="showNav" class="menubar">
+    <nav  v-if="isAuthenticated" class="menubar">
         <div class="left">
             <a href="/home" @click="goToHome">Room Booking System</a>
         </div>

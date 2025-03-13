@@ -9,7 +9,7 @@ const credentials = ref({
     password: ''
 });
 
-const { hideNav, showNavBar } = inject('navControls');
+const { isAuthenticated, hideNav } = inject('auth')
 const router = useRouter();
 const showPassword = ref(false);
 
@@ -37,7 +37,7 @@ const login = async () => {
         if (response.status === 204 || response.headers.get('Content-Length') === '0') {
           console.warn('Empty response from server');
           localStorage.setItem('token', ''); 
-          showNavBar(); // Show nav bar after login
+          isAuthenticated.value = true;
           router.push('/home');
           return;
         }
@@ -46,7 +46,7 @@ const login = async () => {
         if (!text) {
             console.warn('Empty response body');
             localStorage.setItem('token', ''); // Assuming token is empty
-            showNavBar(); // Show nav bar after login
+            isAuthenticated.value = true;
             router.push('/home');
             return;
         }
@@ -60,6 +60,7 @@ const login = async () => {
 
         // save token to local storage
         localStorage.setItem('token', data.token);
+        isAuthenticated.value = true;
         router.push('/home');
     } catch (error) {
         alert(error);
