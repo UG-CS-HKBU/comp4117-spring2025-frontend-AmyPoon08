@@ -64,7 +64,6 @@ const fetchName = async () => {
 
         const data = await response.json();
         userName.value = data; 
-        console.log('userName fetched successfully:', data);
     } catch (error) {
         console.error('Error fetching profile:', error.message);
     }

@@ -1,8 +1,56 @@
 <script setup>
 import { ref, onMounted, computed} from 'vue';
-import { useRoute} from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
+
+const userDetails = ref({
+  _id: null,
+  username: '',
+  email: '',
+  mobile: '',
+});
+
+const fetchUserDetails = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+        const response = await fetch(`/api/profile`, {
+            method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Pass the token in the Authorization header
+                }
+        });
+        
+        if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Unauthorized: Please log in again.');
+                } else if (response.status === 403) {
+                    throw new Error('Forbidden: Invalid token.');
+                } else if (response.status === 404) {
+                    throw new Error('User data not found.');
+                } else {
+                    throw new Error('Failed to fetch user data. Server responded with status: ' + response.status);
+                }
+            }
+            
+        
+        const data = await response.json();
+        console.log("Successfully fetched user data " + data._id);
+        
+        userDetails.value = {
+            ...data, 
+        };
+        console.log("user details", userDetails.value);
+    
+    } catch (err) {
+        console.error('Failed to fetch user data:', err);
+    }
+};
 
 const room = ref({
   _id: null,
@@ -23,9 +71,10 @@ const room = ref({
 
 const fetchRoom = async () => {
     try {
+        const roomId = route.params.id;
         // Check if there's an ID in the route params
-        if (route.params.id) {
-            const response = await fetch(`/api/rooms/${route.params.id}`);
+        if (roomId) {
+            const response = await fetch(`/api/rooms/${roomId}`);
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -52,9 +101,10 @@ const timeSlots = computed(() => {
   const slots = [];
   for (let i = 0; i < 24; i++) {
     const hour = i.toString().padStart(2, '0');
-    const nextHour = ((i + 1) % 24).toString().padStart(2, '0');
+    // const nextHour = ((i + 1) % 24).toString().padStart(2, '0');
     const time = `${hour}:00`;
-    const label = `${hour}:00 - ${nextHour}:00`;
+    // const label = `${hour}:00 - ${nextHour}:00`;
+    const label = `${hour}:00`;
     slots.push({ time, label });
   }
   return slots;
@@ -104,45 +154,67 @@ const calculateTotal = () => {
   return selectedTimeSlots.value.length * room.value.price; // Price per selected timeslot
 };
 
+// Book Room
 const bookRoom = async () => {
   try {
+    
+    if (!userDetails.value._id) {
+        await fetchUserDetails();
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
 
-    const response = await fetch(`/api/rooms/${room.value._id}/book`, {
+    if (!userDetails.value._id) {
+      throw new Error('User ID not available');
+    }
+
+    const bookingData = {
+        roomId: room.value._id,
+        roomName: room.value.name,
+        roomNumber: room.value.room_number,
+        date: selectedDate.value,
+        timeslots: selectedTimeSlots.value,
+        totalPrice: calculateTotal(),
+        userId: userDetails.value._id,
+        username: userDetails.value.username,
+        userContact: userDetails.value.mobile,
+        userEmail: userDetails.value.email
+    };
+
+    console.log('Sending booking data:', bookingData);
+
+    const response = await fetch('/api/bookings/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        date: selectedDate.value,
-        timeslots: selectedTimeSlots.value
-      })
+      body: JSON.stringify(bookingData)
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Server error response:', errorData);
       throw new Error(errorData.message || 'Failed to book room');
     }
 
     const data = await response.json();
     console.log('Room booked successfully:', data);
-
-    // Reset the form
-    selectedDate.value = '';
-    selectedTimeSlots.value = [];
-    isAllDaySelected.value = false;
+    alert('Booking successful!');
+    router.push('/bookings');
 
   } catch (error) {
-    console.error('Error booking room:', error.message);
+    console.error('Error booking room:', error);
+    alert(error.message);
   }
 };
 
 onMounted(() => {
     fetchRoom();
+    fetchUserDetails();
 });
 
 </script>
