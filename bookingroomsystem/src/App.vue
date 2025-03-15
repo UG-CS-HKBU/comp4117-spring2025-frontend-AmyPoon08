@@ -107,7 +107,7 @@ onMounted(() => {
 });
 </script>
 
-<template>
+<!-- <template>
     <nav  v-if="isAuthenticated" class="menubar">
         <div class="left">
             <a href="/home" @click="goToHome">Room Booking System</a>
@@ -128,10 +128,28 @@ onMounted(() => {
         </div>
     </nav>
     <RouterView />
+</template> -->
+
+<template>
+    <nav v-if="isAuthenticated" class="menubar">
+        <div class="left">
+            <a href="/home" @click="goToHome">Room Booking System</a>
+        </div>
+        <div class="right">
+            <span>{{ userName.username }}</span>
+            <a href="/Bookings">Bookings</a>
+            <a href="/BookingRecord">Booking Record</a>
+            <a href="/profile">Profile</a>
+            <a href="/AboutUs">About us</a>
+            <a href="#" @click="logout">Logout</a>
+        </div>
+    </nav>
+    <RouterView />
 </template>
 
-<style>
-.menubar {
+
+<style scoped>
+/* .menubar {
     display: flex;
     justify-content: space-between;
     padding: 10px;
@@ -191,5 +209,31 @@ onMounted(() => {
 
 .menubar .right .dropdown:hover .dropbtn {
     background-color: #555;
+} */
+.menubar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333; /* Background color for the navbar */
+    color: white; /* Text color */
+}
+
+.left a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.right {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adds space between items */
+}
+
+.right a {
+    color: white;
+    text-decoration: none;
 }
 </style>
