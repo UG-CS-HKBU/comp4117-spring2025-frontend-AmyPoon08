@@ -7,6 +7,7 @@ import CreateNewRoomView from '../views/CreateNewRoomView.vue'
 import BookingsView from '../views/BookingsView.vue'
 import BookView from '../views/BookView.vue'
 import RoomInfoView from '../views/RoomInfoView.vue'
+import RoomEdit from '../views/RoomEdit.vue'
 
 
 const router = createRouter({
@@ -54,6 +55,11 @@ const router = createRouter({
       name: 'CreateNewRoom',
       component: CreateNewRoomView,
     },
+    {
+      path: "/rooms/:id/edit",
+      component: RoomEdit
+    }
+    
   ],
 })
 
