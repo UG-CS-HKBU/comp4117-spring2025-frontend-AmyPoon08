@@ -47,6 +47,7 @@ const createRoom = async () => {
         formData.append(key, room.value[key]);
       }
     });
+    
 
     const response = await fetch('/api/rooms', {  
       method: 'POST',
@@ -69,7 +70,7 @@ const createRoom = async () => {
     if (fileInput.value) {
       fileInput.value.value = ''; // clear the file input
     }
-    
+
   } catch (error) {
     console.error('Error creating room:', error.message);
   }

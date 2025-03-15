@@ -437,8 +437,8 @@ export default {
                     <div class="col-md-4 mb-4" v-for="room in rooms" :key="room._id">
                         <div class="card h-200">
                             <img 
-                                v-if="room.imageUrl || room.sasUrl" 
-                                :src="room.imageUrl || room.sasUrl" 
+                                v-if="room.imageUrl" 
+                                :src="room.imageUrl" 
                                 :alt="room.name"
                                 class="room-image"
                                 @error="handleImageError"

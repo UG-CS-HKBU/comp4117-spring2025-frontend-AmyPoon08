@@ -226,8 +226,8 @@ onMounted(() => {
             <div class="col-md-6">
                 <div class="image-container">
                     <img 
-                        v-if="room.imageUrl || room.sasUrl" 
-                        :src="room.imageUrl || room.sasUrl" 
+                        v-if="room.imageUrl" 
+                        :src="room.imageUrl" 
                         :alt="room.name"
                         class="room-image"
                         @error="handleImageError"
