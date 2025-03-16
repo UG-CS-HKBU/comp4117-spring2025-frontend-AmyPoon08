@@ -181,7 +181,8 @@ const bookRoom = async () => {
         userId: userDetails.value._id,
         username: userDetails.value.username,
         userContact: userDetails.value.mobile,
-        userEmail: userDetails.value.email
+        userEmail: userDetails.value.email,
+        paymentProof: null
     };
 
     console.log('Sending booking data:', bookingData);
