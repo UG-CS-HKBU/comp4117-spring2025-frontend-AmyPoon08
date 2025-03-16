@@ -52,22 +52,7 @@ const fetchUserDetails = async () => {
     }
 };
 
-const room = ref({
-  _id: null,
-  room_number: '',
-  name: '',
-  type: '',
-  category: '',
-  capacity: '',
-  participant: '',
-  location: '',
-  availability: true,
-  under_maintenance: false,
-  price: '',
-  description: '',
-  sasUrl: '',
-  highlight: false,
-});
+const room = ref({});
 
 const fetchRoom = async () => {
     try {

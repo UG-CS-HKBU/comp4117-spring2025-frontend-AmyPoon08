@@ -32,7 +32,7 @@ const fetchRoomDetails = async () => {
     
     const data = await response.json();
     room.value = { ...data, image: null }; // Keep existing image URL
-    room.value.existingImage = data.image; // Save existing image
+    room.value.existingImage = data.imageUrl; // Save existing image
   } catch (error) {
     console.error('Error fetching room details:', error);
   }
