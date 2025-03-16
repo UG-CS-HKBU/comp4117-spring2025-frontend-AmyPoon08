@@ -7,11 +7,9 @@ import CreateNewRoomView from '../views/CreateNewRoomView.vue'
 import BookingsView from '../views/BookingsView.vue'
 import BookView from '../views/BookView.vue'
 import RoomInfoView from '../views/RoomInfoView.vue'
-<<<<<<< HEAD
 import RoomEdit from '../views/RoomEdit.vue'
-=======
 import BookingRecordView from '../views/BookingRecordView.vue'
->>>>>>> f2c4cc2b6f4f3a1f1980d7489378c3c7da26930b
+import BookingDetailsView from '../views/BookingDetailsView.vue'
 
 
 const router = createRouter({
@@ -51,6 +49,11 @@ const router = createRouter({
       path: '/bookingRecord',
       name: 'BookingRecord',
       component: BookingRecordView,
+    },
+    {
+      path: '/bookingHistory/:id',
+      name: 'BookingDetails',
+      component: BookingDetailsView,
     },
 
     // Admin routes
