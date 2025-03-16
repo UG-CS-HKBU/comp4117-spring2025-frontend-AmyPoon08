@@ -2,13 +2,17 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
+const fileInput = ref(null);
+const selectedFile = ref(null);
+
 const route = useRoute();
 const details = ref({
     bookingId: '',
     roomName: '',
     date: '',
     timeslots: [],
-    status: ''
+    status: '',
+    paymentProof: null
 });
 
 
@@ -64,8 +68,61 @@ const getEndTime = (timeslots) => {
     return timeslots[timeslots.length - 1];
 }
 
+const handleFileChange = (event) => {
+  selectedFile.value = event.target.files[0];
+  console.log('Selected file:', selectedFile.value);
+};
+
+const uploadPaymentProof = async () => {
+    try {
+
+        if (!selectedFile.value) {
+            console.error('No file selected');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+
+        const formData = new FormData()
+        // Object.keys(details.value).forEach(key => {
+        //     if (key === 'paymentProof' && details.value[key]) {
+        //         formData.append('paymentProof', details.value[key]);
+        //     } else if (typeof details.value[key] === 'boolean') {
+        //         formData.append(key, details.value[key].toString());
+        //     } else if (details.value[key] !== null && details.value[key] !== undefined) {
+        //         formData.append(key, details.value[key]);
+        //     }
+        // });
+
+        formData.append('paymentProof', selectedFile.value)
+
+        const response = await fetch(`/api/users/bookingHistory/${details.value.bookingId}/uploadPaymentProof`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload payment proof');
+        }
+
+        const data = await response.json();
+        console.log('Payment proof uploaded successfully:', data);
+        await fetchDetails();
+
+    } catch (error) {
+        console.error('Error uploading payment proof:', error.message);
+    }
+};
+
 onMounted(() => {
-    fetchDetails();
+    fetchDetails();    
 })
 </script>
 
@@ -94,4 +151,46 @@ onMounted(() => {
             State: {{ details.status }}
         </div>
     </div>
+    <div class="row mt-3">
+        <!-- Payment Proof Exist -->
+        <div v-if = "details.paymentProof">
+            <h5>Payment Proof:</h5>
+            <img 
+                v-if="details.paymentProof" 
+                :src="details.paymentProof" 
+                :alt="details.bookingId"
+                @error="handleImageError"
+                class="proof-img"
+            />
+        </div>
+
+        <!-- No Payment Proof -->
+        <div v-else>
+            <form @submit.prevent="uploadPaymentProof">
+            <div class="mb-3">
+                <label>Upload Payment Proof:</label>
+                <input 
+                    type="file" 
+                    @change="handleFileChange" 
+                    accept="image/*" 
+                    ref="fileInput"
+                />
+            </div>
+            <button 
+                type="submit" 
+                class="btn btn-primary" 
+                :disabled="!selectedFile"
+            >
+                Upload
+            </button>
+        </form>
+        </div>
+    </div>
 </template>
+
+<style scoped>
+.proof-img {
+    max-height: 300px;
+    object-fit: contain;
+}
+</style>
