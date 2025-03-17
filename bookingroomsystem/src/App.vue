@@ -3,7 +3,8 @@ import { RouterView, useRouter } from 'vue-router'
 import { ref, provide, onMounted, watch } from 'vue'
 
 const router = useRouter();
-const isAuthenticated = ref(false)
+const isAuthenticated = ref(false);
+const isAdmin = ref(false);
 
 const logout = async () =>{
     try{
@@ -34,6 +35,19 @@ const logout = async () =>{
   }
 };
 const userName = ref('') 
+
+const fetchIsAdmin = async () => {
+    try{
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+        isAdmin.value = localStorage.getItem('admin') === 'on'
+        console.log('Admin: ', isAdmin.value)
+    } catch (error) {
+        console.error('Error during fetchIsAdmin:', error.message);
+    }
+}
 
 const fetchName = async () => {
     try {
@@ -103,6 +117,7 @@ onMounted(() => {
     isAuthenticated.value = !!token;
     if (isAuthenticated.value) {
         fetchName();
+        fetchIsAdmin();
     }
 });
 </script>
@@ -130,8 +145,9 @@ onMounted(() => {
     <RouterView />
 </template> -->
 
+<!-- Users nav bar -->
 <template>
-    <nav v-if="isAuthenticated" class="menubar">
+    <nav v-if="isAuthenticated && !isAdmin" class="menubar">
         <div class="left">
             <a href="/home" @click="goToHome">Room Booking System</a>
         </div>
@@ -144,8 +160,24 @@ onMounted(() => {
             <a href="#" @click="logout">Logout</a>
         </div>
     </nav>
+    <!-- admin nav bar -->
+    <nav v-if="isAuthenticated && isAdmin" class="menubar">
+        <div class="left">
+            <a href="/home" @click="goToHome">Room Booking System</a>
+        </div>
+        <div class="right">
+            <span>{{ userName.username }}</span>
+            <a href="/profile">Profile</a>
+            <a href="/rooms">Room Information</a>
+            <a href="#">User Information</a>
+            <a href="#">Bookings</a>
+            <a href="/AboutUs">About us</a>
+            <a href="#" @click="logout">Logout</a>
+        </div>
+    </nav>
     <RouterView />
 </template>
+
 
 
 <style scoped>
