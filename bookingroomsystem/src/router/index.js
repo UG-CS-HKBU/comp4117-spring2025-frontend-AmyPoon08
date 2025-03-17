@@ -10,6 +10,7 @@ import RoomInfoView from '../views/RoomInfoView.vue'
 import RoomEdit from '../views/RoomEdit.vue'
 import BookingRecordView from '../views/BookingRecordView.vue'
 import BookingDetailsView from '../views/BookingDetailsView.vue'
+import PaymentView from '../views/PaymentView.vue'
 
 function isAuthenticated() {
   const token = localStorage.getItem('token')
@@ -54,6 +55,11 @@ const router = createRouter({
       path: '/bookings/book/:id',
       name: 'RoomBooking',
       component: BookView,
+    },
+    {
+      path: '/payment',
+      name: 'Payment',
+      component: PaymentView,
     },
     {
       path: '/bookingRecord',

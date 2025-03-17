@@ -139,10 +139,9 @@ const calculateTotal = () => {
   return selectedTimeSlots.value.length * room.value.price; // Price per selected timeslot
 };
 
-// Book Room
+// Modified to redirect to payment page instead of creating booking
 const bookRoom = async () => {
   try {
-    
     if (!userDetails.value._id) {
         await fetchUserDetails();
     }
@@ -170,30 +169,14 @@ const bookRoom = async () => {
         paymentProof: null
     };
 
-    console.log('Sending booking data:', bookingData);
-
-    const response = await fetch('/api/bookings/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(bookingData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Server error response:', errorData);
-      throw new Error(errorData.message || 'Failed to book room');
-    }
-
-    const data = await response.json();
-    console.log('Room booked successfully:', data);
-    alert('Booking successful!');
-    router.push('/bookings');
+    // Save the booking data to localStorage instead of submitting it
+    localStorage.setItem('pendingBookingDetails', JSON.stringify(bookingData));
+    
+    // Redirect to payment page
+    router.push('/payment');
 
   } catch (error) {
-    console.error('Error booking room:', error);
+    console.error('Error preparing booking:', error);
     alert(error.message);
   }
 };
