@@ -11,6 +11,16 @@ import RoomEdit from '../views/RoomEdit.vue'
 import BookingRecordView from '../views/BookingRecordView.vue'
 import BookingDetailsView from '../views/BookingDetailsView.vue'
 
+function isAuthenticated() {
+  const token = localStorage.getItem('token')
+  return !!token
+}
+
+function isAdmin() {
+  const adminStatus = localStorage.getItem('admin')
+  console.log('Admin check in router:', adminStatus)
+  return adminStatus === 'on'
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,18 +71,51 @@ const router = createRouter({
       path: '/rooms',
       name: 'RoomInformation',
       component: RoomInfoView,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/createRoom',
       name: 'CreateNewRoom',
       component: CreateNewRoomView,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: "/rooms/:id/edit",
-      component: RoomEdit
+      name: "EditRoom",
+      component: RoomEdit,
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
     
-  ],
+  ]
 })
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
+
+  console.log('Route requires auth:', requiresAuth)
+  console.log('Route requires admin:', requiresAdmin)
+  console.log('Is authenticated:', isAuthenticated())
+  console.log('Is admin:', isAdmin())
+
+  if (requiresAuth && !isAuthenticated()) {
+    console.log('Redirecting to login - not authenticated')
+    next({
+      path: '/',
+      query: { redirect: to.fullPath }
+    })
+    return
+  }
+
+  if (requiresAdmin && !isAdmin()) {
+    console.log('Redirecting to home - not admin')
+    next('/home')
+    return
+  }
+
+  console.log('Proceeding to route:', to.path)
+  next()
+})
+
 
 export default router
