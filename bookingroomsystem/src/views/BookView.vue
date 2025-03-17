@@ -169,6 +169,25 @@ const bookRoom = async () => {
         paymentProof: null
     };
 
+    console.log('Sending booking data:', bookingData);
+
+    const response = await fetch('/api/bookings/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(bookingData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Server error response:', errorData);
+      throw new Error(errorData.message || 'Failed to book room');
+    }
+
+    const data = await response.json();
+    console.log('Room booked successfully:', data);
     // Save the booking data to localStorage instead of submitting it
     localStorage.setItem('pendingBookingDetails', JSON.stringify(bookingData));
     
