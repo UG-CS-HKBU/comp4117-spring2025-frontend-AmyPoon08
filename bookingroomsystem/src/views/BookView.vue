@@ -355,8 +355,6 @@ onMounted(() => {
 }
 .room-info{
     flex: 1;
-    padding: 10px;
-    margin: 10px;
 }
 
 .room-name{
@@ -369,7 +367,10 @@ onMounted(() => {
 .room-description{
     font-size: 25px;
     padding-bottom: 30px;
-    padding-left: 2px;
+    padding: 10px;
+}
+
+.room-price{
     padding: 10px;
 }
 
@@ -467,7 +468,7 @@ onMounted(() => {
 .book-now-btn {
     padding: 12px 24px;
     margin-right:10px;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
     color: white;
     background-color: #28a745;
