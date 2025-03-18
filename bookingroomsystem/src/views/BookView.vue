@@ -309,11 +309,6 @@ onMounted(() => {
                         </button>
                     </div>
 
-
-                    
-
-                    
-                    
                 </div>
 
             </div>

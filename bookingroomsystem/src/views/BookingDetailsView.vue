@@ -4,15 +4,16 @@ import { useRoute } from 'vue-router';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
-
 const route = useRoute();
+
 const details = ref({
     bookingId: '',
     roomName: '',
     date: '',
     timeslots: [],
     status: '',
-    paymentProof: null
+    paymentProof: null,
+    totalPrice: 0
 });
 
 
@@ -65,7 +66,13 @@ const getStartTime = (timeslots) => {
 
 const getEndTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
-    return timeslots[timeslots.length - 1];
+    
+    const startTime = timeslots[timeslots.length - 1]; // Get the last timeslot
+    const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
+    const endTime = new Date();
+    endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
+
+    return endTime.toTimeString().slice(0, 5); // Format as HH:MM
 }
 
 const handleFileChange = (event) => {
@@ -127,11 +134,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <div row="row mt-3">
+    <div class="header mt-3">
         <h1>Booking Details</h1>
     </div>
 
-    <div class="row mt-3">
+    <div class="details mt-3">
         <div>
             Booking ID: {{ details.bookingId }}
         </div>
@@ -151,10 +158,10 @@ onMounted(() => {
             State: {{ details.status }}
         </div>
     </div>
-    <div class="row mt-3">
+    <div class="payment-proof row mt-3">
         <!-- Payment Proof Exist -->
         <div v-if = "details.paymentProof">
-            <h5>Payment Proof:</h5>
+            <div class="payment-header">Payment Proof:</div>
             <img 
                 v-if="details.paymentProof" 
                 :src="details.paymentProof" 
@@ -168,12 +175,13 @@ onMounted(() => {
         <div v-else>
             <form @submit.prevent="uploadPaymentProof">
             <div class="mb-3">
-                <label>Upload Payment Proof:</label>
+                <div class="payment-header">Upload Payment Proof:</div>
                 <input 
                     type="file" 
                     @change="handleFileChange" 
                     accept="image/*" 
                     ref="fileInput"
+                    class="file-picker"
                 />
             </div>
             <button 
@@ -191,6 +199,54 @@ onMounted(() => {
 <style scoped>
 .proof-img {
     max-height: 300px;
-    object-fit: contain;
+    padding:30px;
+}
+
+.header{
+    padding: 30px;
+    font-size: 70px;
+    font-weight: bold;
+    padding-bottom: 60px;
+}
+
+.details{
+    padding: 30px;
+    font-size: 25px;
+    row-gap: 15px;
+}
+
+.payment-header{
+    padding: 30px;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.file-picker{
+    padding: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    margin-left:30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745;
+    border-color: #196b2b;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 120px;
+}
+
+.btn:hover {
+    background-color: #196b2b; 
+    transform: scale(1.05); 
+}
+
+.btn:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
 }
 </style>

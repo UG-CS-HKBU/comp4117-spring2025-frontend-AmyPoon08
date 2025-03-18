@@ -167,10 +167,11 @@ onMounted(() => {
         </div>
         <div class="right">
             <span>{{ userName.username }}</span>
-            <a href="/profile">Profile</a>
             <a href="/rooms">Room Information</a>
             <a href="#">User Information</a>
             <a href="/bookings">Bookings</a>
+            <a href="/BookingRecord">Booking Record</a>
+            <a href="/profile">Profile</a>
             <a href="/AboutUs">About us</a>
             <a href="#" @click="logout">Logout</a>
         </div>
