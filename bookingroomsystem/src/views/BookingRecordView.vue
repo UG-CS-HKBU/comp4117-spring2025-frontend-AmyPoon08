@@ -114,10 +114,11 @@ onMounted(() => {
             <td class="p-3">{{ getEndTime(booking.timeslots) }}</td>
             <td class="p-3">{{ booking.status }}</td>
             <td class="p-3">
-              <button class="bg-blue-500 px-4 py-1 rounded"
-                      @click="viewBooking(booking.bookingId)">
+                <router-link 
+                :to="`/bookingHistory/${booking.bookingId}`" 
+                class="bg-blue-500 text-black px-4 py-1 rounded hover:bg-blue-600">
                 View
-              </button>
+              </router-link>
             </td>
           </tr>
         </tbody>

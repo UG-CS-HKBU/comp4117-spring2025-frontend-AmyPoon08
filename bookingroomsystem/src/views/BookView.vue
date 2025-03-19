@@ -52,22 +52,7 @@ const fetchUserDetails = async () => {
     }
 };
 
-const room = ref({
-  _id: null,
-  room_number: '',
-  name: '',
-  type: '',
-  category: '',
-  capacity: '',
-  participant: '',
-  location: '',
-  availability: true,
-  under_maintenance: false,
-  price: '',
-  description: '',
-  sasUrl: '',
-  highlight: false,
-});
+const room = ref({});
 
 const fetchRoom = async () => {
     try {
@@ -154,10 +139,9 @@ const calculateTotal = () => {
   return selectedTimeSlots.value.length * room.value.price; // Price per selected timeslot
 };
 
-// Book Room
+// Modified to redirect to payment page instead of creating booking
 const bookRoom = async () => {
   try {
-    
     if (!userDetails.value._id) {
         await fetchUserDetails();
     }
@@ -181,7 +165,8 @@ const bookRoom = async () => {
         userId: userDetails.value._id,
         username: userDetails.value.username,
         userContact: userDetails.value.mobile,
-        userEmail: userDetails.value.email
+        userEmail: userDetails.value.email,
+        paymentProof: null
     };
 
     console.log('Sending booking data:', bookingData);
@@ -203,11 +188,14 @@ const bookRoom = async () => {
 
     const data = await response.json();
     console.log('Room booked successfully:', data);
-    alert('Booking successful!');
-    router.push('/bookings');
+    // Save the booking data to localStorage instead of submitting it
+    localStorage.setItem('pendingBookingDetails', JSON.stringify(bookingData));
+    
+    // Redirect to payment page
+    router.push('/payment');
 
   } catch (error) {
-    console.error('Error booking room:', error);
+    console.error('Error preparing booking:', error);
     alert(error.message);
   }
 };
@@ -219,11 +207,12 @@ onMounted(() => {
 
 </script>
 
+
 <template>
     <div>
-        <h1>Book Room</h1>
+        <!-- <h1>Book Room</h1> -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4 image-column">
                 <div class="image-container">
                     <img 
                         v-if="room.imageUrl" 
@@ -234,32 +223,41 @@ onMounted(() => {
                     />
                 </div>
             </div>
-            <div class="col-md-6">
-                <h1 class="card-title font-weight-bold">{{ room.name }}</h1>
-                <h3 class="card-text">{{ room.description }}</h3>
-
+            <div class="col-md-8 main">
+                <div class="room-info">
+                    <div class="room-name">
+                        <p class="card-title font-weight-bold">{{ room.name }}</p>
+                    </div>
+                    <div class="room-description">
+                        <p class="card-text" style="color:steelblue">{{ room.description }}</p>
+                    </div>
+                    <div class="room-price">
+                        <p class="card-text" style="color:slategrey">Price per hour: ${{ room.price }}</p>
+                    </div>
+                </div>
+                
+                
                 <!-- Select Date -->
-                <div class="d-flex align-items-center">
+                <div class="col-md-6 align-items-center date-picker">
+                    <font-awesome-icon :icon="['fad', 'calendar']" />
                     <input 
                         type="date" 
                         class="form-control" 
                         v-model="selectedDate"
                         :min="getCurrentDate()"
+                        style="height: 50px;"
                     />
                 </div>
 
+                <!-- Timeslot description -->
+                 <div v-if="selectedDate" class="timeslot-description">
+                    <h2>Timeslot</h2>
+                    <p>!  Each timeslot represents 1 hour</p>
+                    <p>!  You can must select at least 1 timeslot per booking</p>
+                 </div>
+
                 <!-- Select Timeslot -->
                 <div v-if="selectedDate" class="timeslots-container">
-                    <div class="mb-4">
-                        <button 
-                        class="all-day-btn"
-                        :class="{ 'selected': isAllDaySelected }"
-                        @click="toggleAllDay"
-                        >
-                        All Day
-                        </button>
-                    </div>
-
                     <!-- Clear Selection -->
                     <button 
                         class="clear-btn"
@@ -269,33 +267,48 @@ onMounted(() => {
                         Clear Selection
                     </button>
 
-                    <div class="timeslots-grid">
-                        <button
-                        v-for="slot in timeSlots"
-                        :key="slot.time"
-                        class="time-slot"
-                        :class="{ 
-                            'selected': selectedTimeSlots.includes(slot.time),
-                            'disabled': isAllDaySelected
-                        }"
-                        @click="toggleTimeSlot(slot.time)"
-                        :disabled="isAllDaySelected"
-                        >
-                        {{ slot.label }}
-                        </button>
+                    
+                    <div class="timeslots-container">
+                        <div class="timeslots-grid">
+                            <!-- All day -->
+                            <button 
+                            class="all-day-btn"
+                            :class="{ 'selected': isAllDaySelected }"
+                            @click="toggleAllDay"
+                            >
+                            All Day
+                            </button>
+                            <!-- Timeslots -->
+                            <button
+                            v-for="slot in timeSlots"
+                            :key="slot.time"
+                            class="time-slot"
+                            :class="{ 
+                                'selected': selectedTimeSlots.includes(slot.time),
+                                'disabled': isAllDaySelected
+                            }"
+                            @click="toggleTimeSlot(slot.time)"
+                            :disabled="isAllDaySelected"
+                            >
+                            {{ slot.label }}
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Total Price -->
-                    <div v-if="selectedDate" class="total-price mt-6">
-                        <span class="text-xl font-bold">
+                    <div class="booking-actions">
+                        <span class="total-price">
                             Total: HKD {{ calculateTotal() }}
                         </span>
+                        <button 
+                            class="book-now-btn" 
+                            :disabled="!isValidBooking" 
+                            @click="bookRoom"
+                        >
+                            Book Now
+                        </button>
                     </div>
 
-                    <button class="book-now-btn" :disabled="!isValidBooking" @click="bookRoom">
-                        Book Now
-                    </button>
-                    
                 </div>
 
             </div>
@@ -306,11 +319,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
+.image-column {
+    flex: 1;
+    max-width: 33.33%;
+    padding: 10px;
+}
+
 .image-container {
   width: 100%;
   height: 0;
-  padding-bottom: 75%; /* Adjust this value to maintain aspect ratio */
+  padding-bottom: 75%; 
   position: relative;
+  margin: 10px;
 }
 
 .room-image {
@@ -320,5 +341,163 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 10px
+}
+
+.main{
+    flex: 1;
+    padding-left: 50px;
+}
+.room-info{
+    flex: 1;
+}
+
+.room-name{
+    font-size: 50px;
+    font-weight: bold;
+    padding-bottom: 60px;
+    padding: 10px;
+}
+
+.room-description{
+    font-size: 25px;
+    padding-bottom: 30px;
+    padding: 10px;
+}
+
+.room-price{
+    padding: 10px;
+}
+
+.date-picker{
+    padding: 10px;
+    padding-bottom: 60px;
+}
+
+.timeslot-description{
+    padding: 10px;
+    padding-bottom: 30px;
+}
+
+.timeslots-container {
+    margin-top: 20px;
+    padding-right:10px;
+    margin-bottom: 20px;
+}
+
+.timeslots-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 10px; 
+}
+
+.all-day-btn,
+.time-slot {
+    padding: 10px;
+    font-size: 14px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.all-day-btn.selected,
+.time-slot.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.time-slot.disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.all-day-btn:hover:not(.disabled),
+.time-slot:hover:not(.disabled) {
+    background-color: #0056b3;
+    color: white;
+}
+
+.clear-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #1678b5; 
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.clear-btn:hover {
+    background-color: #05324e; 
+    transform: scale(1.05); 
+}
+
+.clear-btn:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.booking-actions {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.total-price {
+    font-size: 25px;
+    font-weight: bold;
+    color: #333;
+}
+
+.book-now-btn {
+    padding: 12px 24px;
+    margin-right:10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 120px;
+}
+
+.book-now-btn:hover {
+    background-color: #196b2b; 
+    transform: scale(1.05); 
+}
+
+.book-now-btn:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .booking-actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .total-price {
+        text-align: center;
+    }
+
+    .book-now-btn {
+        width: 100%;
+    }
 }
 </style>
