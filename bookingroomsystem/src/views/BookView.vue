@@ -53,6 +53,7 @@ const fetchUserDetails = async () => {
 };
 
 const room = ref({});
+const participant = ref(1); // Initialize participant with a default value
 
 const fetchRoom = async () => {
     try {
@@ -128,16 +129,25 @@ const toggleAllDay = () => {
   }
 };
 
-const isValidBooking = computed(() => {
-  return selectedTimeSlots.value.length > 0;
-});
+// Removed duplicate declaration of isValidBooking
 
 const calculateTotal = () => {
+  const additional_price = room.value.additional_price_per_participant * participant.value
   if (isAllDaySelected.value) {
-    return room.value.price * 24; // Full day price
+    return room.value.price * 24 + additional_price; // Full day price
   }
-  return selectedTimeSlots.value.length * room.value.price; // Price per selected timeslot
+  return selectedTimeSlots.value.length * room.value.price + additional_price; // Price per selected timeslot
 };
+
+const isValidBooking = computed(() => {
+    const participantCount = Number(participant.value); 
+    const roomCapacity = Number(room.value.capacity); 
+    return (
+        (selectedTimeSlots.value.length > 0 || isAllDaySelected.value) &&
+        participantCount >= 1 &&
+        participantCount <= roomCapacity // Validate against room capacity
+    );
+});
 
 // Modified to redirect to payment page instead of creating booking
 const bookRoom = async () => {
@@ -155,12 +165,16 @@ const bookRoom = async () => {
       throw new Error('User ID not available');
     }
 
+    const participant = ref();
+
+
     const bookingData = {
         roomId: room.value._id,
         roomName: room.value.name,
         roomNumber: room.value.room_number,
         date: selectedDate.value,
         timeslots: selectedTimeSlots.value,
+        participant: participant.value,
         totalPrice: calculateTotal(),
         userId: userDetails.value._id,
         username: userDetails.value.username,
@@ -168,6 +182,11 @@ const bookRoom = async () => {
         userEmail: userDetails.value.email,
         paymentProof: null
     };
+
+    if (!isValidBooking.value) {
+        alert('Please select at least one timeslot and enter a valid number of participants.');
+        return;
+    }
 
     console.log('Sending booking data:', bookingData);
 
@@ -292,6 +311,13 @@ onMounted(() => {
                             >
                             {{ slot.label }}
                             </button>
+                        </div>
+                    </div>
+
+                    <div class="participants">
+                        <div>
+                            <label>Number of Participant:</label>
+                            <input v-model="participant" :min="1" :max=room.capacity required /> 
                         </div>
                     </div>
 

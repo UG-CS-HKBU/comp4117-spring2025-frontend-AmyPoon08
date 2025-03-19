@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 // import DatePicker from 'vue-datepicker-next';
 
 export default {
@@ -31,29 +31,29 @@ export default {
 
         const roomOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
-            { label: 'Single room', value: 'single_room', checked: false },
-            { label: 'Share room', value: 'share_room', checked: false }
+            { label: 'Single room', value: 'Single room', checked: false },
+            { label: 'Share room', value: 'Share room', checked: false }
         ]);
 
         const categoryOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
-            { label: 'Room 1', value: 'room_1', checked: false },
-            { label: 'Room 2', value: 'room_2', checked: false }
+            { label: 'Room 1', value: 'Room 1', checked: false },
+            { label: 'Room 2', value: 'Room 2', checked: false }
         ]);
 
         const capacityOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
-            { label: '≤5', value: 'below_5', checked: false },
-            { label: '≤10', value: 'below_10', checked: false }
+            { label: '≥5', value: '≥5', checked: false },
+            { label: '≥10', value: '≥10', checked: false },
+            { label: '≥20', value: '≥20', checked: false }
         ]);
 
-        const participantOptions = ref([
-            { label: 'Select All', value: 'select_all', checked: false },
-            { label: '≤5', value: 'below_5', checked: false },
-            { label: '≤10', value: 'below_10', checked: false },
-            { label: '≤20', value: 'below_20', checked: false },
-            { label: '20 or above', value: 'above_20', checked: false }
-        ]);
+        // const participantOptions = ref([
+        //     { label: 'Select All', value: 'select_all', checked: false },
+        //     { label: '≥5', value: '≥5', checked: false },
+        //     { label: '≥10', value: '≥10', checked: false },
+        //     { label: '≥20', value: '≥20', checked: false }
+        // ]);
 
         const priceOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
@@ -121,22 +121,22 @@ export default {
             }
         };
 
-        const toggleParticipantSelectAll = () => {
-            const selectAllOption = participantOptions.value.find(option => option.value === 'select_all');
-            const isChecked = selectAllOption.checked;
-            participantOptions.value.forEach(option => {
-                option.checked = isChecked;
-            });
-        };
+        // const toggleParticipantSelectAll = () => {
+        //     const selectAllOption = participantOptions.value.find(option => option.value === 'select_all');
+        //     const isChecked = selectAllOption.checked;
+        //     participantOptions.value.forEach(option => {
+        //         option.checked = isChecked;
+        //     });
+        // };
 
-        const handleParticipantOptionChange = (option) => {
-            if (option.value === 'select_all') {
-                toggleParticipantSelectAll();
-            } else {
-                const allChecked = participantOptions.value.every(opt => opt.value === 'select_all' || opt.checked);
-                participantOptions.value.find(opt => opt.value === 'select_all').checked = allChecked;
-            }
-        };
+        // const handleParticipantOptionChange = (option) => {
+        //     if (option.value === 'select_all') {
+        //         toggleParticipantSelectAll();
+        //     } else {
+        //         const allChecked = participantOptions.value.every(opt => opt.value === 'select_all' || opt.checked);
+        //         participantOptions.value.find(opt => opt.value === 'select_all').checked = allChecked;
+        //     }
+        // };
 
         const togglePriceSelectAll = () => {
             const selectAllOption = priceOptions.value.find(option => option.value === 'select_all');
@@ -202,14 +202,131 @@ export default {
             }
         };
 
+        const filteredRooms = computed(() => {
+            return rooms.value.filter(room => {
+                // Get selected options (excluding 'select_all')
+                const selectedRoomTypes = roomOptions.value
+                    .filter(opt => opt.checked && opt.value !== 'select_all')
+                    .map(opt => opt.value);
+                
+                const selectedCategories = categoryOptions.value
+                    .filter(opt => opt.checked && opt.value !== 'select_all')
+                    .map(opt => opt.value);
+
+                const selectedCapacities = capacityOptions.value
+                    .filter(opt => opt.checked && opt.value !== 'select_all')
+                    .map(opt => opt.value);
+
+                // const selectedParticipants = participantOptions.value
+                //     .filter(opt => opt.checked && opt.value !== 'select_all')
+                //     .map(opt => opt.value);
+
+                const selectedPrices = priceOptions.value
+                    .filter(opt => opt.checked && opt.value !== 'select_all')
+                    .map(opt => opt.value);
+
+                const selectedAvailability = availabilityOptions.value
+                    .filter(opt => opt.checked && opt.value !== 'select_all')
+                    .map(opt => opt.value);
+
+                // If no options are selected in a category, don't filter for that category
+                const matchesRoomType = selectedRoomTypes.length === 0 || 
+                    selectedRoomTypes.includes(room.type);
+
+                const matchesCategory = selectedCategories.length === 0 || 
+                    selectedCategories.includes(room.category);
+
+                const matchesCapacity = selectedCapacities.length === 0 || 
+                    checkCapacity(selectedCapacities, room.capacity);
+
+                // const matchesParticipants = selectedParticipants.length === 0 || 
+                //     checkParticipants(selectedParticipants, room.maxParticipants);
+
+                const matchesPrice = selectedPrices.length === 0 || 
+                    checkPrice(selectedPrices, room.price);
+
+                const matchesAvailability = selectedAvailability.length === 0 || 
+                    checkAvailability(selectedAvailability, room.availability);
+
+                // Search query filter
+                const matchesSearch = !searchQuery.value || 
+                    room.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+
+                return matchesRoomType && 
+                       matchesCategory && 
+                       matchesCapacity && 
+                    //    matchesParticipants && 
+                       matchesPrice && 
+                       matchesAvailability && 
+                       matchesSearch;
+            });
+        });
+
+        // Helper functions for checking ranges
+        const checkCapacity = (selectedCapacities, roomCapacity) => {
+            return selectedCapacities.some(capacity => {
+                switch(capacity) {
+                    case '≥5': return roomCapacity >= 5;
+                    case '≥10': return roomCapacity >= 10;
+                    case '≥20': return roomCapacity >= 20;
+                    default: return false;
+                }
+            });
+        };
+
+        // const checkParticipants = (selectedParticipants, roomParticipant) => {
+        //     return selectedParticipants.some(participant => {
+        //         switch(participant) {
+        //             case '≥5': return roomParticipant >= 5;
+        //             case '≥10': return roomParticipant >= 10;
+        //             case '≥20': return roomParticipant >= 20;
+        //             default: return false;
+        //         }
+        //     });
+        // };
+
+        const checkPrice = (selectedPrices, price) => {
+            return selectedPrices.some(range => {
+                switch(range) {
+                    case 'below_100': return price <= 100;
+                    case '101_to_200': return price > 100 && price <= 200;
+                    case '201_to_300': return price > 200 && price <= 300;
+                    case 'above_301': return price > 300;
+                    default: return false;
+                }
+            });
+        };
+
+        const checkAvailability = (selectedAvailability, availability) => {
+            return selectedAvailability.some(status => {
+                switch(status) {
+                    case 'low_availability': return availability < 50;
+                    case 'high_availability': return availability >= 50;
+                    default: return false;
+                }
+            });
+        };
+
+        // Add watchers for filter changes
+        watch([
+            roomOptions,
+            categoryOptions,
+            capacityOptions,
+            // participantOptions,
+            priceOptions,
+            availabilityOptions
+        ], () => {
+            // You might want to update the API call here if you're filtering on the server
+            fetchRooms();
+        }, { deep: true });
+
+
+
+
         onMounted(() => {
             fetchRooms();
         });
 
-        // const handleSearch = () => {
-        //     const query = searchQuery.value ? `?name=${encodeURIComponent(searchQuery.value)}` : '';
-        //     fetchRooms(query);
-        // };
 
         return {
             dateRange,
@@ -218,7 +335,7 @@ export default {
             roomOptions,
             categoryOptions,
             capacityOptions,
-            participantOptions,
+            // participantOptions,
             priceOptions,
             availabilityOptions,
             handleTimeRangeChange,
@@ -226,12 +343,13 @@ export default {
             handleRoomOptionChange,
             handleCategoryOptionChange,
             handleCapacityOptionChange,
-            handleParticipantOptionChange,
+            // handleParticipantOptionChange,
             handlePriceOptionChange,
             handleAvailabilityOptionChange,
             // handleSearch,
             searchQuery,
-            rooms
+            rooms,
+            filteredRooms
         };
     }
 };
@@ -351,7 +469,7 @@ export default {
                 </div>
             </div>
 
-            <div class="col-2">
+            <!-- <div class="col-2">
                 <label class="form-label">Participant Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonParticipant"
@@ -368,7 +486,7 @@ export default {
                         </li>
                     </ul>
                 </div>
-            </div>
+            </div> -->
 
             <div class="col-2">
                 <label class="form-label">Price Options:</label>
@@ -409,15 +527,6 @@ export default {
             </div>
         </div>
 
-        <!-- Search -->
-        <!-- <div class="row mt-3">
-            <div class="col-10">
-                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
-            </div>
-            <div class="col-2">
-                <button @click="handleSearch" class="btn btn-primary w-100">Search</button>
-            </div>
-        </div> -->
         <div class="row mt-3">
             <div class="col-12">
                 <input 
@@ -434,7 +543,7 @@ export default {
                 <h2>Search Results</h2>
 
                 <div class="row">
-                    <div class="col-md-4 mb-4" v-for="room in rooms" :key="room._id">
+                    <div class="col-md-4 mb-4" v-for="room in filteredRooms" :key="room._id">
                         <div class="card h-200">
                             <img 
                                 v-if="room.imageUrl" 

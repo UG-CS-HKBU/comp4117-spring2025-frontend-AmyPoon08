@@ -9,7 +9,7 @@ const initialRoomState = {
   type: '',
   category: '',
   capacity: '',
-  participant: '',
+  additional_price_per_participant: '',
   location: '',
   availability: true,
   under_maintenance: false,
@@ -105,8 +105,9 @@ const createRoom = async () => {
         <input v-model="room.capacity" required />
       </div>
       <div>
-        <label>Participant:</label>
-        <input v-model="room.participant" required />
+        <label>Additional Price per Participant:</label>
+        <input v-model="room.additional_price_per_participant" required /> 
+        <!-- input 0 if no additional price -->
       </div>
       <div>
         <label>Location:</label>

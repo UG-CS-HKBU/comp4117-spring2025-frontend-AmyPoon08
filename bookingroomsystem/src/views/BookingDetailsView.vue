@@ -94,15 +94,6 @@ const uploadPaymentProof = async () => {
         }
 
         const formData = new FormData()
-        // Object.keys(details.value).forEach(key => {
-        //     if (key === 'paymentProof' && details.value[key]) {
-        //         formData.append('paymentProof', details.value[key]);
-        //     } else if (typeof details.value[key] === 'boolean') {
-        //         formData.append(key, details.value[key].toString());
-        //     } else if (details.value[key] !== null && details.value[key] !== undefined) {
-        //         formData.append(key, details.value[key]);
-        //     }
-        // });
 
         formData.append('paymentProof', selectedFile.value)
 

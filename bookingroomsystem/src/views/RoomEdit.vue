@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const roomId = route.params.id;  // Get roomId from URL
+const selectedFile = ref(null);
 
 const fileInput = ref(null);
 const room = ref({
@@ -13,7 +14,7 @@ const room = ref({
   type: '',
   category: '',
   capacity: '',
-  participant: '',
+  additional_price_per_participant: '',
   location: '',
   availability: true,
   under_maintenance: false,
@@ -40,16 +41,23 @@ const fetchRoomDetails = async () => {
 
 // Handle Image Upload
 const handleFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    room.value.image = file;
-    console.log('Selected file:', file);
-  }
+  // const file = event.target.files[0];
+  // if (file) {
+  //   room.value.image = file;
+  //   console.log('Selected file:', file);
+  // }
+  selectedFile.value = event.target.files[0];
 };
 
 // Update Room
 const updateRoom = async () => {
   try {
+
+    if (!selectedFile.value) {
+        console.error('No file selected');
+        return;
+    }
+
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found. Please log in.');
 
@@ -63,6 +71,8 @@ const updateRoom = async () => {
         formData.append(key, room.value[key]);
       }
     });
+
+    formData.append('image', selectedFile.value)
 
     const response = await fetch(`/api/rooms/${roomId}`, {
       method: 'PUT',
@@ -116,8 +126,8 @@ onMounted(fetchRoomDetails);
         <input v-model="room.capacity" required />
       </div>
       <div>
-        <label>Participant:</label>
-        <input v-model="room.participant" required />
+        <label>Additional Price per Participant:</label>
+        <input v-model="room.additional_price_per_participant" required />
       </div>
       <div>
         <label>Location:</label>
