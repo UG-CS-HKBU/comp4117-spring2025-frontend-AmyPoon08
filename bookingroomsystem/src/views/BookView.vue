@@ -253,6 +253,9 @@ onMounted(() => {
                     <div class="room-price">
                         <p class="card-text" style="color:slategrey">Price per hour: ${{ room.price }}</p>
                     </div>
+                    <div class="room-additional-price">
+                        <p class="card-text" style="color:slategrey">Additional Price per Participant: ${{ room.additional_price_per_participant }}</p>
+                    </div>
                 </div>
                 
                 
@@ -391,7 +394,7 @@ onMounted(() => {
     padding: 10px;
 }
 
-.room-price{
+.room-price, .room-additional-price{
     padding: 10px;
 }
 

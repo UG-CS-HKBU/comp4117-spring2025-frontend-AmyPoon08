@@ -38,7 +38,10 @@ export default {
         const categoryOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
             { label: 'Room 1', value: 'Room 1', checked: false },
-            { label: 'Room 2', value: 'Room 2', checked: false }
+            { label: 'Room 2', value: 'Room 2', checked: false },
+            { label: 'Room 3', value: 'Room 3', checked: false },
+            { label: 'Room 4', value: 'Room 4', checked: false },
+            { label: 'Room 5', value: 'Room 5', checked: false },
         ]);
 
         const capacityOptions = ref([
@@ -231,7 +234,7 @@ export default {
 
                 // If no options are selected in a category, don't filter for that category
                 const matchesRoomType = selectedRoomTypes.length === 0 || 
-                    selectedRoomTypes.includes(room.type);
+                    selectedRoomTypes.some(type => type.toLowerCase().trim() === room.type.toLowerCase().trim());
 
                 const matchesCategory = selectedCategories.length === 0 || 
                     selectedCategories.includes(room.category);
