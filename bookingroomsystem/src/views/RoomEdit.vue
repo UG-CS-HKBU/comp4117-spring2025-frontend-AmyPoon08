@@ -41,23 +41,16 @@ const fetchRoomDetails = async () => {
 
 // Handle Image Upload
 const handleFileChange = (event) => {
-  // const file = event.target.files[0];
-  // if (file) {
-  //   room.value.image = file;
-  //   console.log('Selected file:', file);
-  // }
-  selectedFile.value = event.target.files[0];
+  const file = event.target.files[0];
+  if (file) {
+    room.value.image = file;
+    console.log('Selected file:', file);
+  }
 };
 
 // Update Room
 const updateRoom = async () => {
   try {
-
-    if (!selectedFile.value) {
-        console.error('No file selected');
-        return;
-    }
-
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found. Please log in.');
 
