@@ -384,17 +384,9 @@ export default {
                 <!-- Date Range -->
                 <div class="col-md-4">
                     <div class="picker-container">
-                        <input 
-                            type="date" 
-                            class="form-control" 
-                            v-model="dateRange[0]"
-                        />
+                        <input type="date" class="form-control" v-model="dateRange[0]"/>
                         <span class="mx-2">to</span>
-                        <input 
-                            type="date" 
-                            class="form-control" 
-                            v-model="dateRange[1]"
-                        />
+                        <input type="date" class="form-control" v-model="dateRange[1]"/>
                     </div>
                 </div>
                 
@@ -402,60 +394,52 @@ export default {
                 <div class="col-8">
                     <div class="filter-options">
                         <div class="dropdown filter-dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                 Room Type
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" :id="option.value"
-                                            v-model="option.checked" @change="handleRoomOptionChange(option)">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleRoomOptionChange(option)">
                                         <label class="form-check-label" :for="option.value">{{ option.label }}</label>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                         <div class="dropdown filter-dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory" data-bs-toggle="dropdown" aria-expanded="false">
                                 Category
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCategory">
                                 <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" :id="option.value"
-                                            v-model="option.checked" @change="handleCategoryOptionChange(option)">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleCategoryOptionChange(option)">
                                         <label class="form-check-label" :for="option.value">{{ option.label }}</label>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                         <div class="dropdown filter-dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity" data-bs-toggle="dropdown" aria-expanded="false">
                                 Capacity
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCapacity">
                                 <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" :id="option.value"
-                                            v-model="option.checked" @change="handleCapacityOptionChange(option)">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleCapacityOptionChange(option)">
                                         <label class="form-check-label" :for="option.value">{{ option.label }}</label>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                         <div class="dropdown filter-dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice" data-bs-toggle="dropdown" aria-expanded="false">
                                 Price
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
                                 <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" :id="option.value"
-                                            v-model="option.checked" @change="handlePriceOptionChange(option)">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handlePriceOptionChange(option)">
                                         <label class="form-check-label" :for="option.value">{{ option.label }}</label>
                                     </div>
                                 </li>
@@ -474,19 +458,13 @@ export default {
             <div class="row mb-3">
                 <div class="col-md-4">
                     <div class="picker-container">
-                        <select 
-                            v-model="timeRange[0]" 
-                            class="form-control"
-                        >
+                        <select v-model="timeRange[0]" class="form-control">
                             <option v-for="time in timeOptions" :key="time" :value="time">
                                 {{ time }}
                             </option>
                         </select>
                         <span class="mx-2">to</span>
-                        <select 
-                            v-model="timeRange[1]" 
-                            class="form-control"
-                        >
+                        <select v-model="timeRange[1]" class="form-control">
                             <option v-for="time in timeOptions" :key="time" :value="time">
                                 {{ time }}
                             </option>
@@ -495,30 +473,19 @@ export default {
                 </div>
 
                 <div class="col-8">
-                    <input 
-                        type="text" 
-                        v-model="searchQuery" 
-                        class="form-control" 
-                        placeholder="Search..."
-                    />
+                    <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..."/>
                 </div>
             </div>
         </div>
 
-        <div class="row"> <!-- Add this wrapper row -->
+        <div class="row"> 
             <div class="col-md-4 mb-4" 
                 v-for="room in filteredRooms" 
                 :key="room._id"
                 :data-room-id="room._id">
                 <div class="card room-card">
                     <div class="image-container">
-                        <img 
-                            v-if="room.imageUrl" 
-                            :src="room.imageUrl" 
-                            :alt="room.name"
-                            class="room-image"
-                            @error="handleImageError"
-                        />
+                        <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name" class="room-image" @error="handleImageError"/>
                         <div v-else class="placeholder-image">
                             No Image Available
                         </div>
@@ -528,14 +495,10 @@ export default {
                         <h5 class="card-title text-truncate mb-2">{{ room.name }}</h5>
                         
                         <div class="description-container">
-                            <p class="card-description" 
-                            :class="{ 'expanded': expandedCards[room._id] }">
+                            <p class="card-description" :class="{ 'expanded': expandedCards[room._id] }">
                                 {{ room.description }}
                             </p>
-                            <button 
-                                v-if="isTextOverflowing(room._id)"
-                                class="show-more-btn"
-                                @click="toggleDescription(room._id)">
+                            <button v-if="isTextOverflowing(room._id)" class="show-more-btn" @click="toggleDescription(room._id)">
                                 {{ expandedCards[room._id] ? 'Show Less' : 'Show More' }}
                             </button>
                         </div>
