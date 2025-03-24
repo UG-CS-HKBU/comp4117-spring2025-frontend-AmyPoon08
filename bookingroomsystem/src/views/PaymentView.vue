@@ -224,61 +224,15 @@ const formatDate = (dateString) => {
       <h2>Payment Method</h2>
       <div class="payment-options">
         <div class="payment-option">
-          <input type="radio" id="credit_card" value="credit_card" v-model="paymentMethod">
-          <label for="credit_card">Credit Card</label>
-        </div>
-        <div class="payment-option">
           <input type="radio" id="paypalRadio" value="paypal" v-model="paymentMethod">
           <label for="paypal">PayPal</label>
         </div>
-        <div class="payment-option">
-          <input type="radio" id="apple_pay" value="apple_pay" v-model="paymentMethod">
-          <label for="apple_pay">Apple Pay</label>
-        </div>
       </div>
     </div>
 
-    <div v-if="paymentMethod === 'credit_card'" class="credit-card-form">
-      <div class="form-group">
-        <label for="card-number">Card Number</label>
-        <input type="text" id="card-number" v-model="cardNumber" placeholder="1234 5678 9012 3456" maxlength="16"
-          class="form-control" :class="{ 'is-invalid': errors.cardNumber }">
-        <div v-if="errors.cardNumber" class="invalid-feedback">
-          {{ errors.cardNumber }}
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label for="cardholder-name">Cardholder Name</label>
-        <input type="text" id="cardholder-name" v-model="cardholderName" placeholder="John Doe" class="form-control"
-          :class="{ 'is-invalid': errors.cardholderName }">
-        <div v-if="errors.cardholderName" class="invalid-feedback">
-          {{ errors.cardholderName }}
-        </div>
-      </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="expiry-date">Expiry Date</label>
-          <input type="text" id="expiry-date" v-model="expiryDate" placeholder="MM/YY" maxlength="5"
-            class="form-control" :class="{ 'is-invalid': errors.expiryDate }">
-          <div v-if="errors.expiryDate" class="invalid-feedback">
-            {{ errors.expiryDate }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="cvv">CVV</label>
-          <input type="text" id="cvv" v-model="cvv" placeholder="123" maxlength="4" class="form-control"
-            :class="{ 'is-invalid': errors.cvv }">
-          <div v-if="errors.cvv" class="invalid-feedback">
-            {{ errors.cvv }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="paymentMethod === 'paypal'" class="paypal-info">
+    <div v-if="paymentMethod === 'paypal'" class="paypal-info">
       <div v-if="paypalLoaded">
         <div id="paypal-button-container"></div>
       </div>
@@ -287,9 +241,6 @@ const formatDate = (dateString) => {
       </div>
     </div>
 
-    <div v-else-if="paymentMethod === 'apple_pay'" class="apple-pay-info">
-      <p>You will use Apple Pay to complete your payment.</p>
-    </div>
 
     <div class="payment-actions">
       <button class="btn-back" @click="router.go(-1)">
