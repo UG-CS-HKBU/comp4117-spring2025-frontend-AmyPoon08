@@ -47,7 +47,7 @@ const login = async () => {
             console.warn('Empty response body');
             localStorage.setItem('token', ''); // Assuming token is empty
             isAuthenticated.value = true;
-            router.push('/home');
+           // router.push('/home');
             return;
         }
 
