@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { loadScript } from "@paypal/paypal-js";
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
 const router = useRouter();
 
 const bookingDetails = ref({
@@ -25,6 +25,26 @@ const expiryDate = ref('');
 const cvv = ref('');
 const isProcessing = ref(false);
 const errors = ref({});
+const paypalLoaded = ref(false);
+let paypal;
+
+onMounted(async () => {
+  const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
+  if (details) {
+    bookingDetails.value = details;
+  } else {
+    alert('No booking details found!');
+    router.push('/bookings');
+  }
+
+  try {
+    paypal = await loadScript({ clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' });
+    paypalLoaded.value = true;
+  } catch (error) {
+    console.error("failed to load the PayPal JS SDK script", error);
+  }
+
+});
 
 // Get booking details from route params
 onMounted(() => {
@@ -46,17 +66,17 @@ const validateForm = () => {
       errors.value.cardNumber = 'Please enter a valid card number';
       isValid = false;
     }
-    
+
     if (!cardholderName.value) {
       errors.value.cardholderName = 'Please enter the cardholder name';
       isValid = false;
     }
-    
+
     if (!expiryDate.value) {
       errors.value.expiryDate = 'Please enter the expiry date';
       isValid = false;
     }
-    
+
     if (!cvv.value || cvv.value.length < 3) {
       errors.value.cvv = 'Please enter a valid CVV';
       isValid = false;
@@ -66,7 +86,37 @@ const validateForm = () => {
   return isValid;
 };
 
+const renderPayPalButton = async () => {
+  await paypal.Buttons({
+    createOrder: (data, actions) => {
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: bookingDetails.value.totalPrice.toString()
+          }
+        }]
+      });
+    },
+    onApprove: async (data, actions) => {
+      const order = await actions.order.capture();
+      console.log('Order', order);
+      await completeBooking();
+      localStorage.removeItem('pendingBookingDetails');
+      alert('Payment successful! Your room has been booked.');
+      router.push('/bookings');
+    },
+    onError: (err) => {
+      console.error('PayPal Checkout onError', err);
+      alert('Payment failed. Please try again.');
+    }
+  }).render('#paypal-button-container');
+};
+
 const processPayment = async () => {
+  if (paymentMethod.value === 'paypal') {
+    renderPayPalButton();
+    return;
+  }
   if (!validateForm()) {
     return;
   }
@@ -79,10 +129,10 @@ const processPayment = async () => {
 
     // After successful payment, proceed with the booking
     await completeBooking();
-    
+
     // Clear the pending booking details
     localStorage.removeItem('pendingBookingDetails');
-    
+
     // Show success message and redirect
     alert('Payment successful! Your room has been booked.');
     router.push('/bookings');
@@ -123,11 +173,11 @@ const completeBooking = async () => {
 
 const formatTimeslots = (timeslots) => {
   if (!timeslots || timeslots.length === 0) return 'No timeslots selected';
-  
+
   if (timeslots.length === 24) {
     return 'All Day';
   }
-  
+
   const startTime = timeslots[0];
   const endTime = timeslots[timeslots.length - 1];
   return `${startTime} - ${endTime}`;
@@ -143,7 +193,7 @@ const formatDate = (dateString) => {
 <template>
   <div class="payment-container">
     <h1>Payment</h1>
-    
+
     <div class="booking-summary">
       <h2>Booking Summary</h2>
       <div class="summary-details">
@@ -169,7 +219,7 @@ const formatDate = (dateString) => {
         </div>
       </div>
     </div>
-    
+
     <div class="payment-methods">
       <h2>Payment Method</h2>
       <div class="payment-options">
@@ -178,7 +228,7 @@ const formatDate = (dateString) => {
           <label for="credit_card">Credit Card</label>
         </div>
         <div class="payment-option">
-          <input type="radio" id="paypal" value="paypal" v-model="paymentMethod">
+          <input type="radio" id="paypalRadio" value="paypal" v-model="paymentMethod">
           <label for="paypal">PayPal</label>
         </div>
         <div class="payment-option">
@@ -187,94 +237,65 @@ const formatDate = (dateString) => {
         </div>
       </div>
     </div>
-    
+
     <div v-if="paymentMethod === 'credit_card'" class="credit-card-form">
       <div class="form-group">
         <label for="card-number">Card Number</label>
-        <input 
-          type="text" 
-          id="card-number" 
-          v-model="cardNumber" 
-          placeholder="1234 5678 9012 3456"
-          maxlength="16"
-          class="form-control"
-          :class="{ 'is-invalid': errors.cardNumber }"
-        >
+        <input type="text" id="card-number" v-model="cardNumber" placeholder="1234 5678 9012 3456" maxlength="16"
+          class="form-control" :class="{ 'is-invalid': errors.cardNumber }">
         <div v-if="errors.cardNumber" class="invalid-feedback">
           {{ errors.cardNumber }}
         </div>
       </div>
-      
+
       <div class="form-group">
         <label for="cardholder-name">Cardholder Name</label>
-        <input 
-          type="text" 
-          id="cardholder-name" 
-          v-model="cardholderName" 
-          placeholder="John Doe"
-          class="form-control"
-          :class="{ 'is-invalid': errors.cardholderName }"
-        >
+        <input type="text" id="cardholder-name" v-model="cardholderName" placeholder="John Doe" class="form-control"
+          :class="{ 'is-invalid': errors.cardholderName }">
         <div v-if="errors.cardholderName" class="invalid-feedback">
           {{ errors.cardholderName }}
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-group">
           <label for="expiry-date">Expiry Date</label>
-          <input 
-            type="text" 
-            id="expiry-date" 
-            v-model="expiryDate" 
-            placeholder="MM/YY"
-            maxlength="5"
-            class="form-control"
-            :class="{ 'is-invalid': errors.expiryDate }"
-          >
+          <input type="text" id="expiry-date" v-model="expiryDate" placeholder="MM/YY" maxlength="5"
+            class="form-control" :class="{ 'is-invalid': errors.expiryDate }">
           <div v-if="errors.expiryDate" class="invalid-feedback">
             {{ errors.expiryDate }}
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="cvv">CVV</label>
-          <input 
-            type="text" 
-            id="cvv" 
-            v-model="cvv" 
-            placeholder="123"
-            maxlength="4"
-            class="form-control"
-            :class="{ 'is-invalid': errors.cvv }"
-          >
+          <input type="text" id="cvv" v-model="cvv" placeholder="123" maxlength="4" class="form-control"
+            :class="{ 'is-invalid': errors.cvv }">
           <div v-if="errors.cvv" class="invalid-feedback">
             {{ errors.cvv }}
           </div>
         </div>
       </div>
     </div>
-    
+
     <div v-else-if="paymentMethod === 'paypal'" class="paypal-info">
-      <p>You will be redirected to PayPal to complete your payment.</p>
+      <div v-if="paypalLoaded">
+        <div id="paypal-button-container"></div>
+      </div>
+      <div v-else>
+        <p>Loading PayPal...</p>
+      </div>
     </div>
-    
+
     <div v-else-if="paymentMethod === 'apple_pay'" class="apple-pay-info">
       <p>You will use Apple Pay to complete your payment.</p>
     </div>
-    
+
     <div class="payment-actions">
-      <button 
-        class="btn-back" 
-        @click="router.go(-1)"
-      >
+      <button class="btn-back" @click="router.go(-1)">
         Back
       </button>
-      <button 
-        class="btn-pay" 
-        @click="processPayment"
-        :disabled="isProcessing"
-      >
+      <button class="btn-pay" @click="processPayment" :disabled="isProcessing">
         <span v-if="isProcessing">Processing...</span>
         <span v-else>Pay Now</span>
       </button>
@@ -306,7 +327,7 @@ h2 {
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .summary-details {
@@ -403,7 +424,8 @@ h2 {
   margin-top: 2rem;
 }
 
-.btn-back, .btn-pay {
+.btn-back,
+.btn-pay {
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -437,10 +459,11 @@ h2 {
   cursor: not-allowed;
 }
 
-.paypal-info, .apple-pay-info {
+.paypal-info,
+.apple-pay-info {
   background-color: #f8f9fa;
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 2rem;
 }
-</style> 
+</style>
