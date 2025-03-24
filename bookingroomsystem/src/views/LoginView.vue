@@ -94,6 +94,9 @@ onMounted(() => {
                             <label for="password" class="form-label">Password: </label>
                             <div class="input-group">
                                 <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="credentials.password" id="password" required>
+                                <button type="button" class="btn btn-outline-secondary" @click="showPassword = !showPassword">
+                                    {{ showPassword ? 'Hide' : 'Show' }}
+                                </button>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
