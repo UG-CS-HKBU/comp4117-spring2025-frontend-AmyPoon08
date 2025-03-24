@@ -24,7 +24,7 @@ export default {
                 timeRange.value = [start, end];
             }
         };
-        
+
         const handleDateRangeChange = (start, end) => {
             dateRange.value = [start, end];
         };
@@ -191,13 +191,13 @@ export default {
             }, 10); // Wait 10ms after user stops typing
         });
 
-        
-        
+
+
         const fetchRooms = async (query = '') => {
             try {
                 const response = await fetch(`/api/rooms${query}`);
                 if (!response.ok) {
-                throw new Error('Failed to fetch rooms');
+                    throw new Error('Failed to fetch rooms');
                 }
                 rooms.value = await response.json();
             } catch (error) {
@@ -211,7 +211,7 @@ export default {
                 const selectedRoomTypes = roomOptions.value
                     .filter(opt => opt.checked && opt.value !== 'select_all')
                     .map(opt => opt.value);
-                
+
                 const selectedCategories = categoryOptions.value
                     .filter(opt => opt.checked && opt.value !== 'select_all')
                     .map(opt => opt.value);
@@ -233,42 +233,42 @@ export default {
                     .map(opt => opt.value);
 
                 // If no options are selected in a category, don't filter for that category
-                const matchesRoomType = selectedRoomTypes.length === 0 || 
+                const matchesRoomType = selectedRoomTypes.length === 0 ||
                     selectedRoomTypes.some(type => type.toLowerCase().trim() === room.type.toLowerCase().trim());
 
-                const matchesCategory = selectedCategories.length === 0 || 
+                const matchesCategory = selectedCategories.length === 0 ||
                     selectedCategories.includes(room.category);
 
-                const matchesCapacity = selectedCapacities.length === 0 || 
+                const matchesCapacity = selectedCapacities.length === 0 ||
                     checkCapacity(selectedCapacities, room.capacity);
 
                 // const matchesParticipants = selectedParticipants.length === 0 || 
                 //     checkParticipants(selectedParticipants, room.maxParticipants);
 
-                const matchesPrice = selectedPrices.length === 0 || 
+                const matchesPrice = selectedPrices.length === 0 ||
                     checkPrice(selectedPrices, room.price);
 
-                const matchesAvailability = selectedAvailability.length === 0 || 
+                const matchesAvailability = selectedAvailability.length === 0 ||
                     checkAvailability(selectedAvailability, room.availability);
 
                 // Search query filter
-                const matchesSearch = !searchQuery.value || 
+                const matchesSearch = !searchQuery.value ||
                     room.name.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-                return matchesRoomType && 
-                       matchesCategory && 
-                       matchesCapacity && 
+                return matchesRoomType &&
+                    matchesCategory &&
+                    matchesCapacity &&
                     //    matchesParticipants && 
-                       matchesPrice && 
-                       matchesAvailability && 
-                       matchesSearch;
+                    matchesPrice &&
+                    matchesAvailability &&
+                    matchesSearch;
             });
         });
 
         // Helper functions for checking ranges
         const checkCapacity = (selectedCapacities, roomCapacity) => {
             return selectedCapacities.some(capacity => {
-                switch(capacity) {
+                switch (capacity) {
                     case '≥5': return roomCapacity >= 5;
                     case '≥10': return roomCapacity >= 10;
                     case '≥20': return roomCapacity >= 20;
@@ -290,7 +290,7 @@ export default {
 
         const checkPrice = (selectedPrices, price) => {
             return selectedPrices.some(range => {
-                switch(range) {
+                switch (range) {
                     case 'below_100': return price <= 100;
                     case '101_to_200': return price > 100 && price <= 200;
                     case '201_to_300': return price > 200 && price <= 300;
@@ -302,7 +302,7 @@ export default {
 
         const checkAvailability = (selectedAvailability, availability) => {
             return selectedAvailability.some(status => {
-                switch(status) {
+                switch (status) {
                     case 'low_availability': return availability < 50;
                     case 'high_availability': return availability >= 50;
                     default: return false;
@@ -363,7 +363,7 @@ export default {
         <div class="text-center mb-4">
             <h1>Book for all desires</h1>
         </div>
-        
+
         <div class="row mb-2">
             <div class="col-md-6">
                 <label class="form-label">Date Range:</label>
@@ -377,36 +377,22 @@ export default {
             <!-- Date Range -->
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
-                    <input 
-                        type="date" 
-                        class="form-control" 
-                        v-model="dateRange[0]"
-                    />
+                    <input type="date" class="form-control" v-model="dateRange[0]" />
                     <span class="mx-2">to</span>
-                    <input 
-                        type="date" 
-                        class="form-control" 
-                        v-model="dateRange[1]"
-                    />
+                    <input type="date" class="form-control" v-model="dateRange[1]" />
                 </div>
             </div>
 
             <!-- Time Range -->
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
-                    <select 
-                        v-model="timeRange[0]" 
-                        class="form-control"
-                    >
+                    <select v-model="timeRange[0]" class="form-control">
                         <option v-for="time in timeOptions" :key="time" :value="time">
                             {{ time }}
                         </option>
                     </select>
                     <span class="mx-2">to</span>
-                    <select 
-                        v-model="timeRange[1]" 
-                        class="form-control"
-                    >
+                    <select v-model="timeRange[1]" class="form-control">
                         <option v-for="time in timeOptions" :key="time" :value="time">
                             {{ time }}
                         </option>
@@ -532,32 +518,21 @@ export default {
 
         <div class="row mt-3">
             <div class="col-12">
-                <input 
-                    type="text" 
-                    v-model="searchQuery" 
-                    class="form-control" 
-                    placeholder="Search..."
-                />
+                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
             </div>
         </div>
 
         <div class="row mt-3">
             <div class="col-12">
-                <h2>Search Results</h2>
 
                 <div class="row">
                     <div class="col-md-4 mb-4" v-for="room in filteredRooms" :key="room._id">
                         <div class="card h-200">
-                            <img 
-                                v-if="room.imageUrl" 
-                                :src="room.imageUrl" 
-                                :alt="room.name"
-                                class="room-image"
-                                @error="handleImageError"
-                            />
+                            <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name" class="room-image"
+                                @error="handleImageError" />
                             <div class="card-body">
                                 <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
-                                <p class="card-text">{{ room.description }}</p>
+                                <p class="card-description">{{ room.description }}</p>
                                 <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
                                 <a :href="`/bookings/book/${room._id}`">
                                     <button id="Edit" class="btn btn-primary">Book Now!</button>
@@ -573,8 +548,14 @@ export default {
 </template>
 
 <style scoped>
-    .room-image {
-    max-width: 300px;
-    height: auto;
-    }
+.room-image {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.card-description {
+    height: 100px;
+    overflow: auto;
+}
 </style>
