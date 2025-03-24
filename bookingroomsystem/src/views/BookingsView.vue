@@ -1,9 +1,36 @@
 <script>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 // import DatePicker from 'vue-datepicker-next';
 
 export default {
+    
+    
     setup() {
+
+        // State for expanded cards
+        const expandedCards = ref({});
+        const textOverflow = ref({});
+
+        // Text overflow detection functions
+        const checkTextOverflow = () => {
+            nextTick(() => {
+                const descriptions = document.querySelectorAll('.card-description');
+                descriptions.forEach(desc => {
+                    const roomId = desc.closest('.col-md-4').getAttribute('data-room-id');
+                    textOverflow.value[roomId] = desc.scrollHeight > desc.clientHeight;
+                });
+            });
+        };
+
+        const toggleDescription = (roomId) => {
+            expandedCards.value[roomId] = !expandedCards.value[roomId];
+        };
+
+        const isTextOverflowing = (roomId) => {
+            return textOverflow.value[roomId];
+        };
+
+
         const dateRange = ref([null, null]);
         const timeRange = ref([null, null]);
 
@@ -124,23 +151,6 @@ export default {
             }
         };
 
-        // const toggleParticipantSelectAll = () => {
-        //     const selectAllOption = participantOptions.value.find(option => option.value === 'select_all');
-        //     const isChecked = selectAllOption.checked;
-        //     participantOptions.value.forEach(option => {
-        //         option.checked = isChecked;
-        //     });
-        // };
-
-        // const handleParticipantOptionChange = (option) => {
-        //     if (option.value === 'select_all') {
-        //         toggleParticipantSelectAll();
-        //     } else {
-        //         const allChecked = participantOptions.value.every(opt => opt.value === 'select_all' || opt.checked);
-        //         participantOptions.value.find(opt => opt.value === 'select_all').checked = allChecked;
-        //     }
-        // };
-
         const togglePriceSelectAll = () => {
             const selectAllOption = priceOptions.value.find(option => option.value === 'select_all');
             const isChecked = selectAllOption.checked;
@@ -191,8 +201,14 @@ export default {
             }, 10); // Wait 10ms after user stops typing
         });
 
+        // Add watcher for card updates
+        watch(rooms, () => {
+            nextTick(() => {
+                checkTextOverflow();
+            });
+        });
 
-
+        
         const fetchRooms = async (query = '') => {
             try {
                 const response = await fetch(`/api/rooms${query}`);
@@ -277,17 +293,6 @@ export default {
             });
         };
 
-        // const checkParticipants = (selectedParticipants, roomParticipant) => {
-        //     return selectedParticipants.some(participant => {
-        //         switch(participant) {
-        //             case '≥5': return roomParticipant >= 5;
-        //             case '≥10': return roomParticipant >= 10;
-        //             case '≥20': return roomParticipant >= 20;
-        //             default: return false;
-        //         }
-        //     });
-        // };
-
         const checkPrice = (selectedPrices, price) => {
             return selectedPrices.some(range => {
                 switch (range) {
@@ -328,6 +333,7 @@ export default {
 
         onMounted(() => {
             fetchRooms();
+            checkTextOverflow();
         });
 
 
@@ -352,7 +358,11 @@ export default {
             // handleSearch,
             searchQuery,
             rooms,
-            filteredRooms
+            filteredRooms,
+            expandedCards,
+            textOverflow,
+            toggleDescription,
+            isTextOverflowing
         };
     }
 };
@@ -364,198 +374,327 @@ export default {
             <h1>Book for all desires</h1>
         </div>
 
-        <div class="row mb-2">
-            <div class="col-md-6">
-                <label class="form-label">Date Range:</label>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Time Range:</label>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <!-- Date Range -->
-            <div class="col-md-6">
-                <div class="d-flex align-items-center">
-                    <input type="date" class="form-control" v-model="dateRange[0]" />
-                    <span class="mx-2">to</span>
-                    <input type="date" class="form-control" v-model="dateRange[1]" />
+        <div class="row mb-5">
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label class="form-label">Date Range:</label>
                 </div>
             </div>
-
-            <!-- Time Range -->
-            <div class="col-md-6">
-                <div class="d-flex align-items-center">
-                    <select v-model="timeRange[0]" class="form-control">
-                        <option v-for="time in timeOptions" :key="time" :value="time">
-                            {{ time }}
-                        </option>
-                    </select>
-                    <span class="mx-2">to</span>
-                    <select v-model="timeRange[1]" class="form-control">
-                        <option v-for="time in timeOptions" :key="time" :value="time">
-                            {{ time }}
-                        </option>
-                    </select>
+            <div class="row mb-3">
+                <!-- Date Range -->
+                <div class="col-md-4">
+                    <div class="picker-container">
+                        <input type="date" class="form-control" v-model="dateRange[0]"/>
+                        <span class="mx-2">to</span>
+                        <input type="date" class="form-control" v-model="dateRange[1]"/>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-2">
-                <label class="form-label">Room Type Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Room Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleRoomOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-2">
-                <label class="form-label">Category Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Category Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCategory">
-                        <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleCategoryOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-2">
-                <label class="form-label">Capacity Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Capacity Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCapacity">
-                        <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleCapacityOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- <div class="col-2">
-                <label class="form-label">Participant Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonParticipant"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Participant Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonParticipant">
-                        <li v-for="option in participantOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleParticipantOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div> -->
-
-            <div class="col-2">
-                <label class="form-label">Price Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Price Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
-                        <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handlePriceOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-2">
-                <label class="form-label">Availability Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonAvailability"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Availability Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAvailability">
-                        <li v-for="option in availabilityOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleAvailabilityOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="col-12">
-                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="col-12">
-
-                <div class="row">
-                    <div class="col-md-4 mb-4" v-for="room in filteredRooms" :key="room._id">
-                        <div class="card h-200">
-                            <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name" class="room-image"
-                                @error="handleImageError" />
-                            <div class="card-body">
-                                <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
-                                <p class="card-description">{{ room.description }}</p>
-                                <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
-                                <a :href="`/bookings/book/${room._id}`">
-                                    <button id="Edit" class="btn btn-primary">Book Now!</button>
-                                </a>
-                            </div>
+                
+                <!-- Filter options -->
+                <div class="col-8">
+                    <div class="filter-options">
+                        <div class="dropdown filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                Room Type
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleRoomOptionChange(option)">
+                                        <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory" data-bs-toggle="dropdown" aria-expanded="false">
+                                Category
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCategory">
+                                <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleCategoryOptionChange(option)">
+                                        <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity" data-bs-toggle="dropdown" aria-expanded="false">
+                                Capacity
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCapacity">
+                                <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handleCapacityOptionChange(option)">
+                                        <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice" data-bs-toggle="dropdown" aria-expanded="false">
+                                Price
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
+                                <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value" v-model="option.checked" @change="handlePriceOptionChange(option)">
+                                        <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label class="form-label">Time Range:</label>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="picker-container">
+                        <select v-model="timeRange[0]" class="form-control">
+                            <option v-for="time in timeOptions" :key="time" :value="time">
+                                {{ time }}
+                            </option>
+                        </select>
+                        <span class="mx-2">to</span>
+                        <select v-model="timeRange[1]" class="form-control">
+                            <option v-for="time in timeOptions" :key="time" :value="time">
+                                {{ time }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-8">
+                    <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..."/>
+                </div>
+            </div>
+        </div>
+
+        <div class="row"> 
+            <div class="col-md-4 mb-4" 
+                v-for="room in filteredRooms" 
+                :key="room._id"
+                :data-room-id="room._id">
+                <div class="card room-card">
+                    <div class="image-container">
+                        <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name" class="room-image" @error="handleImageError"/>
+                        <div v-else class="placeholder-image">
+                            No Image Available
+                        </div>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate mb-2">{{ room.name }}</h5>
+                        
+                        <div class="description-container">
+                            <p class="card-description" :class="{ 'expanded': expandedCards[room._id] }">
+                                {{ room.description }}
+                            </p>
+                            <button v-if="isTextOverflowing(room._id)" class="show-more-btn" @click="toggleDescription(room._id)">
+                                {{ expandedCards[room._id] ? 'Show Less' : 'Show More' }}
+                            </button>
+                        </div>
+
+                        <div class="card-footer-content mt-auto">
+                            <p class="price-text mb-2">
+                                <strong>Price:</strong> {{ room.price }}
+                            </p>
+                            <a :href="`/bookings/book/${room._id}`" class="w-100">
+                                <button class="btn btn-primary w-100">Book Now!</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.room-image {
-    height: 200px;
+.picker-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.picker-container .form-control {
+    flex: 1;
+    min-width: 0;
+    width: calc(50% - 20px); 
+}
+
+.picker-container span {
+    flex: 0 0 auto;
+}
+
+.filter-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
     width: 100%;
+}
+
+.filter-dropdown {
+    flex: 1;
+}
+
+.btn-secondary {
+    width: 100%;
+    height: 38px;
+}
+
+@media (max-width: 768px) {
+    .picker-container {
+        flex-direction: column;
+    }
+
+    .picker-container .form-control {
+        width: 100%;
+    }
+
+    .filter-options {
+        flex-wrap: wrap;
+    }
+
+    .filter-dropdown {
+        flex: 1 1 calc(50% - 4px);
+    }
+}
+
+.room-card {
+    height: 450px; /* Increased height slightly */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.room-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.image-container {
+    height: 45%; /* Slightly larger image area */
+    overflow: hidden;
+    position: relative;
+    background-color: #f8f9fa;
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
+.card-body {
+    height: 55%;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.description-container {
+    position: relative;
+    flex-grow: 1;
+    overflow: hidden;
+    padding-bottom: 1.5rem; /* Add padding at bottom to make space for button */
+}
+
 .card-description {
-    height: 100px;
-    overflow: auto;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #6c757d;
+    overflow: hidden;
+    position: relative;
+    max-height: 4.5em; /* Show 3 lines by default */
+    transition: max-height 0.3s ease;
+}
+
+.card-description.expanded {
+    max-height: 200px; /* Larger value to show full text */
+}
+
+.show-more-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(to left, white 50%, rgba(255, 255, 255, 0.9) 100%);
+    border: none;
+    color: #007bff;
+    font-size: 0.85rem;
+    padding: 0 4px;
+    cursor: pointer;
+    width: auto;
+    height: 1.5rem; /* Fixed height */
+    line-height: 1.5rem; /* Match height for vertical centering */
+    display: flex;
+    align-items: center;
+}
+
+.show-more-btn::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    width: 50px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), white);
+}
+
+.show-more-btn:hover {
+    text-decoration: underline;
+}
+
+.card-footer-content {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.price-text {
+    font-size: 1.1rem;
+    color: #212529;
+    margin-bottom: 0.75rem;
+}
+
+.btn-primary {
+    padding: 0.625rem 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .room-card {
+        height: 420px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+        max-height: 3.75em; /* Show 2.5 lines on mobile */
+    }
 }
 </style>
+
