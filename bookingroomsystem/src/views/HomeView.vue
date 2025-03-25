@@ -152,7 +152,11 @@ export default {
 
 .calendar-container {
   display: flex;
-  width: 100%;
+  width: 95%;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .monthly-view,
