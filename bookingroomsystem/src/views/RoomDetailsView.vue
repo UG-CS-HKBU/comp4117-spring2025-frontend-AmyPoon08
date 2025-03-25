@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import Button from 'primevue/button';
 
 const route = useRoute();
+const router = useRouter();
 
 const room = ref({});
 
@@ -83,15 +84,32 @@ onMounted(() => {
                     <p class="card-text" style="color:slategrey">Additional Price per Participant: ${{ room.additional_price_per_participant }}</p>
                 </div>
 
-                <div v-if="isAdmin" style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                        raised
+                        raised
+                <div style="display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px;">
                     <Button 
+                        v-if="isAdmin"
                         type="button" 
                         label="Edit" 
                         class="no-underline"
                         @click="$router.push(`/rooms/${room._id}/edit`)"
-                        raised 
+                    />
+                    <Button 
+                        type="button" 
+                        label="Back" 
+                        class="no-underline"
+                        @click="router.go(-1)"
                     />
                 </div>
+                <!-- <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                    <Button 
+                        type="button" 
+                        label="Back" 
+                        class="no-underline"
+                        @click="router.go(-1)"
+                        raised
+                    />
+                </div> -->
             </div>
             
         </div>

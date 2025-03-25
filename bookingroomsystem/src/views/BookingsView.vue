@@ -484,6 +484,9 @@ export default {
                                 <h5 class="card-title font-weight-bold">{{ room.name }}</h5>
                                 <p class="card-description">{{ room.description }}</p>
                                 <p class="card-text"><strong>Price:</strong> {{ room.price }}</p>
+                                <a :href="`/roomdetails/${room._id}`">
+                                    <button id="Edit" class="btn btn-primary">More Details</button>
+                                </a>
                                 <a :href="`/bookings/book/${room._id}`">
                                     <button id="Edit" class="btn btn-primary">Book Now!</button>
                                 </a>
