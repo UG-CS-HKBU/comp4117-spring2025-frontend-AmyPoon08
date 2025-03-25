@@ -1,127 +1,265 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { onMounted } from 'vue'
-
-const searchQuery = ref('');
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import Calendar from 'primevue/calendar';
+import Tag from 'primevue/tag';
+import Select from 'primevue/select';
 
 const bookingHistory = ref([]);
+const loading = ref(false);
 
-let searchDebounceTimeout;
+// Status options for filter
+const statuses = [
+    'pending payment',
+    'pending approval',
+    'confirmed'
+];
+
+// Initialize filters
+const filters = ref({
+    global: { value: null, matchMode: 'contains' },
+    bookingId: { value: null, matchMode: 'contains' },
+    roomName: { value: null, matchMode: 'contains' },
+    date: { value: null, matchMode: 'dateIs' },
+    status: { value: null, matchMode: 'equals' }
+});
+
+const clearFilter = () => {
+    filters.value = {
+        global: { value: null, matchMode: 'contains' },
+        bookingId: { value: null, matchMode: 'contains' },
+        roomName: { value: null, matchMode: 'contains' },
+        date: { value: null, matchMode: 'dateIs' },
+        status: { value: null, matchMode: 'equals' }
+    };
+};
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB'); // Format as DD/MM/YYYY
-}
+    return date.toLocaleDateString('en-GB');
+};
 
 const getStartTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
     return timeslots[0];
-}
+};
 
 const getEndTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
     return timeslots[timeslots.length - 1];
-}
+};
 
-watch(searchQuery, (newQuery) => {
-    // Add debounce to prevent too many API calls
-    if (searchDebounceTimeout) {
-        clearTimeout(searchDebounceTimeout);
+const getStatusSeverity = (status) => {
+    switch (status?.toLowerCase()) {
+        case 'pending payment':
+            return 'danger';
+        case 'pending approval':
+            return 'warn';
+        case 'confirmed':
+            return 'success';
+        default:
+            return null;
     }
-    searchDebounceTimeout = setTimeout(() => {
-        const query = newQuery ? `?roomName=${encodeURIComponent(newQuery)}` : '';
-        fetchBookingHistory(query);
-    }, 10); // Wait 10ms after user stops typing
-});
+};
 
-const fetchBookingHistory = async (query = '') => {
+const fetchBookingHistory = async () => {
     try {
-        const token = localStorage.getItem('token')
+        loading.value = true;
+        const token = localStorage.getItem('token');
         if (!token) {
-            throw new Error('No token found. Please log in.')
+            throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch(`/api/users/bookingHistory${query}`, {
+        const response = await fetch('/api/users/bookingHistory', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             }
-        })
+        });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Unauthorized: Please log in again.')
-            } else if (response.status === 403) {
-                throw new Error('Forbidden: Invalid token.')
-            } else {
-                throw new Error('Failed to fetch booking history. Server responded with status: ' + response.status)
-            }
+            throw new Error('Failed to fetch booking history');
         }
 
-        const data = await response.json()
-        bookingHistory.value = data
-        console.log('Booking history fetched successfully:', data)
+        const data = await response.json();
+        bookingHistory.value = data;
     } catch (error) {
-        console.error('Error fetching booking history:', error.message)
+        console.error('Error:', error);
+    } finally {
+        loading.value = false;
     }
-}
+};
 
 onMounted(() => {
-    fetchBookingHistory()
-})
+    fetchBookingHistory();
+});
 </script>
 
 <template>
-    <div>
-        <h1>Booking Record</h1>
-    </div>
+    <div class="card">
+        <DataTable 
+            v-model:filters="filters" 
+            :value="bookingHistory" 
+            paginator 
+            showGridlines 
+            :rows="10" 
+            dataKey="id"
+            filterDisplay="menu" 
+            :loading="loading"
+            :globalFilterFields="['bookingId', 'roomName']"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rowsPerPageOptions="[5, 10, 25]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
+        >
 
-    <div class="row mt-3">
-        <div class="col-12">
-            <input 
-                type="text" 
-                v-model="searchQuery" 
-                class="form-control" 
-                placeholder="Search..."
-            />
-        </div>
-    </div>
-    
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="bg-blue-500 text-black">
-            <th class="p-3 text-left">NO.</th>
-            <th class="p-3 text-left">Booking ID</th>
-            <th class="p-3 text-left">Room Name</th>
-            <th class="p-3 text-left">Date</th>
-            <th class="p-3 text-left">Start Time</th>
-            <th class="p-3 text-left">End Time</th>
-            <th class="p-3 text-left">State</th>
-            <th class="p-3 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(booking, index) in bookingHistory" 
-              :key="booking.bookingId"
-              class="border-b hover:bg-gray-100">
-            <td class="p-3">{{ index + 1 }}</td>
-            <td class="p-3">{{ booking.bookingId }}</td>
-            <td class="p-3">{{ booking.roomName }}</td>
-            <td class="p-3">{{ formatDate(booking.date) }}</td>
-            <td class="p-3">{{ getStartTime(booking.timeslots) }}</td>
-            <td class="p-3">{{ getEndTime(booking.timeslots) }}</td>
-            <td class="p-3">{{ booking.status }}</td>
-            <td class="p-3">
-                <router-link 
-                :to="`/bookingHistory/${booking.bookingId}`" 
-                class="bg-blue-500 text-black px-4 py-1 rounded hover:bg-blue-600">
-                View
-              </router-link>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            <template #header>
+                <div class="flex items-center gap-4">
+                    <div class="flex-grow">
+                        <span class="p-input-icon-left w-full">
+                            <i class="pi pi-search" />
+                            <InputText v-model="filters['global'].value" placeholder="Keyword Search..." class="w-full"/>
+                        </span>
+                    </div>
+                    <Button 
+                        type="button" 
+                        label="Clear All Filters" 
+                        class="p-button-text"
+                        @click="clearFilter()"
+                    />
+                </div>
+            </template>
+
+            <!-- <template #header>
+                <div class="flex justify-between">
+                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined @click="clearFilter()" />
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search" />
+                        <InputText v-model="filters['global'].value" placeholder="Keyword Search..." />
+                    </span>
+                </div>
+            </template> -->
+
+            <template #empty> No bookings found. </template>
+            <template #loading> Loading booking records. Please wait. </template>
+
+            <Column field="index" header="No." style="min-width: 5rem">
+                <template #body="{ index }">
+                    {{ index + 1 }}
+                </template>
+            </Column>
+
+            <Column field="bookingId" header="Booking ID" sortable style="min-width: 12rem">
+                <template #body="{ data }">
+                    {{ data.bookingId }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText 
+                        v-model="filterModel.value" 
+                        type="text" 
+                        class="p-2 w-full" 
+                        placeholder="Search booking ID"
+                    />
+                </template>
+            </Column>
+
+            <Column field="roomName" header="Room" sortable style="min-width: 12rem">
+                <template #body="{ data }">
+                    {{ data.roomName }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText 
+                        v-model="filterModel.value" 
+                        type="text" 
+                        class="p-2 w-full" 
+                        placeholder="Search room"
+                    />
+                </template>
+            </Column>
+
+            <Column field="date" header="Date" sortable dataType="date" style="min-width: 12rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.date) }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <Calendar 
+                        v-model="filterModel.value" 
+                        dateFormat="dd/mm/yy" 
+                        placeholder="Select date" 
+                        class="p-2 w-full"
+                    />
+                </template>
+            </Column>
+
+            <Column field="timeslots" header="Start Time" style="min-width: 10rem">
+                <template #body="slotProps">
+                    {{ getStartTime(slotProps.data.timeslots) }}
+                </template>
+            </Column>
+
+            <Column field="timeslots" header="End Time" style="min-width: 10rem">
+                <template #body="slotProps">
+                    {{ getEndTime(slotProps.data.timeslots) }}
+                </template>
+            </Column>
+            
+            <Column field="status" header="Status" sortable style="min-width: 12rem">
+                <template #body="{ data }">
+                    <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
+                </template>
+                <template #filter="{ filterModel }">
+                    <Select 
+                        v-model="filterModel.value" 
+                        :options="statuses" 
+                        placeholder="Select Status" 
+                        class="p-2 w-full" 
+                        :showClear="true"
+                    >
+                        <template #option="slotProps">
+                            <Tag :value="slotProps.option" :severity="getStatusSeverity(slotProps.option)" />
+                        </template>
+                    </Select>
+                </template>
+            </Column>
+
+            <Column header="Actions" :exportable="false" style="min-width: 8rem">
+                <template #body="slotProps">
+                    <router-link 
+                        :to="`/bookingHistory/${slotProps.data.bookingId}`" 
+                        class="p-button p-button-primary p-button-sm"
+                    >
+                        View
+                    </router-link>
+                </template>
+            </Column>
+        </DataTable>
     </div>
 </template>
+
+<style scoped>
+:deep(.p-datatable-header) {
+    background-color: #f8f9fa;
+    padding: 1rem;
+}
+
+:deep(.p-column-filter) {
+    width: 100%;
+}
+
+:deep(.p-calendar) {
+    width: 100%;
+}
+
+:deep(.p-dropdown) {
+    width: 100%;
+}
+</style>
+
+
+
+
+
