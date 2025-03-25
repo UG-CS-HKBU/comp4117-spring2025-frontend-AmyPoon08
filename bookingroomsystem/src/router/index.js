@@ -12,6 +12,7 @@ import BookingRecordView from '../views/BookingRecordView.vue'
 import BookingDetailsView from '../views/BookingDetailsView.vue'
 import PaymentView from '../views/PaymentView.vue'
 import RoomDetailsView from '@/views/RoomDetailsView.vue'
+import UserInfoView from '@/views/UserInfoView.vue'
 
 function isAuthenticated() {
   const token = localStorage.getItem('token')
@@ -95,6 +96,12 @@ const router = createRouter({
       path: "/rooms/:id/edit",
       name: "EditRoom",
       component: RoomEdit,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/users",
+      name: "UserInformation",
+      component: UserInfoView,
       meta: { requiresAuth: true, requiresAdmin: true }
     }
     
