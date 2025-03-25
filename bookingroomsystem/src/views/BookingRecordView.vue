@@ -1,6 +1,5 @@
 <script setup>
-import { ref } from 'vue';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
@@ -134,17 +133,7 @@ onMounted(() => {
                 </div>
             </template>
 
-            <!-- <template #header>
-                <div class="flex justify-between">
-                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined @click="clearFilter()" />
-                    <span class="p-input-icon-left">
-                        <i class="pi pi-search" />
-                        <InputText v-model="filters['global'].value" placeholder="Keyword Search..." />
-                    </span>
-                </div>
-            </template> -->
-
-            <template #empty> No bookings found. </template>
+            <template #empty> No booking found. </template>
             <template #loading> Loading booking records. Please wait. </template>
 
             <Column field="index" header="No." style="min-width: 5rem">
