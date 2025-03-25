@@ -84,8 +84,6 @@ onMounted(() => {
                     <p class="card-text" style="color:slategrey">Additional Price per Participant: ${{ room.additional_price_per_participant }}</p>
                 </div>
 
-                        raised
-                        raised
                 <div style="display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px;">
                     <Button 
                         v-if="isAdmin"
@@ -101,15 +99,7 @@ onMounted(() => {
                         @click="router.go(-1)"
                     />
                 </div>
-                <!-- <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-                    <Button 
-                        type="button" 
-                        label="Back" 
-                        class="no-underline"
-                        @click="router.go(-1)"
-                        raised
-                    />
-                </div> -->
+                
             </div>
             
         </div>
