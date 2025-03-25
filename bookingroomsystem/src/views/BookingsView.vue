@@ -369,29 +369,29 @@ export default {
 
         <div class="row">
             <div class="col-2">
-                <label class="form-label">Room Type Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Room Options
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleRoomOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
-                            </div>
-                        </li>
+            <label class="form-label">Room Type Options:</label>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                {{ roomOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Room Options' }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
+                    <div class="form-check">
+                    <input type="checkbox" class="form-check-input" :id="option.value"
+                        v-model="option.checked" @change="handleRoomOptionChange(option)">
+                    <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                    </div>
+                </li>
                     </ul>
                 </div>
             </div>
-            <div class="col-2">
+            <div class="col-4">
                 <label class="form-label">Category Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Category Options
+                        {{ categoryOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Category Options' }}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCategory">
                         <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
@@ -410,7 +410,7 @@ export default {
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Capacity Options
+                        {{ capacityOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Capacity Options' }}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCapacity">
                         <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
@@ -429,7 +429,7 @@ export default {
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Price Options
+                        {{ priceOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Price Options' }}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
                         <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
@@ -443,12 +443,12 @@ export default {
                 </div>
             </div>
 
-            <div class="col-2">
+            <div class="col-3">
                 <label class="form-label">Availability Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonAvailability"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        Select Availability Options
+                        {{ availabilityOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Availability Options' }}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAvailability">
                         <li v-for="option in availabilityOptions" :key="option.value" class="dropdown-item">
@@ -465,7 +465,10 @@ export default {
 
         <div class="row mt-3">
             <div class="col-12">
-                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
+            <div class="input-group">
+                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search keyword" />
+                <button class="btn btn-primary" @click="fetchRooms">Search</button>
+            </div>
             </div>
         </div>
 
