@@ -12,15 +12,20 @@ const credentials = ref({
 const { isAuthenticated, hideNav } = inject('auth')
 const router = useRouter();
 const showPassword = ref(false);
+const errorMessage = ref(''); // Add a ref to store error messages
 
 // Hide nav when component is mounted
 onMounted(() => {
   hideNav()
 });
 
+
 // methods
 const login = async () => {
     try {
+        // Reset error message
+        errorMessage.value = '';
+
         // fetch
         const response = await fetch('/api/login', {
             method: 'POST',
@@ -47,7 +52,6 @@ const login = async () => {
             console.warn('Empty response body');
             localStorage.setItem('token', ''); // Assuming token is empty
             isAuthenticated.value = true;
-           // router.push('/home');
             return;
         }
 
@@ -55,6 +59,7 @@ const login = async () => {
 
         if (!response.ok) {
             console.log("login failed");
+            errorMessage.value = data.message || 'Invalid email or password'; // Set error message
             throw new Error(data.message);
         }
 
@@ -64,13 +69,12 @@ const login = async () => {
         isAuthenticated.value = true;
         router.push('/home');
     } catch (error) {
-        alert(error);
+        if (!errorMessage.value) {
+            errorMessage.value = 'An unexpected error occurred'; // Fallback error message
+        }
+        console.error(error);
     }
 };
-
-// const togglePasswordVisibility = () => {
-//     showPassword.value = !showPassword.value;
-// };
 
 onMounted(() => {
     if (hideNav) {
@@ -83,7 +87,7 @@ onMounted(() => {
     <main>
         <div class="container-fluid mt-5">
             <div class="card">
-                <div class="card-body" >
+                <div class="card-body">
                     <form @submit.prevent="login">
                         <div class="mb-5">
                             <label for="email" class="form-label">Email: </label>
@@ -94,11 +98,12 @@ onMounted(() => {
                             <label for="password" class="form-label">Password: </label>
                             <div class="input-group">
                                 <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="credentials.password" id="password" required>
-                               <button type="button" class="btn btn-outline-secondary" @click="showPassword = !showPassword">
+                                <button type="button" class="btn btn-outline-secondary" @click="showPassword = !showPassword">
                                     {{ showPassword ? 'Hide' : 'Show' }}
-                                </button> 
+                                </button>
                             </div>
                         </div>
+                        <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div> <!-- Display error message -->
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
                 </div>
