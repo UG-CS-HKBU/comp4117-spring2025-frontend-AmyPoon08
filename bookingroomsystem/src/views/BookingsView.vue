@@ -4,7 +4,6 @@ import { ref, onMounted, watch, computed } from 'vue';
 
 export default {
     setup() {
-        const dateRange = ref([null, null]);
         const timeRange = ref([null, null]);
 
         const generateTimeOptions = () => {
@@ -25,7 +24,7 @@ export default {
             }
         };
 
-
+        const dateRange = ref([null, null]);
         const today = new Date();
         const formatDate = (date) => {
             return date.toISOString().split('T')[0];
