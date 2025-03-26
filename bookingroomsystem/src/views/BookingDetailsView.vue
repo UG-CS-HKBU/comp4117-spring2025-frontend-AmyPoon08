@@ -1,12 +1,15 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
+import Select from 'primevue/select';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const route = useRoute();
 const router = useRouter();
+const isAdmin = computed(() => localStorage.getItem('admin') === 'on');
+
 
 const details = ref({
     bookingId: '',
@@ -49,7 +52,14 @@ const fetchDetails = async () => {
 
             const data = await response.json()
             details.value = data
-            console.log('Booking history fetched successfully:', data)
+            console.log(data)
+
+
+            selectedStatus.value = statusOptions.find(option => 
+                option.value === data.status
+            )?.value || null;
+            console.log(selectedStatus)
+            // console.log('Booking history fetched successfully:', data)
         }
     } catch (error) {
         console.error('Error fetching booking history:', error.message)
@@ -121,9 +131,52 @@ const uploadPaymentProof = async () => {
     }
 };
 
+const selectedStatus = ref(null);
+const statusOptions = [
+    { label: 'Pending Payment', value: 'pending payment' },
+    { label: 'Pending Approval', value: 'Pending approval' },
+    { label: 'Confirmed', value: 'confirmed' }
+];
+
+const updateStatus = async () => {
+    try{
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+
+        const response = await fetch(`/api/bookings/${route.params.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: selectedStatus.value })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Unauthorized: Please log in again.');
+            } else if (response.status === 403) {
+                throw new Error('Forbidden: Invalid token.');
+            } else {
+                throw new Error('Failed to save user. Server responded with status: ' + response.status);
+            }
+        }
+
+        const data = await response.json();
+        details.value.status = data.status; 
+        selectedStatus.value = data.status;
+    } catch (error) {
+        console.error('Error updating status:', error.message);
+    }
+}
+
 onMounted(() => {
     fetchDetails();    
 })
+
+
 </script>
 
 <template>
@@ -147,8 +200,27 @@ onMounted(() => {
         <div>
             End Time: {{ getEndTime(details.timeslots) }}
         </div>
-        <div>
-            State: {{ details.status }}
+
+        <div v-if="isAdmin">
+            <form @submit.prevent="updateStatus" class="flex gap-3 items-center"> 
+                <div>Status: </div>
+                <Select
+                    v-model="selectedStatus"
+                    :options="statusOptions"
+                    :placeholder="details.status || 'Select a Status'"
+                    class="w-full md:w-14rem"
+                    optionLabel="label"
+                    optionValue="value"
+                />
+                <Button 
+                    type="submit" 
+                    label="Update Status"
+                    severity="success"
+                />
+            </form>
+        </div>
+        <div v-else>
+            Status: {{ details.status }}
         </div>
     </div>
     <div class="payment-proof row mt-3">
@@ -187,9 +259,9 @@ onMounted(() => {
         </form>
         </div>
     </div>
-    
+
     <div style="display: flex; justify-content: flex-end;">
-        <Button type="button" label="Back" class="btn-back p-button-secondary" @click="router.go(-1)" />
+        <Button type="button" label="Back" class="btn-back p-button-primary" @click="router.go(-1)" />
     </div>
     
 </template>

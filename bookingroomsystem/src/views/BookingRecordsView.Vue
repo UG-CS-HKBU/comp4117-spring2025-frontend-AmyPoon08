@@ -86,7 +86,6 @@ const fetchBookingRecords = async () => {
         }
 
         const data = await response.json();
-        console.log(data)
         bookingRecords.value = data;
     } catch (error) {
         console.error('Error:', error);
