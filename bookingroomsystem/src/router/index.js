@@ -15,6 +15,7 @@ import RoomDetailsView from '@/views/RoomDetailsView.vue'
 import UserInfoView from '@/views/UserInfoView.vue'
 import UserDetailsView from '@/views/UserDetailsView.vue'
 import CreateUserView from '@/views/CreateUserView.vue'
+import BookingRecordsView from '@/views/BookingRecordsView.vue'
 
 function isAuthenticated() {
   const token = localStorage.getItem('token')
@@ -116,6 +117,12 @@ const router = createRouter({
       path: "/createUser",
       name: "CreateUser",
       component: CreateUserView,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/bookingRecords",
+      name: "BookingRecords",
+      component: BookingRecordsView,
       meta: { requiresAuth: true, requiresAdmin: true }
     }
     

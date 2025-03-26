@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import Button from 'primevue/button';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const route = useRoute();
+const router = useRouter();
 
 const details = ref({
     bookingId: '',
@@ -185,6 +187,11 @@ onMounted(() => {
         </form>
         </div>
     </div>
+    
+    <div style="display: flex; justify-content: flex-end;">
+        <Button type="button" label="Back" class="btn-back p-button-secondary" @click="router.go(-1)" />
+    </div>
+    
 </template>
 
 <style scoped>
