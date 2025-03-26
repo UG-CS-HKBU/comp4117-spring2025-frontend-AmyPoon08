@@ -4,7 +4,6 @@ import { ref, onMounted, watch, computed } from 'vue';
 
 export default {
     setup() {
-        const dateRange = ref([null, null]);
         const timeRange = ref([null, null]);
 
         const generateTimeOptions = () => {
@@ -25,9 +24,51 @@ export default {
             }
         };
 
-        const handleDateRangeChange = (start, end) => {
-            dateRange.value = [start, end];
+        const dateRange = ref([null, null]);
+        const today = new Date();
+        const formatDate = (date) => {
+            return date.toISOString().split('T')[0];
         };
+
+        const minDate = computed(() => {
+            return formatDate(today);
+        });
+
+        const maxDate = computed(() => {
+            const futureDate = new Date();
+            futureDate.setFullYear(futureDate.getFullYear() + 1);
+            return formatDate(futureDate);
+        });
+
+        const handleStartDateChange = () => {
+            if (dateRange.value[1] && dateRange.value[1] < dateRange.value[0]) {
+                dateRange.value[1] = null;
+            }
+            fetchRoomsByDateRange();
+        };
+
+        const handleEndDateChange = () => {
+            fetchRoomsByDateRange();
+        };
+
+        const fetchRoomsByDateRange = async () => {
+            if (dateRange.value[0] && dateRange.value[1]) {
+                try {
+                    const response = await fetch(`/api/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch rooms');
+                    }
+                    rooms.value = await response.json();
+                } catch (error) {
+                    console.error('Error fetching rooms:', error.message);
+                }
+            }
+        };
+        
+
+        // const handleDateRangeChange = (start, end) => {
+        //     dateRange.value = [start, end];
+        // };
 
         const roomOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
@@ -299,6 +340,11 @@ export default {
 
         return {
             dateRange,
+            minDate,
+            maxDate,
+            handleStartDateChange,
+            handleEndDateChange,
+            fetchRoomsByDateRange,
             timeRange,
             timeOptions,
             roomOptions,
@@ -308,7 +354,6 @@ export default {
             priceOptions,
             availabilityOptions,
             handleTimeRangeChange,
-            handleDateRangeChange,
             handleRoomOptionChange,
             handleCategoryOptionChange,
             handleCapacityOptionChange,
@@ -341,11 +386,34 @@ export default {
 
         <div class="row mb-3">
             <!-- Date Range -->
+            <!-- <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <input type="date" class="form-control" v-model="dateRange[0]" @change="fetchRoomsByDateRange" :max="new Date().toISOString().split('T')[0]" />
+                    <span class="mx-2">to</span>
+                    <input type="date" class="form-control" v-model="dateRange[1]" @change="fetchRoomsByDateRange" />
+                </div>
+            </div> -->
+
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
-                    <input type="date" class="form-control" v-model="dateRange[0]" />
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        v-model="dateRange[0]" 
+                        :min="minDate"
+                        :max="maxDate"
+                        @change="handleStartDateChange"
+                    />
                     <span class="mx-2">to</span>
-                    <input type="date" class="form-control" v-model="dateRange[1]" />
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        v-model="dateRange[1]" 
+                        :min="dateRange[0] || minDate"
+                        :max="maxDate"
+                        :disabled="!dateRange[0]"
+                        @change="handleEndDateChange"
+                    />
                 </div>
             </div>
 
