@@ -14,6 +14,7 @@ import PaymentView from '../views/PaymentView.vue'
 import RoomDetailsView from '@/views/RoomDetailsView.vue'
 import UserInfoView from '@/views/UserInfoView.vue'
 import UserDetailsView from '@/views/UserDetailsView.vue'
+import CreateUserView from '@/views/CreateUserView.vue'
 
 function isAuthenticated() {
   const token = localStorage.getItem('token')
@@ -109,6 +110,12 @@ const router = createRouter({
       path: "/userdetails/:id",
       name: "UserDetails",
       component: UserDetailsView,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/createUser",
+      name: "CreateUser",
+      component: CreateUserView,
       meta: { requiresAuth: true, requiresAdmin: true }
     }
     
