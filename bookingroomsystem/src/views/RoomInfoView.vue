@@ -6,11 +6,17 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Select from 'primevue/select';
+import Dialog from 'primevue/dialog';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 // const searchQuery = ref('');
 
 const rooms = ref([]);
 const loading = ref(false);
+const deleteDialog = ref(false);
+const roomToDelete = ref(null);
+const toast = useToast();
 
 // Type options for filter
 const types = [
@@ -66,6 +72,51 @@ const fetchRooms = async () => {
     }
 };
 
+const confirmDeleteRoom = (room) => {
+    roomToDelete.value = room;
+    deleteDialog.value = true;
+};
+
+const deleteRoom = async () => {
+    if (!roomToDelete.value) return;
+    
+    try {
+        loading.value = true;
+        const response = await fetch(`/api/rooms/${roomToDelete.value._id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete room');
+        }
+
+        // Remove the room from the list
+        rooms.value = rooms.value.filter(room => room._id !== roomToDelete.value._id);
+        
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: `Room ${roomToDelete.value.name} deleted successfully`,
+            life: 3000
+        });
+        
+        deleteDialog.value = false;
+        roomToDelete.value = null;
+    } catch (error) {
+        console.error('Error deleting room:', error.message);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete room',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
 
 onMounted(() => {
     fetchRooms();
@@ -74,8 +125,9 @@ onMounted(() => {
 </script>
 
 <template>
-
-<div class="card">
+<div>
+    <Toast position="top-right" />
+    <div class="card">
         <DataTable 
             v-model:filters="filters" 
             :value="rooms" 
@@ -181,16 +233,55 @@ onMounted(() => {
             <Column field="price" header="Price" sortable style="min-width: 10rem"></Column>
             
 
-            <Column header="" :exportable="false" style="min-width: 8rem">
+            <Column header="Actions" :exportable="false" style="min-width: 12rem">
                 <template #body="slotProps">
-                    <router-link 
-                        :to="`/roomdetails/${slotProps.data._id}`" 
-                        class="p-button p-button-primary p-button-sm"
-                    >
-                        View
-                    </router-link>
+                    <div class="flex gap-4 justify-between">
+                        <router-link 
+                            :to="`/roomdetails/${slotProps.data._id}`" 
+                            class="p-button p-button-primary p-button-sm mr-2"
+                        >
+                            View
+                        </router-link>
+                        <Button 
+                            type="button" 
+                            class="p-button p-button-danger p-button-sm ml-2"
+                            @click="confirmDeleteRoom(slotProps.data)"
+                        >
+                            Delete
+                        </Button>
+                    </div>
                 </template>
             </Column>
         </DataTable>
     </div>
+    
+    <!-- Delete Confirmation Dialog -->
+    <Dialog 
+        v-model:visible="deleteDialog" 
+        header="Confirm Delete" 
+        :modal="true"
+        :style="{ width: '450px' }" 
+        :closable="false"
+    >
+        <div class="confirmation-content">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+            <span v-if="roomToDelete">Are you sure you want to delete room <b>{{ roomToDelete.name }}</b>?</span>
+        </div>
+        <template #footer>
+            <Button 
+                label="No" 
+                icon="pi pi-times" 
+                class="p-button-text" 
+                @click="deleteDialog = false" 
+            />
+            <Button 
+                label="Yes" 
+                icon="pi pi-check" 
+                class="p-button-danger" 
+                @click="deleteRoom" 
+                :loading="loading" 
+            />
+        </template>
+    </Dialog>
+</div>
 </template>
