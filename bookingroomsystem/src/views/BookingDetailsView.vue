@@ -82,80 +82,11 @@ const fetchDetails = async () => {
         router.push('/bookings'); // Redirect to bookings page on error
     }
 };
-// const fetchDetails = async () => {
-//     try {
-//         const bookingId = route.params.id;
-
-//         if(bookingId) {
-//             const token = localStorage.getItem('token')
-//             if (!token) {
-//                 throw new Error('No token found. Please log in.')
-//             }
-
-//             // Use different endpoints based on user role
-//             const endpoint = isAdmin.value 
-//                 ? `/api/bookings/${bookingId}`
-//                 : `/api/users/bookingHistory/${bookingId}`;
-
-//             const response = await fetch(endpoint, {
-//                 method: 'GET',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     'Authorization': `Bearer ${token}`
-//                 }
-//             });
-
-//             if (!response.ok) {
-//                 if (response.status === 401) {
-//                     throw new Error('Unauthorized: Please log in again.')
-//                 } else if (response.status === 403) {
-//                     throw new Error('Forbidden: Invalid token.')
-//                 } else {
-//                     throw new Error('Failed to fetch booking details. Server responded with status: ' + response.status)
-//                 }
-//             }
-
-//             const data = await response.json();
-            
-//             // Transform the data to match the expected format
-//             details.value = isAdmin.value ? {
-//                 bookingId: data._id,
-//                 roomName: data.roomName,
-//                 date: data.date,
-//                 timeslots: data.timeslots,
-//                 status: data.status,
-//                 paymentProof: data.paymentProof,
-//                 totalPrice: data.totalPrice
-//             } : data;
-
-//             selectedStatus.value = data.status;
-//             console.log('Fetched booking details:', data);
-//         }
-//     } catch (error) {
-//         console.error('Error fetching booking details:', error.message)
-//     }
-// }
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB'); // Format as DD/MM/YYYY
 }
-
-// const getStartTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-//     return timeslots[0];
-// }
-
-// const getEndTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-    
-//     const startTime = timeslots[timeslots.length - 1]; // Get the last timeslot
-//     const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
-//     const endTime = new Date();
-//     endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
-
-//     return endTime.toTimeString().slice(0, 5); // Format as HH:MM
-// }
 
 const getStartTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
@@ -444,39 +375,6 @@ onMounted(() => {
             </form>
         </div>
 
-    <!-- <div class="payment-proof row mt-3">
-        <div v-if = "details.paymentProof">
-            <div class="payment-header">Payment Proof:</div>
-            <img 
-                v-if="details.paymentProof" 
-                :src="details.paymentProof" 
-                :alt="details.bookingId"
-                @error="handleImageError"
-                class="proof-img"
-            />
-        </div>
-
-        <div v-else>
-            <form @submit.prevent="uploadPaymentProof">
-            <div class="mb-3">
-                <div class="payment-header">Upload Payment Proof:</div>
-                <input 
-                    type="file" 
-                    @change="handleFileChange" 
-                    accept="image/*" 
-                    ref="fileInput"
-                    class="file-picker"
-                />
-            </div>
-            <button 
-                type="submit" 
-                class="btn btn-primary" 
-                :disabled="!selectedFile"
-            >
-                Upload
-            </button>
-        </form>
-        </div> -->
     </div>
 
     <div style="display: flex; justify-content: flex-end;">

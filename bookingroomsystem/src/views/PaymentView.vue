@@ -79,42 +79,6 @@ onMounted(async () => {
     timeLeft.value = statusData.timeRemaining;
     startTimer();
 
-    // if (booking.status !== 'pending payment') {
-    //   throw new Error('This booking is no longer pending payment');
-    // }
-
-    // // Calculate time elapsed since booking creation
-    // const bookingTime = new Date(booking.createdAt).getTime();
-    // const currentTime = Date.now();
-    // const timeElapsed = Math.floor((currentTime - bookingTime) / 1000); // in seconds
-    
-    // if (timeElapsed >= 900) { // 15 minutes
-    //   throw new Error('Booking has expired');
-    // }
-    // if (timeElapsed >= 900) { // 15 minutes
-    //   throw new Error('Booking has expired');
-    // }
-
-
-
-
-    // // const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
-    // if (details) {
-    //   bookingDetails.value = details;
-      
-    //   // Check if this is a new booking
-    //   if (!localStorage.getItem(getBookingTimerKey(pendingBookingId))) {
-    //     localStorage.setItem(getBookingTimerKey(pendingBookingId), Date.now().toString());
-    //   }
-
-    //   startTimer();
-    // } else {
-    //   alert('No booking details found!');
-    //   router.push('/bookings');
-    // }
-
-      
-
       // Set booking details
       bookingDetails.value = {
         roomId: booking.roomId,
@@ -129,19 +93,12 @@ onMounted(async () => {
         userEmail: booking.userEmail
       };
 
-      // // Initialize timer
-      // timeLeft.value = Math.max(0, 900 - timeElapsed);
-      // startTimer();
-
       // Initialize PayPal
       paypal = await loadScript({ 
         clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' 
       });
       paypalLoaded.value = true;
 
-    // try {
-    //   paypal = await loadScript({ clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' });
-    //   paypalLoaded.value = true;
   } catch (error) {
     console.error("failed to load the PayPal JS SDK script", error);
   }
@@ -317,16 +274,6 @@ const formattedTimeLeft = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-const getBookingTimerKey = (bookingId) => `booking_timer_${bookingId}`;
-
-const calculateTimeLeft = (bookingId) => {
-  const bookingTime = localStorage.getItem(getBookingTimerKey(bookingId));
-  if (!bookingTime) return 0;
-
-  const elapsedSeconds = Math.floor((Date.now() - parseInt(bookingTime)));
-  const remainingSeconds = 900 - elapsedSeconds; // 15 minutes = 900 seconds
-  return Math.max(0, remainingSeconds);
-};
 
 const startTimer = () => {
   // Clear any existing timer
