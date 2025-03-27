@@ -62,9 +62,10 @@ const router = createRouter({
       component: BookView,
     },
     {
-      path: '/payment',
+      path: '/payment/:bookingId',
       name: 'Payment',
       component: PaymentView,
+      props: true 
     },
     {
       path: '/myBookings',

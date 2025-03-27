@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { loadScript } from "@paypal/paypal-js";
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
+const bookingId = ref(null);
 
 const bookingDetails = ref({
   roomId: '',
@@ -29,33 +31,133 @@ const paypalLoaded = ref(false);
 let paypal;
 
 onMounted(async () => {
-  const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
-  if (details) {
-    bookingDetails.value = details;
-  } else {
-    alert('No booking details found!');
-    router.push('/bookings');
-  }
+  try{
+    // Get bookingId from route params
+    bookingId.value = route.params.bookingId;
+      if (!bookingId.value) {
+        throw new Error('No booking ID provided');
+      }
 
-  try {
-    paypal = await loadScript({ clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' });
-    paypalLoaded.value = true;
+    // Fetch booking details from API instead of localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found. Please log in.');
+    }
+
+    // First check booking status
+    const statusResponse = await fetch(`/api/bookings/checkStatus/${bookingId.value}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!statusResponse.ok) {
+        throw new Error('Failed to check booking status');
+    }
+
+    const statusData = await statusResponse.json();
+
+    if (statusData.status === 'expired') {
+        alert('This booking has expired');
+        router.push('/bookings');
+        return;
+    }
+
+    const response = await fetch(`/api/bookings/${bookingId.value}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch booking details');
+    }
+
+    const booking = await response.json();
+
+    bookingDetails.value = booking;
+    timeLeft.value = statusData.timeRemaining;
+    startTimer();
+
+    // if (booking.status !== 'pending payment') {
+    //   throw new Error('This booking is no longer pending payment');
+    // }
+
+    // // Calculate time elapsed since booking creation
+    // const bookingTime = new Date(booking.createdAt).getTime();
+    // const currentTime = Date.now();
+    // const timeElapsed = Math.floor((currentTime - bookingTime) / 1000); // in seconds
+    
+    // if (timeElapsed >= 900) { // 15 minutes
+    //   throw new Error('Booking has expired');
+    // }
+    // if (timeElapsed >= 900) { // 15 minutes
+    //   throw new Error('Booking has expired');
+    // }
+
+
+
+
+    // // const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
+    // if (details) {
+    //   bookingDetails.value = details;
+      
+    //   // Check if this is a new booking
+    //   if (!localStorage.getItem(getBookingTimerKey(pendingBookingId))) {
+    //     localStorage.setItem(getBookingTimerKey(pendingBookingId), Date.now().toString());
+    //   }
+
+    //   startTimer();
+    // } else {
+    //   alert('No booking details found!');
+    //   router.push('/bookings');
+    // }
+
+      
+
+      // Set booking details
+      bookingDetails.value = {
+        roomId: booking.roomId,
+        roomName: booking.roomName,
+        roomNumber: booking.roomNumber,
+        date: booking.date,
+        timeslots: booking.timeslots,
+        totalPrice: booking.totalPrice,
+        userId: booking.userId,
+        username: booking.username,
+        userContact: booking.userContact,
+        userEmail: booking.userEmail
+      };
+
+      // // Initialize timer
+      // timeLeft.value = Math.max(0, 900 - timeElapsed);
+      // startTimer();
+
+      // Initialize PayPal
+      paypal = await loadScript({ 
+        clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' 
+      });
+      paypalLoaded.value = true;
+
+    // try {
+    //   paypal = await loadScript({ clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' });
+    //   paypalLoaded.value = true;
   } catch (error) {
     console.error("failed to load the PayPal JS SDK script", error);
   }
 
 });
 
-// Get booking details from route params
-onMounted(() => {
-  const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
-  if (details) {
-    bookingDetails.value = details;
-  } else {
-    alert('No booking details found!');
-    router.push('/bookings');
-  }
-});
+// // Get booking details from route params
+// onMounted(() => {
+//   const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
+//   if (details) {
+//     bookingDetails.value = details;
+//   } else {
+//     alert('No booking details found!');
+//     router.push('/bookings');
+//   }
+// });
 
 const validateForm = () => {
   errors.value = {};
@@ -87,6 +189,8 @@ const validateForm = () => {
 };
 
 const renderPayPalButton = async () => {
+  if (!paypal || !bookingDetails.value.totalPrice) return;
+
   await paypal.Buttons({
     createOrder: (data, actions) => {
       return actions.order.create({
@@ -98,19 +202,26 @@ const renderPayPalButton = async () => {
       });
     },
     onApprove: async (data, actions) => {
-      const order = await actions.order.capture();
-      console.log('Order', order);
-      await completeBooking();
-      localStorage.removeItem('pendingBookingDetails');
-      alert('Payment successful! Your room has been booked.');
-      router.push('/bookings');
+      try {
+        const order = await actions.order.capture();
+        console.log('PayPal Order:', order);
+        
+        await completeBooking();
+        
+        alert('Payment successful! Your booking has been confirmed.');
+        router.push('/bookings');
+      } catch (error) {
+        console.error('PayPal payment error:', error);
+        alert('Payment failed. Please try again.');
+      }
     },
     onError: (err) => {
-      console.error('PayPal Checkout onError', err);
+      console.error('PayPal Checkout error:', err);
       alert('Payment failed. Please try again.');
     }
   }).render('#paypal-button-container');
 };
+
 
 const processPayment = async () => {
   if (paymentMethod.value === 'paypal') {
@@ -146,25 +257,32 @@ const processPayment = async () => {
 const completeBooking = async () => {
   try {
     const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No token found. Please log in.');
+    if (!token) throw new Error('No token found');
+
+    if (timeLeft.value <= 0) {
+      throw new Error('Booking time has expired');
     }
 
-    const response = await fetch('/api/bookings/create', {
-      method: 'POST',
+    const response = await fetch(`/api/bookings/update/${bookingId.value}`, {
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(bookingDetails.value)
+      body: JSON.stringify({
+        paymentMethod: paymentMethod.value,
+        paymentProof: null // For PayPal, no proof needed
+      })
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to book room');
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to complete booking');
     }
 
+    clearInterval(timer.value);
     return await response.json();
+
   } catch (error) {
     console.error('Error completing booking:', error);
     throw error;
@@ -188,11 +306,97 @@ const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
+
+
+const timeLeft = ref(900); //15 mins
+const timer = ref(null);
+
+const formattedTimeLeft = computed(() => {
+  const minutes = Math.floor(timeLeft.value / 60);
+  const seconds = timeLeft.value % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+const getBookingTimerKey = (bookingId) => `booking_timer_${bookingId}`;
+
+const calculateTimeLeft = (bookingId) => {
+  const bookingTime = localStorage.getItem(getBookingTimerKey(bookingId));
+  if (!bookingTime) return 0;
+
+  const elapsedSeconds = Math.floor((Date.now() - parseInt(bookingTime)));
+  const remainingSeconds = 900 - elapsedSeconds; // 15 minutes = 900 seconds
+  return Math.max(0, remainingSeconds);
+};
+
+const startTimer = () => {
+  // Clear any existing timer
+  if (timer.value) {
+    clearInterval(timer.value);
+  }
+
+  // If time has already expired, handle it immediately
+  if (timeLeft.value <= 0) {
+    handleExpiredBooking();
+    return;
+  }
+
+  // Start the countdown
+  timer.value = setInterval(() => {
+    timeLeft.value--;
+    if (timeLeft.value <= 0) {
+      clearInterval(timer.value);
+      handleExpiredBooking();
+    }
+  }, 1000);
+};
+
+const handleExpiredBooking = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const response = await fetch(`/api/bookings/checkExpired`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        bookingId: bookingId.value 
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to handle expired booking');
+    }
+
+    alert('Booking expired. Please try again.');
+    router.push('/rooms');
+  } catch (error) {
+    console.error('Error handling expired booking:', error);
+    alert('Error handling expired booking. Please try again.');
+    router.push('/rooms');
+  }
+};
+
+
+onUnmounted(() => {
+  if (timer.value) {
+    clearInterval(timer.value);
+  }
+});
+
+
 </script>
 
 <template>
   <div class="payment-container">
     <h1>Payment</h1>
+    <div class="timer-container">
+      <div class="timer" :class="{ 'timer-warning': timeLeft < 300 }">
+        Time remaining: {{ formattedTimeLeft }}
+      </div>
+    </div>
 
     <div class="booking-summary">
       <h2>Booking Summary</h2>
@@ -416,5 +620,30 @@ h2 {
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 2rem;
+}
+
+.timer-container {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #28a745;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.timer-warning {
+  color: #dc3545;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 </style>

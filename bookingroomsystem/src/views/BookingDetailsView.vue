@@ -21,59 +21,120 @@ const details = ref({
     totalPrice: 0
 });
 
+
 const fetchDetails = async () => {
     try {
         const bookingId = route.params.id;
 
-        if(bookingId) {
-            const token = localStorage.getItem('token')
-            if (!token) {
-                throw new Error('No token found. Please log in.')
-            }
-
-            // Use different endpoints based on user role
-            const endpoint = isAdmin.value 
-                ? `/api/bookings/${bookingId}`
-                : `/api/users/bookingHistory/${bookingId}`;
-
-            const response = await fetch(endpoint, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error('Unauthorized: Please log in again.')
-                } else if (response.status === 403) {
-                    throw new Error('Forbidden: Invalid token.')
-                } else {
-                    throw new Error('Failed to fetch booking details. Server responded with status: ' + response.status)
-                }
-            }
-
-            const data = await response.json();
-            
-            // Transform the data to match the expected format
-            details.value = isAdmin.value ? {
-                bookingId: data._id,
-                roomName: data.roomName,
-                date: data.date,
-                timeslots: data.timeslots,
-                status: data.status,
-                paymentProof: data.paymentProof,
-                totalPrice: data.totalPrice
-            } : data;
-
-            selectedStatus.value = data.status;
-            console.log('Fetched booking details:', data);
+        if (!bookingId) {
+            throw new Error('No booking ID provided');
         }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in.');
+        }
+
+        // Always use the same endpoint for fetching booking details
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Unauthorized: Please log in again.');
+            } else if (response.status === 403) {
+                throw new Error('Forbidden: You do not have permission to view this booking.');
+            } else {
+                throw new Error('Failed to fetch booking details');
+            }
+        }
+
+        const data = await response.json();
+        
+        // Transform the data consistently for both admin and normal users
+        details.value = {
+            bookingId: data._id,
+            roomId: data.roomId,
+            roomName: data.roomName,
+            roomNumber: data.roomNumber,
+            date: data.date,
+            timeslots: data.timeslots,
+            status: data.status,
+            paymentProof: data.paymentProof,
+            totalPrice: data.totalPrice,
+            participant: data.participant,
+            userId: data.userId,
+            username: data.username,
+            userContact: data.userContact,
+            userEmail: data.userEmail
+        };
+
+        selectedStatus.value = data.status;
+        console.log('Fetched booking details:', data);
+
     } catch (error) {
-        console.error('Error fetching booking details:', error.message)
+        console.error('Error fetching booking details:', error);
+        router.push('/bookings'); // Redirect to bookings page on error
     }
-}
+};
+// const fetchDetails = async () => {
+//     try {
+//         const bookingId = route.params.id;
+
+//         if(bookingId) {
+//             const token = localStorage.getItem('token')
+//             if (!token) {
+//                 throw new Error('No token found. Please log in.')
+//             }
+
+//             // Use different endpoints based on user role
+//             const endpoint = isAdmin.value 
+//                 ? `/api/bookings/${bookingId}`
+//                 : `/api/users/bookingHistory/${bookingId}`;
+
+//             const response = await fetch(endpoint, {
+//                 method: 'GET',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Authorization': `Bearer ${token}`
+//                 }
+//             });
+
+//             if (!response.ok) {
+//                 if (response.status === 401) {
+//                     throw new Error('Unauthorized: Please log in again.')
+//                 } else if (response.status === 403) {
+//                     throw new Error('Forbidden: Invalid token.')
+//                 } else {
+//                     throw new Error('Failed to fetch booking details. Server responded with status: ' + response.status)
+//                 }
+//             }
+
+//             const data = await response.json();
+            
+//             // Transform the data to match the expected format
+//             details.value = isAdmin.value ? {
+//                 bookingId: data._id,
+//                 roomName: data.roomName,
+//                 date: data.date,
+//                 timeslots: data.timeslots,
+//                 status: data.status,
+//                 paymentProof: data.paymentProof,
+//                 totalPrice: data.totalPrice
+//             } : data;
+
+//             selectedStatus.value = data.status;
+//             console.log('Fetched booking details:', data);
+//         }
+//     } catch (error) {
+//         console.error('Error fetching booking details:', error.message)
+//     }
+// }
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -210,6 +271,67 @@ const updateStatus = async () => {
     }
 }
 
+const canReturnToPayment = computed(() => {
+    return details.value.status === 'pending payment';
+});
+
+const hasPaymentProof = computed(() => {
+    return !!details.value.paymentProof;
+});
+
+const returnToPayment = () => {
+    try {
+        const bookingId = details.value.bookingId; // Using bookingId from details
+        if (!bookingId) {
+            throw new Error('Booking ID not found');
+        }
+
+        const timerKey = `booking_timer_${bookingId}`;
+        
+        // Check if this specific booking has expired
+        const bookingTime = localStorage.getItem(timerKey);
+        if (!bookingTime) {
+            // If no timer exists, set a new one
+            localStorage.setItem(timerKey, Date.now().toString());
+        } else {
+            // Check if existing timer has expired
+            const elapsedSeconds = Math.floor((Date.now() - parseInt(bookingTime)) / 1000);
+            if (elapsedSeconds >= 900) { // 15 minutes
+                alert('Payment session has expired. Please make a new booking.');
+                // Clean up expired booking data
+                localStorage.removeItem(`pending_booking_${bookingId}`);
+                localStorage.removeItem(timerKey);
+                router.push('/rooms');
+                return;
+            }
+        }
+
+        // Store the current booking details
+        localStorage.setItem(`pending_booking_${bookingId}`, JSON.stringify({
+            bookingId: details.value.bookingId,
+            roomId: details.value.roomId,
+            roomName: details.value.roomName,
+            roomNumber: details.value.roomNumber,
+            date: details.value.date,
+            timeslots: details.value.timeslots,
+            participant: details.value.participant, // Added participant
+            totalPrice: details.value.totalPrice,
+            userId: details.value.userId,
+            username: details.value.username,
+            userContact: details.value.userContact,
+            userEmail: details.value.userEmail,
+            status: 'pending payment'
+        }));
+        
+        // Navigate to payment page with booking ID
+        router.push(`/payment/${bookingId}`);
+
+    } catch (error) {
+        console.error('Error returning to payment:', error);
+        alert('Failed to return to payment page. Please try again.');
+    }
+};
+
 onMounted(() => {
     fetchDetails();    
 })
@@ -261,8 +383,48 @@ onMounted(() => {
             Status: {{ details.status }}
         </div>
     </div>
+
+    <div v-if="canReturnToPayment" class="payment-actions mt-3">
+        <Button 
+            label="Return to Payment" 
+            severity="success" 
+            @click="returnToPayment"
+            :disabled="!details.bookingId"
+        />
+    </div>
+
     <div class="payment-proof row mt-3">
-        <!-- Payment Proof Exist -->
+        <div v-if="hasPaymentProof">
+            <div class="payment-header">Payment Proof:</div>
+            <img 
+                :src="details.paymentProof" 
+                :alt="`Payment proof for booking ${details.bookingId}`"
+                @error="handleImageError"
+                class="proof-img"
+            />
+        </div>
+        <div v-else-if="details.status === 'pending payment'">
+            <form @submit.prevent="uploadPaymentProof" class="upload-form">
+                <div class="mb-3">
+                    <div class="payment-header">Upload Payment Proof:</div>
+                    <input 
+                        type="file" 
+                        @change="handleFileChange" 
+                        accept="image/*" 
+                        ref="fileInput"
+                        class="file-picker"
+                    />
+                </div>
+                <Button 
+                    type="submit" 
+                    label="Upload"
+                    severity="primary"
+                    :disabled="!selectedFile"
+                />
+            </form>
+        </div>
+
+    <!-- <div class="payment-proof row mt-3">
         <div v-if = "details.paymentProof">
             <div class="payment-header">Payment Proof:</div>
             <img 
@@ -274,7 +436,6 @@ onMounted(() => {
             />
         </div>
 
-        <!-- No Payment Proof -->
         <div v-else>
             <form @submit.prevent="uploadPaymentProof">
             <div class="mb-3">
@@ -295,7 +456,7 @@ onMounted(() => {
                 Upload
             </button>
         </form>
-        </div>
+        </div> -->
     </div>
 
     <div style="display: flex; justify-content: flex-end;">
