@@ -65,7 +65,9 @@ const login = async () => {
 
         // save token to local storage
         localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.userId); 
         localStorage.setItem('admin', data.admin);
+
         isAuthenticated.value = true;
         router.push('/home');
     } catch (error) {

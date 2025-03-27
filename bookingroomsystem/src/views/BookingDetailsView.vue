@@ -217,12 +217,18 @@ const canReturnToPayment = computed(() => {
 
 const canUploadPaymentProof = computed(() => {
     const currentUserId = localStorage.getItem('userId');
+    console.log('Current user ID:', currentUserId);
+    console.log('Booking user ID:', details.value.userId);
+    
+    // If you need to compare ObjectIds, convert both to strings
+    const bookingUserId = details.value.userId?.toString();
+    const currentUserIdString = currentUserId?.toString();
+    
     return (
         details.value.status === 'pending payment' && 
-        details.value.userId && 
-        currentUserId && 
-        details.value.userId.toString() === currentUserId.toString() &&
-        !isAdmin.value
+        bookingUserId && 
+        currentUserIdString && 
+        bookingUserId === currentUserIdString 
     );
 });
 
