@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed} from 'vue';
+import { ref, onMounted, computed, watch} from 'vue';
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -111,14 +111,54 @@ const clearSelection = () => {
 };
 
 
+// const toggleTimeSlot = (time) => {
+//   const index = selectedTimeSlots.value.indexOf(time);
+//   if (index === -1) {
+//     selectedTimeSlots.value.push(time);
+//   } else {
+//     selectedTimeSlots.value.splice(index, 1);
+//   }
+// };
+
 const toggleTimeSlot = (time) => {
-  const index = selectedTimeSlots.value.indexOf(time);
-  if (index === -1) {
-    selectedTimeSlots.value.push(time);
-  } else {
-    selectedTimeSlots.value.splice(index, 1);
-  }
+    if (!availableTimeSlots.value[time]) {
+        return; // Don't allow selection of unavailable slots
+    }
+
+    const index = selectedTimeSlots.value.indexOf(time);
+    if (index === -1) {
+        // Adding a new slot
+        if (selectedTimeSlots.value.length === 0) {
+            // First selection
+            selectedTimeSlots.value.push(time);
+        } else {
+            // Check if the new slot is consecutive
+            const currentHours = selectedTimeSlots.value.map(slot => parseInt(slot));
+            const newHour = parseInt(time);
+            
+            const minHour = Math.min(...currentHours);
+            const maxHour = Math.max(...currentHours);
+            
+            if (newHour === minHour - 1 || newHour === maxHour + 1) {
+                selectedTimeSlots.value.push(time);
+                selectedTimeSlots.value.sort();
+            } else {
+                alert('Please select consecutive time slots only');
+            }
+        }
+    } else {
+        // Removing a slot - only allow if it doesn't break consecutive sequence
+        const hours = selectedTimeSlots.value.map(slot => parseInt(slot));
+        const hourToRemove = parseInt(time);
+        
+        if (hourToRemove === Math.min(...hours) || hourToRemove === Math.max(...hours)) {
+            selectedTimeSlots.value.splice(index, 1);
+        } else {
+            alert('Cannot remove middle time slots. Please remove from ends.');
+        }
+    }
 };
+
 
 const toggleAllDay = () => {
   isAllDaySelected.value = !isAllDaySelected.value;
@@ -219,6 +259,29 @@ const bookRoom = async () => {
   }
 };
 
+const availableTimeSlots = ref({});
+
+const fetchAvailability = async () => {
+    try {
+        if (!selectedDate.value || !room.value._id) return;
+        
+        const response = await fetch(`/api/bookings/availability/${room.value._id}/${selectedDate.value}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch availability');
+        }
+        
+        const data = await response.json();
+        availableTimeSlots.value = data;
+    } catch (error) {
+        console.error('Error fetching availability:', error);
+    }
+};
+
+watch(selectedDate, () => {
+    fetchAvailability();
+    clearSelection();
+});
+
 onMounted(() => {
     fetchRoom();
     fetchUserDetails();
@@ -291,28 +354,51 @@ onMounted(() => {
 
                     
                     <div class="timeslots-container">
-                        <div class="timeslots-grid">
-                            <!-- All day -->
+                        <!-- <div class="timeslots-grid">
                             <button 
-                            class="all-day-btn"
-                            :class="{ 'selected': isAllDaySelected }"
-                            @click="toggleAllDay"
+                                class="all-day-btn"
+                                :class="{ 'selected': isAllDaySelected }"
+                                @click="toggleAllDay"
                             >
-                            All Day
+                                All Day
                             </button>
-                            <!-- Timeslots -->
                             <button
-                            v-for="slot in timeSlots"
-                            :key="slot.time"
-                            class="time-slot"
-                            :class="{ 
-                                'selected': selectedTimeSlots.includes(slot.time),
-                                'disabled': isAllDaySelected
-                            }"
-                            @click="toggleTimeSlot(slot.time)"
-                            :disabled="isAllDaySelected"
+                                v-for="slot in timeSlots"
+                                :key="slot.time"
+                                class="time-slot"
+                                :class="{ 
+                                    'selected': selectedTimeSlots.includes(slot.time),
+                                    'disabled': isAllDaySelected
+                                }"
+                                @click="toggleTimeSlot(slot.time)"
+                                :disabled="isAllDaySelected"
                             >
-                            {{ slot.label }}
+                                {{ slot.label }}
+                            </button>
+                        </div> -->
+                        <div class="timeslots-grid">
+                            <button 
+                                class="all-day-btn"
+                                :class="{ 'selected': isAllDaySelected }"
+                                @click="toggleAllDay"
+                                :disabled="!Object.values(availableTimeSlots).every(slot => slot)"
+                            >
+                                All Day
+                            </button>
+                            
+                            <button
+                                v-for="slot in timeSlots"
+                                :key="slot.time"
+                                class="time-slot"
+                                :class="{ 
+                                    'selected': selectedTimeSlots.includes(slot.time),
+                                    'disabled': isAllDaySelected || !availableTimeSlots[slot.time],
+                                    'unavailable': !availableTimeSlots[slot.time]
+                                }"
+                                @click="toggleTimeSlot(slot.time)"
+                                :disabled="isAllDaySelected || !availableTimeSlots[slot.time]"
+                            >
+                                {{ slot.label }}
                             </button>
                         </div>
                     </div>
@@ -512,6 +598,18 @@ onMounted(() => {
     background-color: #e9ecef;
     color: #6c757d;
     cursor: not-allowed;
+}
+
+.time-slot.unavailable {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.time-slot.unavailable:hover {
+    background-color: #f0f0f0;
+    color: #999;
+    transform: none;
 }
 
 @media (max-width: 768px) {

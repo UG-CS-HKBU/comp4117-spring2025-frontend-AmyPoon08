@@ -80,15 +80,44 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-GB'); // Format as DD/MM/YYYY
 }
 
+// const getStartTime = (timeslots) => {
+//     if (!timeslots || timeslots.length === 0) return '-';
+//     return timeslots[0];
+// }
+
+// const getEndTime = (timeslots) => {
+//     if (!timeslots || timeslots.length === 0) return '-';
+    
+//     const startTime = timeslots[timeslots.length - 1]; // Get the last timeslot
+//     const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
+//     const endTime = new Date();
+//     endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
+
+//     return endTime.toTimeString().slice(0, 5); // Format as HH:MM
+// }
+
 const getStartTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
-    return timeslots[0];
+    // Sort timeslots chronologically
+    const sortedSlots = [...timeslots].sort((a, b) => {
+        const [hourA] = a.split(':').map(Number);
+        const [hourB] = b.split(':').map(Number);
+        return hourA - hourB;
+    });
+    return sortedSlots[0];
 }
 
 const getEndTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
     
-    const startTime = timeslots[timeslots.length - 1]; // Get the last timeslot
+    // Sort timeslots chronologically
+    const sortedSlots = [...timeslots].sort((a, b) => {
+        const [hourA] = a.split(':').map(Number);
+        const [hourB] = b.split(':').map(Number);
+        return hourA - hourB;
+    });
+    
+    const startTime = sortedSlots[sortedSlots.length - 1]; // Get the last timeslot
     const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
     const endTime = new Date();
     endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
