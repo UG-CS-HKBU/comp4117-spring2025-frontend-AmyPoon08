@@ -272,7 +272,27 @@ const updateStatus = async () => {
 }
 
 const canReturnToPayment = computed(() => {
-    return details.value.status === 'pending payment';
+    // Get current user's ID from localStorage or wherever you store it
+    const currentUserId = localStorage.getItem('userId');
+    
+    return (
+        details.value.status === 'pending payment' && 
+        details.value.userId && 
+        currentUserId && 
+        details.value.userId.toString() === currentUserId.toString() &&
+        !isAdmin.value // Additional check to ensure admin can't see this button
+    );
+});
+
+const canUploadPaymentProof = computed(() => {
+    const currentUserId = localStorage.getItem('userId');
+    return (
+        details.value.status === 'pending payment' && 
+        details.value.userId && 
+        currentUserId && 
+        details.value.userId.toString() === currentUserId.toString() &&
+        !isAdmin.value
+    );
 });
 
 const hasPaymentProof = computed(() => {
@@ -403,7 +423,7 @@ onMounted(() => {
                 class="proof-img"
             />
         </div>
-        <div v-else-if="details.status === 'pending payment'">
+        <div v-else-if="canUploadPaymentProof">
             <form @submit.prevent="uploadPaymentProof" class="upload-form">
                 <div class="mb-3">
                     <div class="payment-header">Upload Payment Proof:</div>
