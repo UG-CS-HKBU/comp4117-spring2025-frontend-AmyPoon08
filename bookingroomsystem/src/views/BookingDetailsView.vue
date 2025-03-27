@@ -21,7 +21,6 @@ const details = ref({
     totalPrice: 0
 });
 
-
 const fetchDetails = async () => {
     try {
         const bookingId = route.params.id;
@@ -32,13 +31,18 @@ const fetchDetails = async () => {
                 throw new Error('No token found. Please log in.')
             }
 
-            const response = await fetch(`/api/users/bookingHistory/${bookingId}`, {
+            // Use different endpoints based on user role
+            const endpoint = isAdmin.value 
+                ? `/api/bookings/${bookingId}`
+                : `/api/users/bookingHistory/${bookingId}`;
+
+            const response = await fetch(endpoint, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
-            })
+            });
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -46,23 +50,28 @@ const fetchDetails = async () => {
                 } else if (response.status === 403) {
                     throw new Error('Forbidden: Invalid token.')
                 } else {
-                    throw new Error('Failed to fetch booking history. Server responded with status: ' + response.status)
+                    throw new Error('Failed to fetch booking details. Server responded with status: ' + response.status)
                 }
             }
 
-            const data = await response.json()
-            details.value = data
-            console.log(data)
+            const data = await response.json();
+            
+            // Transform the data to match the expected format
+            details.value = isAdmin.value ? {
+                bookingId: data._id,
+                roomName: data.roomName,
+                date: data.date,
+                timeslots: data.timeslots,
+                status: data.status,
+                paymentProof: data.paymentProof,
+                totalPrice: data.totalPrice
+            } : data;
 
-
-            selectedStatus.value = statusOptions.find(option => 
-                option.value === data.status
-            )?.value || null;
-            console.log(selectedStatus)
-            // console.log('Booking history fetched successfully:', data)
+            selectedStatus.value = data.status;
+            console.log('Fetched booking details:', data);
         }
     } catch (error) {
-        console.error('Error fetching booking history:', error.message)
+        console.error('Error fetching booking details:', error.message)
     }
 }
 
