@@ -210,8 +210,7 @@ const canReturnToPayment = computed(() => {
         details.value.status === 'pending payment' && 
         details.value.userId && 
         currentUserId && 
-        details.value.userId.toString() === currentUserId.toString() &&
-        !isAdmin.value // Additional check to ensure admin can't see this button
+        details.value.userId.toString() === currentUserId.toString()
     );
 });
 
@@ -289,6 +288,22 @@ const returnToPayment = () => {
     }
 };
 
+
+const currentStep = computed(() => details.value.status?.toLowerCase() || '');
+
+const isStepCompleted = (step) => {
+    const status = currentStep.value;
+    
+    switch(status) {
+        case 'pending approval':
+            return step === 'pending payment';
+        case 'confirmed':
+            return step === 'pending payment' || step === 'pending approval';
+        default:
+            return false;
+    }
+};
+
 onMounted(() => {
     fetchDetails();    
 })
@@ -297,8 +312,41 @@ onMounted(() => {
 </script>
 
 <template>
+
     <div class="header mt-3">
         <h1>Booking Details</h1>
+    </div>
+
+    <div>
+        <div class="stepper-wrapper">
+            <div 
+                class="stepper-item"
+                :class="{
+                    'completed': isStepCompleted('pending payment') || currentStep === 'pending payment'
+                }"
+            >
+                <div class="step-counter">1</div>
+                <div class="step-name">Pending Payment</div>
+            </div>
+            <div 
+                class="stepper-item"
+                :class="{
+                    'completed': isStepCompleted('pending approval') || currentStep === 'pending approval'
+                }"
+            >
+                <div class="step-counter">2</div>
+                <div class="step-name">Pending Approval</div>
+            </div>
+            <div 
+                class="stepper-item"
+                :class="{
+                    'completed': isStepCompleted('confirmed') || currentStep === 'confirmed'
+                }"
+            >
+                <div class="step-counter">3</div>
+                <div class="step-name">Confirmed</div>
+            </div>
+        </div>
     </div>
 
     <div class="details mt-3">
@@ -441,5 +489,81 @@ onMounted(() => {
     background-color: #e9ecef;
     color: #6c757d;
     cursor: not-allowed;
+}
+
+.stepper-wrapper {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.stepper-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+.stepper-item::before {
+  position: absolute;
+  content: "";
+  border-bottom: 2px solid #ccc;
+  width: 100%;
+  top: 20px;
+  left: -50%;
+  z-index: 2;
+}
+
+.stepper-item::after {
+  position: absolute;
+  content: "";
+  border-bottom: 2px solid #ccc;
+  width: 100%;
+  top: 20px;
+  left: 50%;
+  z-index: 2;
+}
+
+.stepper-item .step-counter {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ccc;
+  margin-bottom: 6px;
+}
+
+.stepper-item.active {
+  font-weight: bold;
+}
+
+.stepper-item.completed .step-counter {
+  background-color: #38d02d;
+}
+
+.stepper-item.completed::after {
+  position: absolute;
+  content: "";
+  border-bottom: 2px solid #38d02d;
+  width: 100%;
+  top: 20px;
+  left: 50%;
+  z-index: 3;
+}
+
+.stepper-item:first-child::before {
+  content: none;
+}
+.stepper-item:last-child::after {
+  content: none;
 }
 </style>

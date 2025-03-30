@@ -378,10 +378,42 @@ onUnmounted(() => {
           <input type="radio" id="paypalRadio" value="paypal" v-model="paymentMethod">
           <label for="paypal">PayPal</label>
         </div>
+
+        <div class="payment-option">
+          <input type="radio" id="othersRadio" value="others" v-model="paymentMethod">
+          <label for="paypal">Alipay / Payme / Bank Deposit</label>
+        </div>
       </div>
     </div>
 
+    <div v-if="paymentMethod === 'others'">
+        <div class="row alipay">
+          <p>Alipay: </p>
+          <img 
+              src="@/images/Alipay.jpg"
+              alt="Alipay_Code"
+              style="height: 100px; width: 120px;"
+          /> 
+        </div>
 
+        <div class="row payme">
+          <p>Payme: </p>
+          <img 
+              src="@/images/Payme.jpg"
+              :alt="Payme_Code"
+              style="height: 100px; width: 120px;"
+          /> 
+        </div>
+
+        <div class="row bankDeposit">
+          <p>Bank Deposit: </p>
+          <p>HSBC: 1234567890</p>
+          <p>Bank of China: 2345678901</p>
+        </div>
+    </div>
+
+    
+    
 
     <div v-if="paymentMethod === 'paypal'" class="paypal-info">
       <div v-if="paypalLoaded">
