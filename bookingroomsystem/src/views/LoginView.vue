@@ -1,7 +1,7 @@
 <script setup>
 // imports
 import { ref, inject, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+//import { useRouter } from 'vue-router';
 
 // credentials
 const credentials = ref({
@@ -10,7 +10,7 @@ const credentials = ref({
 });
 
 const { isAuthenticated, hideNav } = inject('auth')
-const router = useRouter();
+//const router = useRouter();
 const showPassword = ref(false);
 const errorMessage = ref(''); // Add a ref to store error messages
 
@@ -43,7 +43,8 @@ const login = async () => {
           console.warn('Empty response from server');
           localStorage.setItem('token', ''); 
           isAuthenticated.value = true;
-          router.push('/home');
+          //router.push('/home');
+          window.location.href = '/home';
           return;
         }
     
@@ -69,7 +70,8 @@ const login = async () => {
         localStorage.setItem('admin', data.admin);
 
         isAuthenticated.value = true;
-        router.push('/home');
+        //router.push('/home');
+        window.location.href = '/home';
     } catch (error) {
         if (!errorMessage.value) {
             errorMessage.value = 'An unexpected error occurred'; // Fallback error message
