@@ -15,7 +15,7 @@ import RoomDetailsView from '@/views/RoomDetailsView.vue'
 import UserInfoView from '@/views/UserInfoView.vue'
 import UserDetailsView from '@/views/UserDetailsView.vue'
 import CreateUserView from '@/views/CreateUserView.vue'
-import BookingRecordsView from '@/views/BookingRecordsView.vue'
+import BookingRecordsView from '@/views/BookingRecordsView.vue' 
 
 function isAuthenticated() {
   const token = localStorage.getItem('token')
