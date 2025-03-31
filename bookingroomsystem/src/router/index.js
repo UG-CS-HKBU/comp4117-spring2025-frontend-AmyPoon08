@@ -40,47 +40,56 @@ const router = createRouter({
       path: '/home',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/aboutus',
       name: 'AboutUs',
       component: AboutUsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/bookings',
       name: 'Bookings',
       component: BookingsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/bookings/book/:id',
       name: 'RoomBooking',
       component: BookView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/payment/:bookingId',
       name: 'Payment',
       component: PaymentView,
-      props: true 
+      props: true,
+      meta: { requiresAuth: true }
     },
     {
       path: '/myBookings',
       name: 'MyBookings',
       component: MyBookingsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/bookingHistory/:id',
       name: 'BookingDetails',
       component: BookingDetailsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/roomDetails/:id',
       name: 'RoomDetails',
       component: RoomDetailsView,
+      meta: { requiresAuth: true }
     },
 
     // Admin routes
