@@ -150,7 +150,9 @@ onMounted(() => {
     <div class="page-container">
         <nav v-if="isAuthenticated && !isAdmin" class="menubar">
             <div class="left">
-                <a href="/home" @click="goToHome">Room Booking System</a>
+                <a href="/home" @click="goToHome">
+                    <span>&#127968;</span> Room Booking System
+                </a>
             </div>
             <div class="right">
                 <span>{{ userName.username }}</span>
@@ -164,7 +166,8 @@ onMounted(() => {
         <!-- admin nav bar -->
         <nav v-if="isAuthenticated && isAdmin" class="menubar">
             <div class="left">
-                <a href="/home" @click="goToHome">Room Booking System</a>
+                <a href="/home" @click="goToHome">
+                    <span>&#127968;</span>Room Booking System</a>
             </div>
             <div class="right">
                 <span>{{ userName.username }}</span>
@@ -179,12 +182,12 @@ onMounted(() => {
             </div>
         </nav>
 
-        <div class="content">
+        <div class="content" style="min-height: 100vh;">
             <RouterView />
         </div>
 
         <footer class="footer footer-horizontal footer-center bg-gray text-white rounded p-15">
-            <nav class="grid grid-flow-col gap-4 justify-center">
+            <nav v-if="isAuthenticated" class="grid grid-flow-col gap-4 justify-center">
                 <a href="/AboutUs" class="text-white"> About us</a>
                 <a href="/bookings" class="text-white"> Bookings</a>
                 <!-- <a class="link link-hover text-white">Contact</a> -->
