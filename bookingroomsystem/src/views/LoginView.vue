@@ -1,7 +1,9 @@
 <script setup>
 // imports
-import { ref, inject, onMounted } from 'vue';
-//import { useRouter } from 'vue-router';
+import { ref, inject, onMounted, onBeforeMount } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // credentials
 const credentials = ref({
@@ -10,7 +12,6 @@ const credentials = ref({
 });
 
 const { isAuthenticated, hideNav } = inject('auth')
-//const router = useRouter();
 const showPassword = ref(false);
 const errorMessage = ref(''); // Add a ref to store error messages
 
@@ -19,6 +20,12 @@ onMounted(() => {
   hideNav()
 });
 
+onBeforeMount(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    router.push('/home');
+  } 
+});
 
 // methods
 const login = async () => {

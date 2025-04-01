@@ -166,7 +166,7 @@ const renderPayPalButton = async () => {
         await completeBooking();
         
         alert('Payment successful! Your booking has been confirmed.');
-        router.push('/bookings');
+        router.push('/myBookings');
       } catch (error) {
         console.error('PayPal payment error:', error);
         alert('Payment failed. Please try again.');

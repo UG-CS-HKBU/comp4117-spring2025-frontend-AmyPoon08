@@ -42,6 +42,7 @@ function onApprove(data, actions) {
   return actions.order.capture().then(() => {
     paid.value = true
     console.log('Order complete!')
+    window.location.href = '/myBookings'
   })
 }
 </script>
