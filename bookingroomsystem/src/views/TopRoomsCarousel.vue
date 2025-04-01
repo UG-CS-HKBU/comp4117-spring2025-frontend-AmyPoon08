@@ -11,7 +11,6 @@
         />
         <div class="room-info">
           <h3>{{ room.roomDetails.name }}</h3>
-          <p>{{ room.roomDetails.description }}</p>
           <p class="price">Price: {{ room.roomDetails.price }}</p>
           <p>Total Bookings: {{ room.bookingCount }}</p>
           <div class="buttons">
