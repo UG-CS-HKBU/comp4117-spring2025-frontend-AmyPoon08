@@ -48,7 +48,10 @@ function onApprove(data, actions) {
 
 <template>
   <div v-if="!paid" id="paypal-button-container"></div>
-  <div v-else id="confirmation">Order complete!</div>
+  <div v-else id="confirmation">
+    Order complete!
+    <button @click="redirectToMyBooking">Go to My Booking</button>
+  </div>
 </template>
 
 <style>
