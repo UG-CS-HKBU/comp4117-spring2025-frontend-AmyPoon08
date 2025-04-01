@@ -182,11 +182,11 @@ onMounted(() => {
             </div>
         </nav>
 
-        <div class="content" style="min-height: 100vh;">
+        <div class="main-content">
             <RouterView />
         </div>
 
-        <footer class="footer footer-horizontal footer-center bg-gray text-white rounded p-15">
+        <footer class="footer">
             <nav class="grid grid-flow-col gap-4 justify-center">
                 <a href="/AboutUs" class="text-white"> About us</a>
                 <a href="/bookings" class="text-white"> Bookings</a>
@@ -241,6 +241,9 @@ onMounted(() => {
 
 <style scoped>
 .menubar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -266,10 +269,36 @@ onMounted(() => {
     color: white;
     text-decoration: none;
 }
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    /* padding-bottom: 20px; */
+    padding-bottom: 0;
+}
+
+.footer {
+    margin-top: auto;
+    background-color: #a19f9f;
+    padding: 5px;
+    text-align: center;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}
+/* 
 .footer{
     background-color: #a19f9f;
     color: rgb(192, 184, 184);
     padding: 5px;
     text-align: center;
-}
+} */
 </style>
