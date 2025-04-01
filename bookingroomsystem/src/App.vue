@@ -150,7 +150,9 @@ onMounted(() => {
     <div class="page-container">
         <nav v-if="isAuthenticated && !isAdmin" class="menubar">
             <div class="left">
-                <a href="/home" @click="goToHome">Room Booking System</a>
+                <a href="/home" @click="goToHome">
+                    <span>&#127968;</span> Room Booking System
+                </a>
             </div>
             <div class="right">
                 <span>{{ userName.username }}</span>
