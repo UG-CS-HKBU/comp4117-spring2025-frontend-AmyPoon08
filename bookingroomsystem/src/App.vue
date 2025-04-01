@@ -188,9 +188,11 @@ onMounted(() => {
 
         <footer class="footer">
             <nav class="grid grid-flow-col gap-4 justify-center">
-                <a href="/AboutUs" class="text-white"> About us</a>
-                <a href="/bookings" class="text-white"> Bookings</a>
+                <nav v-if="isAuthenticated" class="grid grid-flow-col gap-4 justify-center">
+                    <a href="/AboutUs" class="text-white"> About us</a>
+                    <a href="/bookings" class="text-white"> Bookings</a>
                 <!-- <a class="link link-hover text-white">Contact</a> -->
+                </nav>
             </nav>
             <nav>
                 <div class="grid grid-flow-col gap-4 justify-center">
