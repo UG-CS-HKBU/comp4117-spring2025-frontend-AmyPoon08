@@ -283,6 +283,34 @@ export default {
             });
         });
 
+        const currentPage = ref(1);
+        const itemsPerPage = 6;
+
+        const paginatedRooms = computed(() => {
+            const startIndex = (currentPage.value - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            return filteredRooms.value.slice(startIndex, endIndex);
+        });
+
+        const totalPages = computed(() => {
+            return Math.ceil(filteredRooms.value.length / itemsPerPage);
+        });
+
+        const handlePageChange = (page) => {
+            currentPage.value = page;
+        };
+
+        const getPageNumbers = computed(() => {
+            const pages = [];
+            for (let i = 1; i <= totalPages.value; i++) {
+                pages.push(i);
+            }
+            return pages;
+        });
+
+
+
+
         // Helper functions for checking ranges
         const checkCapacity = (selectedCapacities, roomCapacity) => {
             return selectedCapacities.some(capacity => {
@@ -326,7 +354,7 @@ export default {
             priceOptions,
             availabilityOptions
         ], () => {
-            // You might want to update the API call here if you're filtering on the server
+            currentPage.value = 1;
             fetchRooms();
         }, { deep: true });
 
@@ -363,7 +391,12 @@ export default {
             // handleSearch,
             searchQuery,
             rooms,
-            filteredRooms
+            filteredRooms,
+            currentPage,
+            paginatedRooms,
+            totalPages,
+            handlePageChange,
+            getPageNumbers
         };
     }
 };
@@ -454,7 +487,7 @@ export default {
                     </ul>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <label class="form-label">Category Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
@@ -544,7 +577,7 @@ export default {
             <div class="col-12">
 
                 <div class="row">
-                    <div class="col-md-4 mb-4" v-for="room in filteredRooms" :key="room._id">
+                    <div class="col-md-4 mb-4" v-for="room in paginatedRooms" :key="room._id">
                         <div class="card h-200">
                             <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name" class="room-image"
                                 @error="handleImageError" />
@@ -563,6 +596,37 @@ export default {
                     </div>
                 </div>
 
+                <nav v-if="totalPages > 1" aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous button -->
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" 
+                                    @click="handlePageChange(currentPage - 1)"
+                                    :disabled="currentPage === 1">
+                                Previous
+                            </button>
+                        </li>
+
+                        <!-- Page numbers -->
+                        <li v-for="page in getPageNumbers" 
+                            :key="page" 
+                            class="page-item"
+                            :class="{ active: currentPage === page }">
+                            <button class="page-link" @click="handlePageChange(page)">
+                                {{ page }}
+                            </button>
+                        </li>
+
+                        <!-- Next button -->
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" 
+                                    @click="handlePageChange(currentPage + 1)"
+                                    :disabled="currentPage === totalPages">
+                                Next
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -578,5 +642,27 @@ export default {
 .card-description {
     height: 100px;
     overflow: auto;
+}
+
+.pagination {
+    margin-bottom: 2rem;
+}
+
+.page-link {
+    color: #333;
+    border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
 }
 </style>
