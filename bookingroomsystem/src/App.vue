@@ -181,7 +181,7 @@ onMounted(() => {
             </div>
         </nav>
 
-        <div class="content">
+        <div class="content" style="min-height: 100vh;">
             <RouterView />
         </div>
 
