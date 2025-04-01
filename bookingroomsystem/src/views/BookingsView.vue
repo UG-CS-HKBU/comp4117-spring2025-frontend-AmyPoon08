@@ -469,7 +469,7 @@ export default {
         </div>
 
         <div class="row">
-            <div class="col-2">
+            <div class="col-6 col-md-4 col-lg-2">
             <label class="form-label">Room Type Options:</label>
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
@@ -481,13 +481,13 @@ export default {
                     <div class="form-check">
                     <input type="checkbox" class="form-check-input" :id="option.value"
                         v-model="option.checked" @change="handleRoomOptionChange(option)">
-                    <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                    <label class="form-check-label">{{ option.label }}</label>
                     </div>
                 </li>
                     </ul>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label class="form-label">Category Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
@@ -499,14 +499,14 @@ export default {
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" :id="option.value"
                                     v-model="option.checked" @change="handleCategoryOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                <label class="form-check-label">{{ option.label }}</label>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="col-2">
+            <div class="col-6 col-md-4 col-lg-2">
                 <label class="form-label">Capacity Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity"
@@ -518,14 +518,14 @@ export default {
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" :id="option.value"
                                     v-model="option.checked" @change="handleCapacityOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                <label class="form-check-label">{{ option.label }}</label>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="col-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <label class="form-label">Price Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice"
@@ -537,14 +537,14 @@ export default {
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" :id="option.value"
                                     v-model="option.checked" @change="handlePriceOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                <label class="form-check-label">{{ option.label }}</label>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="col-3">
+            <div class="col-6 col-md-4 col-lg-2">
                 <label class="form-label">Availability Options:</label>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonAvailability"
@@ -556,7 +556,7 @@ export default {
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" :id="option.value"
                                     v-model="option.checked" @change="handleAvailabilityOptionChange(option)">
-                                <label class="form-check-label" :for="option.value">{{ option.label }}</label>
+                                <label class="form-check-label">{{ option.label }}</label>
                             </div>
                         </li>
                     </ul>
