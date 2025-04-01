@@ -58,35 +58,40 @@
           console.error('Failed to load top rooms:', err);
         }
       },
-      prevSlide() {
-        this.currentIndex =
-          (this.currentIndex - 1 + this.topRooms.length) % this.topRooms.length;
-      },
-      nextSlide() {
-        this.currentIndex = (this.currentIndex + 1) % this.topRooms.length;
-      },
       viewDetails(room) {
-        this.$router.push({ name: 'RoomDetailsView', params: { roomId: room._id } });
+        // Navigate to RoomDetails page with room ID as a parameter
+        this.$router.push({ name: 'room-details', params: { id: room.roomDetails._id } });
       },
       bookRoom(room) {
-        this.$router.push({ name: 'BookView', params: { roomId: room._id } });
+        // Navigate to BookRoom page with room ID as a parameter
+        this.$router.push({ name: 'book-room', params: { roomId: room.roomDetails._id } });
       },
+      prevSlide() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+        }
+      },
+      nextSlide() {
+        if (this.currentIndex < this.topRooms.length - 1) {
+          this.currentIndex++;
+        }
+      }
     },
   };
   </script>
   
   <style scoped>
   .carousel-container {
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 3px;
   }
   
   .carousel-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: bold;
-    margin-bottom: 1.5rem;
+    margin-bottom: 10px;
   }
   
   .carousel-wrapper {
@@ -97,26 +102,26 @@
   }
   
   .carousel-slide {
-    min-width: 100%;
+    width: 100%;
     box-sizing: border-box;
   }
   
   .room-item {
     background: #fff;
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 2px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   }
   
   .room-image {
-    max-width: 100%;
-    height: 300px;
+    max-width: 80%;
+    height: auto;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 2px;
   }
   
   .room-info {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
   
   .price {
@@ -146,10 +151,21 @@
   }
   
   .carousel-nav {
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
+    margin-top: 10px;
+  }
+  
+  .carousel-nav button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .carousel-nav button:hover {
+    background-color: #0056b3;
   }
   </style>
   
