@@ -1,5 +1,8 @@
 <template>
   <div class="home-view mt-5">
+    <div class="carousel-container">
+      <TopRoomsCarousel />
+    </div>
     <div class="calendar-container">
       <div class="monthly-view">
         <FullCalendar :options="calendarOptions" />
@@ -17,11 +20,14 @@ import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
+import TopRoomsCarousel from './TopRoomsCarousel.vue';
+
 
 export default {
   name: 'HomeView',
   components: {
-    FullCalendar
+    FullCalendar,
+    TopRoomsCarousel
   },
   setup() {
     const bookingData = ref([]);
@@ -282,7 +288,13 @@ export default {
 <style>
 .home-view {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carousel-container {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .calendar-container {
