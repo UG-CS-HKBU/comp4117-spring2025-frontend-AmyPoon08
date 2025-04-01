@@ -589,7 +589,7 @@ export default {
                                     <button id="Edit" class="btn btn-primary">More Details</button>
                                 </a>
                                 <a :href="`/bookings/book/${room._id}`">
-                                    <button id="Edit" class="btn btn-primary">Book Now!</button>
+                                    <button id="Edit" class="btn btn-success">Book Now!</button>
                                 </a>
                             </div>
                         </div>
