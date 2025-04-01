@@ -296,7 +296,7 @@ onMounted(() => {
 .room-info-container {
     padding: 2rem;
     background-color: #f8f9fa;
-    min-height: calc(100vh - 60px - 100px); /* Subtract nav and footer height */
+    min-height: calc(100vh - 200px); /* Further reduced height for less empty space */
 }
 
 .header-section {
@@ -539,6 +539,7 @@ onMounted(() => {
 
 :deep(.p-dialog) {
     border-radius: 8px;
+    background-color: white;
 }
 
 :deep(.p-dialog .p-dialog-header) {
@@ -549,11 +550,13 @@ onMounted(() => {
 
 :deep(.p-dialog .p-dialog-content) {
     padding: 1.5rem;
+    background-color: white;
 }
 
 :deep(.p-dialog .p-dialog-footer) {
     border-top: 1px solid #e9ecef;
     padding: 1rem;
+    background-color: white;
 }
 
 :deep(.search-input) {
