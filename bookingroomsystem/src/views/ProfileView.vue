@@ -73,7 +73,7 @@
             }
 
             const data = await response.json();
-            profile.value = data; // Assuming `profile` is a reactive variable
+            //profile.value = data; // Assuming `profile` is a reactive variable
             console.log('Profile saved successfully:', data);
             isEditing.value = false;
         } catch (error) {
@@ -104,7 +104,7 @@
         </div>
         <div class="form-group">
           <label for="email">Email:</label>
-          <input id="email" v-model="profile.email" class="form-control" />
+          <input id="email" style="background-color: #f9f9f9; color: #777;" v-model="profile.email" class="form-control" readonly/>
         </div>
         <div class="form-group">
           <label for="mobile">Mobile:</label>
