@@ -29,10 +29,7 @@
         </div>
       </div>
   
-      <div class="carousel-nav">
-        <button @click="prevSlide">Prev</button>
-        <button @click="nextSlide">Next</button>
-      </div>
+
     </div>
   </template>
   
