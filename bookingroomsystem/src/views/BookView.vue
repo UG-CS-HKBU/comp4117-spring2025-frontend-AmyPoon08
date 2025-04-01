@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, watch} from 'vue';
 import { useRoute, useRouter } from "vue-router";
+import DatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -82,6 +84,18 @@ const fetchRoom = async () => {
 const selectedDate = ref('');
 const selectedTimeSlots = ref([]);
 const isAllDaySelected = ref(false);
+
+// Function to format date for API calls
+const formatDate = (date) => {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+};
 
 const timeSlots = computed(() => {
   const slots = [];
@@ -205,11 +219,12 @@ const bookRoom = async () => {
             return;
         }
 
+        const formattedDate = formatDate(selectedDate.value);
         const bookingData = {
             roomId: room.value._id,
             roomName: room.value.name,
             roomNumber: room.value.room_number,
-            date: selectedDate.value,
+            date: formattedDate,
             timeslots: selectedTimeSlots.value,
             participant: participant.value,
             totalPrice: calculateTotal(),
@@ -353,7 +368,8 @@ const fetchAvailability = async () => {
     try {
         if (!selectedDate.value || !room.value._id) return;
         
-        const response = await fetch(`/api/bookings/availability/${room.value._id}/${selectedDate.value}`);
+        const formattedDate = formatDate(selectedDate.value);
+        const response = await fetch(`/api/bookings/availability/${room.value._id}/${formattedDate}`);
         if (!response.ok) {
             throw new Error('Failed to fetch availability');
         }
@@ -412,14 +428,17 @@ onMounted(() => {
                 
                 <!-- Select Date -->
                 <div class="col-md-6 align-items-center date-picker">
-                    <font-awesome-icon :icon="['fad', 'calendar']" />
-                    <input 
-                        type="date" 
-                        class="form-control" 
-                        v-model="selectedDate"
-                        :min="getCurrentDate()"
-                        style="height: 50px;"
-                    />
+                    <h2>Select Date</h2>
+                    <div class="date-picker-container">
+                        <DatePicker 
+                            v-model="selectedDate" 
+                            :min-date="new Date()"
+                            format="yyyy-MM-dd"
+                            placeholder="Select a date"
+                            :enable-time-picker="false"
+                            auto-apply
+                        />
+                    </div>
                 </div>
 
                 <!-- Timeslot description -->
@@ -575,6 +594,26 @@ onMounted(() => {
 .date-picker{
     padding: 10px;
     padding-bottom: 60px;
+}
+
+.date-picker h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.date-picker-container {
+    width: 100%;
+}
+
+.date-picker-container :deep(.dp__main) {
+    width: 100%;
+}
+
+.date-picker-container :deep(.dp__input) {
+    height: 50px;
+    font-size: 16px;
+    padding: 10px 15px;
 }
 
 .timeslot-description{
