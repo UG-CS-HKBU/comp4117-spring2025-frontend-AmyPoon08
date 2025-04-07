@@ -105,7 +105,8 @@ onMounted(() => {
                     <Button 
                         type="button" 
                         label="Book Now" 
-                        class="p-button-raised p-button-primary book-button"
+                        class="p-button-raised p-button-primary book-button" 
+                        @click="router.push(`/bookings/book/${room._id}`)"
                     />
                     
                     <div class="secondary-actions">
