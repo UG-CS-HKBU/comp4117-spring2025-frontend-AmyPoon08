@@ -173,8 +173,8 @@ onMounted(() => {
                 <span>{{ userName.username }}</span>
                 <a href="/rooms">Room Information</a>
                 <a href="/users">User Information</a>
-                <a href="/bookings">Bookings</a>
-                <a href="/myBookings">My Bookings</a>
+                <!-- <a href="/bookings">Bookings</a>
+                <a href="/myBookings">My Bookings</a> -->
                 <a href="/BookingRecords">Booking Record</a>
                 <a href="/profile">Profile</a>
                 <a href="/AboutUs">About us</a>

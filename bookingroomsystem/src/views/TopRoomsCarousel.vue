@@ -1,6 +1,6 @@
 <template>
   <div class="carousel-container">
-    <h2 class="carousel-title">Top 3 Most Booked Rooms</h2>
+    <h2 class="carousel-title">Top 3 Most popular Rooms</h2>
 
     <div class="rooms-grid">
       <div v-for="room in topRooms" :key="room._id" class="room-item">
