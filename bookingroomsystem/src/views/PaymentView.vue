@@ -31,12 +31,12 @@ const paypalLoaded = ref(false);
 let paypal;
 
 onMounted(async () => {
-  try{
+  try {
     // Get bookingId from route params
     bookingId.value = route.params.bookingId;
-      if (!bookingId.value) {
-        throw new Error('No booking ID provided');
-      }
+    if (!bookingId.value) {
+      throw new Error('No booking ID provided');
+    }
 
     // Fetch booking details from API instead of localStorage
     const token = localStorage.getItem('token');
@@ -46,21 +46,21 @@ onMounted(async () => {
 
     // First check booking status
     const statusResponse = await fetch(`/api/bookings/checkStatus/${bookingId.value}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     if (!statusResponse.ok) {
-        throw new Error('Failed to check booking status');
+      throw new Error('Failed to check booking status');
     }
 
     const statusData = await statusResponse.json();
 
     if (statusData.status === 'expired') {
-        alert('This booking has expired');
-        router.push('/bookings');
-        return;
+      alert('This booking has expired');
+      router.push('/bookings');
+      return;
     }
 
     const response = await fetch(`/api/bookings/${bookingId.value}`, {
@@ -79,25 +79,25 @@ onMounted(async () => {
     timeLeft.value = statusData.timeRemaining;
     startTimer();
 
-      // Set booking details
-      bookingDetails.value = {
-        roomId: booking.roomId,
-        roomName: booking.roomName,
-        roomNumber: booking.roomNumber,
-        date: booking.date,
-        timeslots: booking.timeslots,
-        totalPrice: booking.totalPrice,
-        userId: booking.userId,
-        username: booking.username,
-        userContact: booking.userContact,
-        userEmail: booking.userEmail
-      };
+    // Set booking details
+    bookingDetails.value = {
+      roomId: booking.roomId,
+      roomName: booking.roomName,
+      roomNumber: booking.roomNumber,
+      date: booking.date,
+      timeslots: booking.timeslots,
+      totalPrice: booking.totalPrice,
+      userId: booking.userId,
+      username: booking.username,
+      userContact: booking.userContact,
+      userEmail: booking.userEmail
+    };
 
-      // Initialize PayPal
-      paypal = await loadScript({ 
-        clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA' 
-      });
-      paypalLoaded.value = true;
+    // Initialize PayPal
+    paypal = await loadScript({
+      clientId: 'AbB0Y1oixi3sgEZdVbzhe9RSYadn-cwaEkG-jWVFCAWesdvsZORFoSrejNG-AEJPZaVuo7nS9b3d8XmA'
+    });
+    paypalLoaded.value = true;
 
   } catch (error) {
     console.error("failed to load the PayPal JS SDK script", error);
@@ -162,9 +162,9 @@ const renderPayPalButton = async () => {
       try {
         const order = await actions.order.capture();
         console.log('PayPal Order:', order);
-        
+
         await completeBooking();
-        
+
         alert('Payment successful! Your booking has been confirmed.');
         router.push('/myBookings');
       } catch (error) {
@@ -254,7 +254,30 @@ const formatTimeslots = (timeslots) => {
   }
 
   const startTime = timeslots[0];
-  const endTime = timeslots[timeslots.length - 1];
+
+  let endTime = timeslots[timeslots.length - 1];
+
+  // if timeslots = {0: '04:00', 1: '05:00', 2: '06:00'}
+  // startTime = 04:00
+  // endTime = 07:00
+  // if timeslots = {0: '04:00'}
+  // endTime = 05:00
+
+  if (timeslots.length > 0) {
+    const lastTime = timeslots[timeslots.length - 1];
+    const lastHour = parseInt(lastTime.split(':')[0], 10);
+    const lastMinute = parseInt(lastTime.split(':')[1], 10);
+
+    // The last timeslot is at the end of the hour, add 1 hour to the last hour
+    // e.g. 04:00, 05:00, 06:00 -> endTime = 07:00
+    // e.g. 04:00 -> endTime = 05:00
+    if (lastMinute === 0) {
+      endTime = `${lastHour + 1}:00`;
+    } else {
+      endTime = `${lastHour}:${lastMinute}`;
+    }
+  } 
+
   return `${startTime} - ${endTime}`;
 };
 
@@ -308,8 +331,8 @@ const handleExpiredBooking = async () => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
-        bookingId: bookingId.value 
+      body: JSON.stringify({
+        bookingId: bookingId.value
       })
     });
 
@@ -387,33 +410,25 @@ onUnmounted(() => {
     </div>
 
     <div v-if="paymentMethod === 'others'">
-        <div class="row alipay">
-          <p>Alipay: </p>
-          <img 
-              src="@/images/Alipay.jpg"
-              alt="Alipay_Code"
-              style="height: 100px; width: 120px;"
-          /> 
-        </div>
+      <div class="row alipay">
+        <p>Alipay: </p>
+        <img src="@/images/Alipay.jpg" alt="Alipay_Code" style="height: 100px; width: 120px;" />
+      </div>
 
-        <div class="row payme">
-          <p>Payme: </p>
-          <img 
-              src="@/images/Payme.jpg"
-              :alt="Payme_Code"
-              style="height: 100px; width: 120px;"
-          /> 
-        </div>
+      <div class="row payme">
+        <p>Payme: </p>
+        <img src="@/images/Payme.jpg" :alt="Payme_Code" style="height: 100px; width: 120px;" />
+      </div>
 
-        <div class="row bankDeposit">
-          <p>Bank Deposit: </p>
-          <p>HSBC: 1234567890</p>
-          <p>Bank of China: 2345678901</p>
-        </div>
+      <div class="row bankDeposit">
+        <p>Bank Deposit: </p>
+        <p>HSBC: 1234567890</p>
+        <p>Bank of China: 2345678901</p>
+      </div>
     </div>
 
-    
-    
+
+
 
     <div v-if="paymentMethod === 'paypal'" class="paypal-info">
       <div v-if="paypalLoaded">
@@ -621,8 +636,16 @@ h2 {
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 </style>

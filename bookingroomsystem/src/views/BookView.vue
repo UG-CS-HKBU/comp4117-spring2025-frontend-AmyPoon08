@@ -140,6 +140,7 @@ const toggleTimeSlot = (time) => {
     }
 
     const index = selectedTimeSlots.value.indexOf(time);
+    
     if (index === -1) {
         // Adding a new slot
         if (selectedTimeSlots.value.length === 0) {
@@ -261,106 +262,6 @@ const bookRoom = async () => {
         alert(error.message);
     }
 };
-
-// const bookRoom = async () => {
-//   try {
-//     if (!userDetails.value._id) {
-//         await fetchUserDetails();
-//     }
-
-//     const token = localStorage.getItem('token');
-//     if (!token) {
-//       throw new Error('No token found. Please log in.');
-//     }
-
-//     if (!userDetails.value._id) {
-//       throw new Error('User ID not available');
-//     }
-
-//     const participant = ref();
-
-//     if (!isValidBooking.value) {
-//         alert('Please select at least one timeslot and enter a valid number of participants.');
-//         return;
-//     }
-
-
-//     const bookingData = {
-//         roomId: room.value._id,
-//         roomName: room.value.name,
-//         roomNumber: room.value.room_number,
-//         date: selectedDate.value,
-//         timeslots: selectedTimeSlots.value,
-//         participant: participant.value,
-//         totalPrice: calculateTotal(),
-//         userId: userDetails.value._id,
-//         username: userDetails.value.username,
-//         userContact: userDetails.value.mobile,
-//         userEmail: userDetails.value.email,
-//         status: 'pending payment',
-//         paymentProof: null,
-//         createdAt: new Date()
-//     };
-
-//     // if (!isValidBooking.value) {
-//     //     alert('Please select at least one timeslot and enter a valid number of participants.');
-//     //     return;
-//     // }
-
-//     console.log('Sending booking data:', bookingData);
-
-//      // Initiate booking with pending payment status
-//      const response = await fetch('/api/bookings/initiate', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${token}`
-//       },
-//       body: JSON.stringify(bookingData)
-//     });
-
-//     // const response = await fetch('/api/bookings/create', {
-//     //   method: 'POST',
-//     //   headers: {
-//     //     'Content-Type': 'application/json',
-//     //     'Authorization': `Bearer ${token}`
-//     //   },
-//     //   body: JSON.stringify(bookingData)
-//     // });
-
-//     if (!response.ok) {
-//       const errorData = await response.json();
-//       console.error('Server error response:', errorData);
-//       throw new Error(errorData.message || 'Failed to book room');
-//     }
-
-//     const { bookingId } = await response.json();
-
-//     // Store booking details in localStorage with the bookingId
-//     localStorage.setItem(`pending_booking_${bookingId}`, JSON.stringify({
-//       ...bookingData,
-//       bookingId: bookingId
-//     }));
-
-//     // Set the timer for this booking
-//     localStorage.setItem(`booking_timer_${bookingId}`, Date.now().toString());
-
-
-//     // const data = await response.json();
-//     // console.log('Room booked successfully:', data);
-//     // // Save the booking data to localStorage instead of submitting it
-//     // localStorage.setItem('pendingBookingDetails', JSON.stringify(bookingData));
-    
-    
-//     // Redirect to payment page
-//     router.push(`/payment?bookingId=${bookingId}`);
-//     // router.push('/payment');
-
-//   } catch (error) {
-//     console.error('Error preparing booking:', error);
-//     alert(error.message);
-//   }
-// };
 
 const availableTimeSlots = ref({});
 
