@@ -135,7 +135,7 @@ main {
     height: 100vh;
 }
 .card {
-    width: 50%;
+    width: 30%;
     background-color: rgba(255, 255, 255, 0.8);
     margin: 0 auto;
 }
