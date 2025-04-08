@@ -96,11 +96,11 @@
       <form v-if="isEditing" @submit.prevent="saveProfile" class="profile-form">
         <div class="form-group">
           <label for="company">Company:</label>
-          <input id="company" v-model="profile.company" class="form-control" />
+          <input id="company" style="background-color: #f9f9f9; color: #777;" v-model="profile.company" class="form-control" readonly/>
         </div>
         <div class="form-group">
           <label for="username">Username:</label>
-          <input id="username" v-model="profile.username" class="form-control" />
+          <input id="username" style="background-color: #f9f9f9; color: #777;" v-model="profile.username" class="form-control" readonly/>
         </div>
         <div class="form-group">
           <label for="email">Email:</label>
@@ -112,7 +112,7 @@
         </div>
         <div class="form-group">
           <label for="department">Department:</label>
-          <input id="department" v-model="profile.department" class="form-control" />
+          <input id="department" style="background-color: #f9f9f9; color: #777;" v-model="profile.department" class="form-control" readonly/>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-save">Save Changes</button>
