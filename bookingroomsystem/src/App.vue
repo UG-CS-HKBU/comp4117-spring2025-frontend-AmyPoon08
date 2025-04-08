@@ -122,29 +122,6 @@ onMounted(() => {
 });
 </script>
 
-<!-- <template>
-    <nav  v-if="isAuthenticated" class="menubar">
-        <div class="left">
-            <a href="/home" @click="goToHome">Room Booking System</a>
-        </div>
-        <div class="right">
-            <span>{{ userName.username }}</span> 
-            <br>
-            <div class="dropdown">
-                <button class="dropbtn"><span>&#9776;</span></button>
-                <div class="dropdown-content">
-                    <a href="/profile">Profile</a>
-                    <a href="/Bookings">Bookings</a>
-                    <a href="/BookingRecord">Booking Record</a>
-                    <a href="/AboutUs">About us</a>
-                    <a href="#" @click="logout">Logout</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <RouterView />
-</template> -->
-
 <!-- Users nav bar -->
 <template>
     <div class="page-container">
