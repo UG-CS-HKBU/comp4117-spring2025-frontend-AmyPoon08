@@ -1,6 +1,6 @@
 <template>
   <div class="carousel-container">
-    <h2 class="carousel-title">Top 3 Most popular Rooms</h2>
+    <h2 class="carousel-title">The Most popular Rooms</h2>
 
     <div class="rooms-grid">
       <div v-for="room in topRooms" :key="room._id" class="room-item">
@@ -15,7 +15,7 @@
           <p>Total Bookings: {{ room.bookingCount }}</p>
           <div class="buttons">
             <button @click="viewDetails(room)">More Details</button>
-            <button @click="bookRoom(room)">Book Now</button>
+            <button v-if="!isAdmin" @click="bookRoom(room)">Book Now</button>
           </div>
         </div>
       </div>
@@ -30,10 +30,12 @@ export default {
   data() {
     return {
       topRooms: [],
+      isAdmin: false,
     };
   },
   mounted() {
     this.fetchTopRooms();
+    this.checkAdminStatus();
   },
   methods: {
     async fetchTopRooms() {
@@ -42,6 +44,25 @@ export default {
         this.topRooms = res.data;
       } catch (err) {
         console.error('Failed to load top rooms:', err);
+      }
+    },
+    async checkAdminStatus() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found');
+        }
+        
+        const res = await axios.get('/api/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        this.isAdmin = localStorage.getItem('admin') === 'on';
+      } catch (err) {
+        console.error('Failed to check admin status:', err);
+        this.isAdmin = false;
       }
     },
     viewDetails(room) {

@@ -103,6 +103,7 @@ onMounted(() => {
                 
                 <div class="room-actions">
                     <Button 
+                        v-if="!isAdmin"
                         type="button" 
                         label="Book Now" 
                         class="p-button-raised p-button-primary book-button" 
