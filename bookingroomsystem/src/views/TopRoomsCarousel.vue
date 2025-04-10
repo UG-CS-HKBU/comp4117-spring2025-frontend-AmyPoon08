@@ -40,8 +40,10 @@ export default {
   methods: {
     async fetchTopRooms() {
       try {
+        // const res = await axios.get('/api/rooms');
+        // this.topRooms = res.data.topRooms;
         const res = await axios.get('/api/rooms/top');
-        this.topRooms = res.data;
+        this.topRooms = res.data.topRooms;
       } catch (err) {
         console.error('Failed to load top rooms:', err);
       }
@@ -68,10 +70,12 @@ export default {
     viewDetails(room) {
       // Navigate to RoomDetails page with room ID as a parameter
       this.$router.push({ name: 'RoomDetails', params: { id: room.roomDetails._id } });
+      console.log('Viewing details for room:', room.roomDetails._id);
     },
     bookRoom(room) {
       // Navigate to BookRoom page with room ID as a parameter
       this.$router.push({ name: 'RoomBooking', params: { id: room.roomDetails._id } });
+      console.log('Booking room:', room.roomDetails._id);
     }
   },
 };
