@@ -78,11 +78,12 @@ export default {
 
         const categoryOptions = ref([
             { label: 'Select All', value: 'select_all', checked: false },
-            { label: 'Room 1', value: 'Room 1', checked: false },
-            { label: 'Room 2', value: 'Room 2', checked: false },
-            { label: 'Room 3', value: 'Room 3', checked: false },
-            { label: 'Room 4', value: 'Room 4', checked: false },
-            { label: 'Room 5', value: 'Room 5', checked: false },
+            { label: 'Meeting room', value: 'Meeting room', checked: false },
+            { label: 'Conference room', value: 'Conference room', checked: false },
+            { label: 'Meeting room II', value: 'Meeting room II', checked: false },
+            { label: 'Conference Room II', value: 'Conference Room II', checked: false },
+            { label: 'Multimedia Room', value: 'Multimedia Room', checked: false },
+            { label: 'Meeting room III', value: 'Meeting room III', checked: false },
         ]);
 
         const capacityOptions = ref([
