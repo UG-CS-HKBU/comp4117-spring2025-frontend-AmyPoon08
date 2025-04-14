@@ -166,16 +166,16 @@ onMounted(() => {
         <footer class="footer">
             <div class="row">
                 <div class="col-6 col-md-4">
-                    <img style="width: 80%; max-width: 200px;" class="company-image" src="@/images/AboutUs.jpg" alt="Company Image" />
+                    <img style="width: 60%; max-width: 200px;" class="company-image" src="@/images/AboutUs.jpg" alt="Company Image" />
                 </div>
-                <div class="col-6 col-md-4">
+                <div class="col-6 col-md-4"> 
                     <nav v-if="isAuthenticated" class="grid grid-flow-col gap-4 justify-center">
                         <a href="/AboutUs" class="text-white"> About us</a>
                         <a href="/bookings" class="text-white"> Bookings</a>
-                        <!-- <a class="link link-hover text-white">Contact</a> -->
                     </nav>
+                   
   
-                        <div style="min-height: 50px; padding-top: 50px;">
+                        <div style="min-height: 30px; padding-top: 50px;">
                             <a>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     class="fill-current text-white">
@@ -201,6 +201,11 @@ onMounted(() => {
                                 </svg>
                             </a>
                         </div>
+                        
+
+                        <aside>
+                            <p>Room Booking System © 2025 - Comp4117 Group C Project</p>
+                        </aside>
           
                 </div>
 
@@ -223,10 +228,6 @@ onMounted(() => {
                     </nav>
                 </div>
             </div>
-
-            <aside>
-                <p>Room Booking System © 2025 - Comp4117 Group C Project</p>
-            </aside>
         </footer>
     </div>
 </template>
