@@ -49,9 +49,10 @@ const login = async () => {
         if (response.status === 204 || response.headers.get('Content-Length') === '0') {
           console.warn('Empty response from server');
           localStorage.setItem('token', ''); 
+          console.log(localStorage.getItem('token'))
           isAuthenticated.value = true;
-          //router.push('/home');
-          window.location.href = '/home';
+          router.push('/home');
+        //   window.location.href = '/home';
           return;
         }
     
@@ -77,8 +78,8 @@ const login = async () => {
         localStorage.setItem('admin', data.admin);
 
         isAuthenticated.value = true;
-        //router.push('/home');
-        window.location.href = '/home';
+        router.push('/home');
+        // window.location.href = '/home';
     } catch (error) {
         if (!errorMessage.value) {
             errorMessage.value = 'An unexpected error occurred'; // Fallback error message
