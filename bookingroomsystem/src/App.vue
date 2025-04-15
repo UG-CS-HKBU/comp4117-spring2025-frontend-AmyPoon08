@@ -132,7 +132,7 @@ onMounted(() => {
                 </a>
             </div>
             <div class="right">
-                <span>{{ userName.username }}</span>
+                <span>Welcome, {{ userName.username }}</span>
                 <a href="/bookings">Bookings</a>
                 <a href="/myBookings">My Bookings</a>
                 <a href="/profile">Profile</a>
@@ -147,7 +147,7 @@ onMounted(() => {
                     <span>&#127968;</span>Room Booking System</a>
             </div>
             <div class="right">
-                <span>{{ userName.username }}</span>
+                <span>Welcome, {{ userName.username }}</span>
                 <a href="/rooms">Room Information</a>
                 <a href="/users">User Information</a>
                 <!-- <a href="/bookings">Bookings</a>
@@ -262,6 +262,12 @@ onMounted(() => {
     align-items: center;
     gap: 20px;
     /* Adds space between items */
+}
+
+.right span {
+    margin-right: 40px; /* Add more gap between username and routes */
+    font-weight: bold;
+    color: white;
 }
 
 .right a {
