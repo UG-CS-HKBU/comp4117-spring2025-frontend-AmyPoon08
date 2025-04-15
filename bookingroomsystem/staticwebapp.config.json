@@ -8,7 +8,7 @@
     "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://<your-backend-app-service-name>.azurewebsites.net/api/*"
+      "rewrite": "https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/*"
     }
   ]
 }
