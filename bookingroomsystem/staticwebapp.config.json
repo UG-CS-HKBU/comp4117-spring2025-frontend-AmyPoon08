@@ -4,5 +4,11 @@
     },
     "mimeTypes": {
         ".json": "text/json"
+    },
+    "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://<your-backend-app-service-name>.azurewebsites.net/api/*"
     }
+  ]
 }
