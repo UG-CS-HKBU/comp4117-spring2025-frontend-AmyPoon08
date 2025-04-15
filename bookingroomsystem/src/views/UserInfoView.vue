@@ -141,6 +141,7 @@ onMounted(() => {
                             type="button" 
                             label="Clear Filters" 
                             class="p-button-outlined"
+                            id="clear-filter-btn"
                             @click="clearFilter()"
                         />
                     </div>
@@ -148,6 +149,7 @@ onMounted(() => {
                         <Button 
                             type="button" 
                             label="Add New User" 
+                            
                             class="p-button-primary"
                             icon="pi pi-plus"
                             @click="$router.push('/createUser')"
@@ -228,7 +230,7 @@ onMounted(() => {
                     <div class="flex gap-4 justify-between">
                         <router-link 
                             :to="`/userdetails/${slotProps.data._id}`" 
-                            class="p-button p-button-primary p-button-sm mr-2"
+                            class="p-button p-button-primary p-button-sm mr-5"
                         >
                             View
                         </router-link>
@@ -373,18 +375,18 @@ onMounted(() => {
 }
 
 :deep(.p-button-primary) {
-    background-color: #4CAF50;
-    color: #000000;
-    border-color: #45a049;
+    background-color: #00a316;
+    color: #ffffff;
+    border-color: #00a316;
     white-space: nowrap;
     min-width: fit-content;
     padding: 0.5rem 1rem;
 }
 
 :deep(.p-button-primary:hover) {
-    background-color: #2E7D32;
+    background-color: #90ff96;
     color: #000000;
-    border-color: #1B5E20;
+    border-color: #90ff96;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
 }
@@ -394,35 +396,38 @@ onMounted(() => {
 }
 
 :deep(.p-button-primary.p-button-sm) {
-    background-color: #3498db;
-    border-color: #2980b9;
-    color: black;
+    background-color: #3f65ff;
+    border-color: #3f65ff;
+    color: rgb(255, 255, 255);
     text-decoration: none;
     padding: 0.4rem 0.8rem;
+    margin-right: 3px;
 }
 
-:deep(.p-button-primary.p-button-sm:hover) {
-    background-color: #2980b9;
-    border-color: #2980b9;
+/* :deep(.p-button-primary.p-button-sm:hover) {
+    background-color: #9ed8ff;
+    border-color: #9ed8ff;
+    color:#000000;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
-}
+} */
 
 :deep(.p-button-primary.p-button-sm:focus) {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
 :deep(.p-button-danger.p-button-sm) {
-    background-color: #dc3545;
-    border-color: #bd2130;
-    color: black;
+    background-color: #ff4e4e;
+    border-color: #ff4e4e;
+    color: rgb(255, 255, 255);
     text-decoration: none;
     padding: 0.4rem 0.8rem;
 }
 
 :deep(.p-button-danger.p-button-sm:hover) {
-    background-color: #c82333;
-    border-color: #bd2130;
+    background-color: #ffafb7;
+    border-color: #ffafb7;
+    color:#000000;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
@@ -432,24 +437,26 @@ onMounted(() => {
 }
 
 :deep(.p-button-outlined) {
-    background-color: #4CAF50;
-    color: #000000;
-    border-color: #45a049;
+    /* Change initial state */
+    background-color: transparent !important; 
+    color: #346bf6 !important;
+    border-color: #346bf6 !important;
     white-space: nowrap;
     min-width: fit-content;
     padding: 0.5rem 1rem;
 }
 
 :deep(.p-button-outlined:hover) {
-    background-color: #2E7D32;
-    color: #000000;
-    border-color: #1B5E20;
+    /* Change hover state */
+    background-color: #346bf6 !important;
+    color: #ffffff !important;
+    border-color: #346bf6 !important;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 2px 4px rgba(52, 107, 246, 0.2);
 }
 
 :deep(.p-button-outlined:focus) {
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 0 0 2px rgba(52, 107, 246, 0.2);
 }
 
 :deep(.p-inputtext) {
@@ -497,8 +504,8 @@ onMounted(() => {
 }
 
 :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
-    background-color: #4CAF50;
-    color: #000000;
+    background-color: #2942ff;
+    color: #ffffff;
 }
 
 :deep(.p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover) {
@@ -555,4 +562,6 @@ onMounted(() => {
     background-color: #c82333;
     border-color: #bd2130;
 }
+
+
 </style>

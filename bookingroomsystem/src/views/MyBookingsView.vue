@@ -15,7 +15,8 @@ const loading = ref(false);
 const statuses = [
     'pending payment',
     'pending approval',
-    'confirmed'
+    'confirmed',
+    'expired'
 ];
 
 // Initialize filters
@@ -91,6 +92,8 @@ const getStatusSeverity = (status) => {
             return 'warn';
         case 'confirmed':
             return 'success';
+        case 'expired':
+            return 'contrast';
         default:
             return null;
     }
@@ -100,20 +103,13 @@ const getStatusSeverity = (status) => {
 const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
         case 'pending payment':
-            return {
-                backgroundColor: '#B71C1C', // Darker red color for pending payment
-                color: '#ffffff'
-            };
+            return 'danger';
         case 'pending approval':
-            return {
-                backgroundColor: '#FFA000', // Darker yellow color for pending approval
-                color: '#ffffff'
-            };
+            return 'warn'
         case 'confirmed':
-            return {
-                backgroundColor: '#1B5E20', // Dark green color for confirmed
-                color: '#ffffff'
-            };
+            return 'success';
+        case 'expired':
+            return 'contrast';
         default:
             return {};
     }
@@ -375,6 +371,9 @@ onMounted(() => {
     background-color: #f8f9fa !important;
 }
 
+
+
+
 :deep(.p-button) {
     border-radius: 6px;
     padding: 0.5rem 1rem;
@@ -403,16 +402,16 @@ onMounted(() => {
 }
 
 :deep(.p-button-primary.p-button-sm) {
-    background-color: #3498db;
-    border-color: #2980b9;
-    color: black;
+    background-color: #bfe5ff;
+    border-color: #8dd2ff;
+    color: rgb(18, 0, 214);
     text-decoration: none;
     padding: 0.4rem 0.8rem;
 }
 
 :deep(.p-button-primary.p-button-sm:hover) {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background-color: #40aaf0;
+    border-color: #40aaf0;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
@@ -441,6 +440,9 @@ onMounted(() => {
 :deep(.p-button-outlined:focus) {
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
+
+
+
 
 :deep(.p-inputtext) {
     border-radius: 6px;

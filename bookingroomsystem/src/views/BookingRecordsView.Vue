@@ -95,23 +95,36 @@ const getStatusSeverity = (status) => {
     }
 };
 
+// const getStatusStyle = (status) => {
+//     switch (status?.toLowerCase()) {
+//         case 'pending payment':
+//             return {
+//                 backgroundColor: '#B71C1C', // Darker red color for pending payment
+//                 color: '#ffffff'
+//             };
+//         case 'pending approval':
+//             return {
+//                 backgroundColor: '#FFA000', // Darker yellow color for pending approval
+//                 color: '#ffffff'
+//             };
+//         case 'confirmed':
+//             return {
+//                 backgroundColor: '#1B5E20', // Dark green color for confirmed
+//                 color: '#ffffff'
+//             };
+//         default:
+//             return {};
+//     }
+// };
+
 const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
         case 'pending payment':
-            return {
-                backgroundColor: '#B71C1C', // Darker red color for pending payment
-                color: '#ffffff'
-            };
+            return 'danger';
         case 'pending approval':
-            return {
-                backgroundColor: '#FFA000', // Darker yellow color for pending approval
-                color: '#ffffff'
-            };
+            return 'warn'
         case 'confirmed':
-            return {
-                backgroundColor: '#1B5E20', // Dark green color for confirmed
-                color: '#ffffff'
-            };
+            return 'success';
         default:
             return {};
     }
@@ -415,16 +428,16 @@ onMounted(() => {
 }
 
 :deep(.p-button-primary.p-button-sm) {
-    background-color: #3498db;
-    border-color: #2980b9;
-    color: black;
+    background-color: #bfe5ff;
+    border-color: #bfe5ff;
+    color: rgb(18, 0, 214);
     text-decoration: none;
     padding: 0.4rem 0.8rem;
 }
 
 :deep(.p-button-primary.p-button-sm:hover) {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background-color: #40aaf0;
+    border-color: #40aaf0;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
