@@ -4,7 +4,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
+// import Calendar from 'primevue/calendar';
 import Tag from 'primevue/tag';
 import Select from 'primevue/select';
 
@@ -24,7 +24,7 @@ const filters = ref({
     global: { value: null, matchMode: 'contains' },
     bookingId: { value: null, matchMode: 'contains' },
     roomName: { value: null, matchMode: 'contains' },
-    date: { value: null, matchMode: 'dateIs' },
+    date: { value: null, matchMode: 'equals' },
     status: { value: null, matchMode: 'equals' }
 });
 
@@ -201,42 +201,42 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ data.bookingId }}
                 </template>
-                <template #filter="{ filterModel }">
+                <!-- <template #filter="{ filterModel }">
                     <InputText 
                         v-model="filterModel.value" 
                         type="text" 
                         class="p-2 w-full" 
                         placeholder="Search booking ID"
                     />
-                </template>
+                </template> -->
             </Column>
 
             <Column field="roomName" header="Room" sortable style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ data.roomName }}
                 </template>
-                <template #filter="{ filterModel }">
+                <!-- <template #filter="{ filterModel }">
                     <InputText 
                         v-model="filterModel.value" 
                         type="text" 
                         class="p-2 w-full" 
                         placeholder="Search room"
                     />
-                </template>
+                </template> -->
             </Column>
 
             <Column field="date" header="Date" sortable dataType="date" style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ formatDate(data.date) }}
                 </template>
-                <template #filter="{ filterModel }">
+                <!-- <template #filter="{ filterModel }">
                     <Calendar 
                         v-model="filterModel.value" 
-                        dateFormat="dd/mm/yy" 
+                        dateFormat="yy-mm-dd" 
                         placeholder="Select date" 
                         class="p-2 w-full"
                     />
-                </template>
+                </template> -->
             </Column>
 
             <Column field="timeslots" header="Start Time" style="min-width: 10rem">

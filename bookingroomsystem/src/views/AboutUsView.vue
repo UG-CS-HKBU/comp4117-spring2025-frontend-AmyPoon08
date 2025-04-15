@@ -1,47 +1,41 @@
 <template>
   <div class="about-us">
-    <h1>About Us</h1>
+    <h1>KUJU</h1>
+    <p>
+      Empowering Life's Defining Moments
+    </p>
     <div class="content">
       <div class="text-content">
+        <h2>Our Philosophy</h2>
         <p>
-          Welcome to our booking room system. We are dedicated to providing the
-          best service for booking rooms efficiently and effectively.
+          In Ancient Greece, there were two different concepts of time: “Chronos” is the quantitative measure of time, i.e., the time we see on a clock; and “Kairos” is the qualitative concept of time – a time to be present, a defining moment, a time to take action – just like the ideal moment an archer shoots an arrow at his target.
         </p>
-        <section class="company-info">
-          <h2>Our Company</h2>
-          <p>
-            Founded in 2025, our company has been at the forefront of providing
-            top-notch room booking services. Our mission is to make booking
-            rooms as seamless and convenient as possible.
-          </p>
-          <h3>Our Values</h3>
-          <ul>
-            <li>Customer Satisfaction</li>
-            <li>Innovation</li>
-            <li>Integrity</li>
-            <li>Teamwork</li>
-          </ul>
-          <h3>Our Vision</h3>
-          <p>
-            We envision a world where booking rooms is effortless, allowing
-            individuals and businesses to focus on what truly matters. Our
-            platform is designed to adapt to the evolving needs of our users.
-          </p>
-          <h3>Our Commitment</h3>
-          <p>
-            We are committed to continuous improvement, ensuring that our
-            services remain reliable, user-friendly, and accessible to everyone.
-            Your satisfaction is our priority.
-          </p>
-        </section>
+        <p>
+          Technology should aim to improve the lives of its users, not simply by giving them more time and efficiency, but by empowering them to live their best lives in each opportune moment and share that with those they love. This is the value and essence we want to convey to our customers.
+        </p>
       </div>
       <div class="image-container">
         <img
           class="company-image"
-          src="@/images/AboutUs.jpeg"
+          src="@/images/AboutUs.jpg"
           alt="Company Image"
         />
       </div>
+    </div>
+    <div class="text-content">
+      <h2>Contact Us</h2>
+      <p>
+        <strong>HK Headquarter</strong><br />
+        Unit 219, 2/F,<br />
+        16 Science Park West Avenue,<br />
+        Shatin, New Territories,<br />
+        Hong Kong
+      </p>
+      <p>
+        <strong>TRONICO TECHNOLOGY CO. LTD.</strong><br />
+        Phone: (852) 9667 7650<br />
+        Email: <a href="mailto:kuju@tronico.com.hk">kuju@tronico.com.hk</a>
+      </p>
     </div>
   </div>
 </template>
@@ -60,51 +54,40 @@
   color: #333;
 }
 
+.about-us h2 {
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  color: #444;
+}
+
 .content {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 30px;
   margin-top: 20px;
-  text-align: left;
 }
 
 .text-content {
   flex: 1;
   min-width: 300px;
+  text-align: justify;
 }
 
 .text-content p {
   font-size: 1.2em;
-  line-height: 1.6;
+  line-height: 1.8;
   color: #555;
-}
-
-.company-info {
-  margin-top: 30px;
-}
-
-.company-info h2 {
-  font-size: 2em;
   margin-bottom: 15px;
-  color: #444;
 }
 
-.company-info h3 {
-  font-size: 1.6em;
-  margin-top: 20px;
-  color: #555;
+.text-content a {
+  color: #007BFF;
+  text-decoration: none;
 }
 
-.company-info ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-.company-info li {
-  font-size: 1.2em;
-  margin-bottom: 10px;
-  color: #666;
+.text-content a:hover {
+  text-decoration: underline;
 }
 
 .image-container {
@@ -117,7 +100,8 @@
 
 .company-image {
   width: 100%;
-  height: 100%;
+  max-width: 500px;
+  height: auto;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
