@@ -34,7 +34,7 @@ const login = async () => {
         errorMessage.value = '';
 
         // fetch
-        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
