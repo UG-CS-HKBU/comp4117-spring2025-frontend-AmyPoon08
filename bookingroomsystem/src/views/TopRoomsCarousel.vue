@@ -53,7 +53,7 @@ export default {
           throw new Error('No token found');
         }
         
-        const res = await axios.get('/api/profile', {
+        const res = await axios.get('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
