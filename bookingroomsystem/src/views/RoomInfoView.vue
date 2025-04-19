@@ -164,7 +164,7 @@ onMounted(() => {
                     </div>
                     <div class="right-controls">
                         <Button 
-                            type="button" 
+                            type="button add-btn" 
                             label="Add New Room" 
                             class="p-button-primary"
                             icon="pi pi-plus"
@@ -245,7 +245,7 @@ onMounted(() => {
                     <div class="flex gap-4 justify-between">
                         <router-link 
                             :to="`/roomdetails/${slotProps.data._id}`" 
-                            class="p-button p-button-primary p-button-sm mr-2"
+                            class="p-button p-button-primary p-button-sm mr-5 view-btn"
                         >
                             View
                         </router-link>
@@ -410,22 +410,27 @@ onMounted(() => {
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-:deep(.p-button-primary.p-button-sm) {
-    background-color: #3f65ff;
-    border-color: #3f65ff;
-    color: rgb(255, 255, 255);
+/* Specific style for View button */
+:deep(.view-btn) {
+    background-color: #3f65ff !important;
+    border-color: #3f65ff !important;
+    color: rgb(255, 255, 255) !important;
     text-decoration: none;
     padding: 0.4rem 0.8rem;
     margin-right: 3px;
 }
 
-/* :deep(.p-button-primary.p-button-sm:hover) {
-    background-color: #9ed8ff;
-    border-color: #9ed8ff;
-    color:#000000;
+:deep(.view-btn:hover) {
+    background-color: #9ed8ff !important;
+    border-color: #9ed8ff !important;
+    color: #000000 !important;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
-} */
+}
+
+:deep(.view-btn:focus) {
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
 
 :deep(.p-button-primary.p-button-sm:focus) {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);

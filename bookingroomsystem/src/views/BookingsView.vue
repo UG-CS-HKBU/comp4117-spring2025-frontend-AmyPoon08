@@ -685,11 +685,11 @@ export default {
 }
 
 .bookings-view {
-    padding-bottom: 120px; /* Add significant padding at the bottom */
+    padding-bottom: 120px; 
 }
 
 .footer-spacer {
-    height: 80px; /* Creates extra space at the bottom */
+    height: 80px; 
     width: 100%;
 }
 
@@ -741,7 +741,7 @@ nav[aria-label="Page navigation"] {
     border-color: #dee2e6;
 }
 
-/* Filter row styling */
+
 .filter-row {
     display: flex;
     flex-wrap: wrap;
@@ -749,7 +749,7 @@ nav[aria-label="Page navigation"] {
     margin-bottom: 15px;
 }
 
-/* Filter item styling */
+
 .filter-item {
     flex: 1;
     min-width: 180px;
@@ -762,7 +762,7 @@ nav[aria-label="Page navigation"] {
     font-weight: 500;
 }
 
-/* Button styling */
+
 .filter-dropdown {
     position: relative;
 }
@@ -773,7 +773,7 @@ nav[aria-label="Page navigation"] {
     position: relative;
 }
 
-/* Badge styling */
+
 .filter-badge {
     position: absolute;
     top: -8px;
@@ -789,7 +789,7 @@ nav[aria-label="Page navigation"] {
     z-index: 2;
 }
 
-/* Dropdown menu styling */
+
 .dropdown-menu {
     width: 100%;
     z-index: 1030;
@@ -804,7 +804,7 @@ nav[aria-label="Page navigation"] {
     background-color: #f8f9fa;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 992px) {
     .filter-row {
         gap: 10px;
@@ -824,4 +824,24 @@ nav[aria-label="Page navigation"] {
         width: 100%;
     }
 }
+
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

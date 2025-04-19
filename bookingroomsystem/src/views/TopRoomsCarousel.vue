@@ -14,8 +14,8 @@
           <p class="price">Price: {{ room.roomDetails.price }}</p>
           <p>Total Bookings: {{ room.bookingCount }}</p>
           <div class="buttons">
-            <button @click="viewDetails(room)">More Details</button>
-            <button v-if="!isAdmin" @click="bookRoom(room)">Book Now</button>
+            <button class="details-btn" @click="viewDetails(room)">More Details</button>
+            <button v-if="!isAdmin" class="book-btn" @click="bookRoom(room)">Book Now</button>
           </div>
         </div>
       </div>
@@ -40,8 +40,6 @@ export default {
   methods: {
     async fetchTopRooms() {
       try {
-        // const res = await axios.get('/api/rooms');
-        // this.topRooms = res.data.topRooms;
         const res = await axios.get('/api/rooms/top');
         this.topRooms = res.data.topRooms;
       } catch (err) {
@@ -93,6 +91,7 @@ export default {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 30px;
+  color: #333;
 }
 
 .rooms-grid {
@@ -109,6 +108,12 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.room-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 .room-image {
@@ -127,11 +132,14 @@ export default {
 
 .room-info h3 {
   margin-top: 0;
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .price {
   font-weight: bold;
   margin: 0.5rem 0;
+  color: #444;
 }
 
 .buttons {
@@ -146,14 +154,125 @@ button {
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 6px;
-  background-color: #007bff;
-  color: #fff;
   cursor: pointer;
   font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.details-btn {
+  background-color: #3f65ff;
+  color: #fff;
+}
+
+.details-btn:hover {
+  background-color: #254EDB;
+}
+
+.book-btn {
+  background-color: #00a316;
+  color: #fff;
+}
+
+.book-btn:hover {
+  background-color: #008512;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .carousel-container {
+    padding: 15px;
+  }
+  
+  .carousel-title {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+  }
+  
+  .room-image {
+    height: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .carousel-title {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+  }
+  
+  .room-info h3 {
+    font-size: 1.1rem;
+  }
+  
+  .buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .carousel-title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+  
+  .room-item {
+    padding: 0.8rem;
+  }
+  
+  .room-image {
+    height: 160px;
+  }
+  
+  .room-info {
+    margin-top: 0.7rem;
+  }
+  
+  .room-info h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .price, .room-info p {
+    font-size: 0.9rem;
+    margin: 0.3rem 0;
+  }
+  
+  .buttons {
+    padding-top: 0.7rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .carousel-container {
+    padding: 10px;
+  }
+  
+  .room-image {
+    height: 140px;
+  }
+  
+  button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
 }
 </style>
-  

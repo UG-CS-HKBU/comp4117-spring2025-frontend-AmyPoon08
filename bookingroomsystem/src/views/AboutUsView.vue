@@ -41,6 +41,7 @@
 </template>
 
 <style scoped>
+
 .about-us {
   padding: 20px;
   max-width: 1200px;

@@ -50,8 +50,6 @@ const logout = async () => {
     }
 };
 
-
-
 const fetchIsAdmin = async () => {
     try {
         isAdmin.value = localStorage.getItem('admin') === 'on';
@@ -137,55 +135,87 @@ onMounted(() => {
 });
 </script>
 
-<!-- Users nav bar -->
 <template>
     <div class="page-container">
+        <!-- Users nav bar -->
         <nav v-if="isAuthenticated && !isAdmin && !isLoading" class="menubar">
-            <div class="left">
-                <a href="/home">
-                    <span>&#127968;</span> Room Booking System
+            <!-- Left side with logo and navigation -->
+            <div class="nav-left">
+                <a href="/home" class="logo-link">
+                    <img src="./images/icon.png" alt="KOJU by tronico" class="nav-logo" />
                 </a>
+                <!-- Navigation links on left -->
+                <div class="nav-links">
+                    <a href="/bookings">Bookings</a>
+                    <a href="/myBookings">My Bookings</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/AboutUs">About us</a>
+                </div>
             </div>
-            <div class="welcome-mobile">
-                <span>Welcome, {{ userName.username }}</span>
+            
+            <!-- Right side with welcome and logout -->
+            <div class="nav-right">
+                <span class="welcome-text">Welcome, {{ userName.username }}</span>
+                <a href="#" class="logout-btn" @click="logout">Logout</a>
             </div>
+            
+            <!-- Mobile menu button -->
             <div class="hamburger" @click="toggleMenu">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-            <div class="right" :class="{ 'open': menuOpen }">
-                <span class="welcome-desktop">Welcome, {{ userName.username }}</span>
+            
+            <!-- Mobile menu -->
+            <div class="mobile-menu" :class="{ 'open': menuOpen }">
+                <div class="welcome-mobile">Welcome, {{ userName.username }}</div>
                 <a href="/bookings" @click="menuOpen = false">Bookings</a>
                 <a href="/myBookings" @click="menuOpen = false">My Bookings</a>
                 <a href="/profile" @click="menuOpen = false">Profile</a>
                 <a href="/AboutUs" @click="menuOpen = false">About us</a>
-                <a href="#" @click="logout(); menuOpen = false">Logout</a>
+                <a href="#" @click="logout(); menuOpen = false" class="mobile-logout">Logout</a>
             </div>
         </nav>
         
-        <!-- admin nav bar -->
+        <!-- Admin nav bar -->
         <nav v-if="isAuthenticated && isAdmin && !isLoading" class="menubar">
-            <div class="left">
-                <a href="/home">
-                    <span>&#127968;</span>Room Booking System</a>
+            <!-- Left side with logo and navigation -->
+            <div class="nav-left">
+                <a href="/home" class="logo-link">
+                    <img src="./images/icon.png" alt="KOJU by tronico" class="nav-logo" />
+                </a>
+                <!-- Admin navigation links on left -->
+                <div class="nav-links">
+                    <a href="/rooms">Room Information</a>
+                    <a href="/users">User Information</a>
+                    <a href="/BookingRecords">Booking Record</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/AboutUs">About us</a>
+                </div>
             </div>
-            <div class="welcome-mobile">
-                <span>Welcome, {{ userName.username }}</span>
+            
+            <!-- Right side with welcome and logout -->
+            <div class="nav-right">
+                <span class="welcome-text">Welcome, {{ userName.username }}</span>
+                <a href="#" class="logout-btn" @click="logout">Logout</a>
             </div>
+            
+            <!-- Mobile menu button -->
             <div class="hamburger" @click="toggleMenu">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-            <div class="right" :class="{ 'open': menuOpen }">
-                <span class="welcome-desktop">Welcome, {{ userName.username }}</span>
+            
+            <!-- Mobile menu -->
+            <div class="mobile-menu" :class="{ 'open': menuOpen }">
+                <div class="welcome-mobile">Welcome, {{ userName.username }}</div>
                 <a href="/rooms" @click="menuOpen = false">Room Information</a>
                 <a href="/users" @click="menuOpen = false">User Information</a>
                 <a href="/BookingRecords" @click="menuOpen = false">Booking Record</a>
                 <a href="/profile" @click="menuOpen = false">Profile</a>
                 <a href="/AboutUs" @click="menuOpen = false">About us</a>
-                <a href="#" @click="logout(); menuOpen = false">Logout</a>
+                <a href="#" @click="logout(); menuOpen = false" class="mobile-logout">Logout</a>
             </div>
         </nav>
 
@@ -193,29 +223,53 @@ onMounted(() => {
             <RouterView />
         </div>
 
+        <!-- Compact Footer -->
         <footer class="app-footer">
             <div class="footer-content">
-                <div class="footer-top">
+                <!-- Mobile Footer -->
+                <div class="mobile-footer">
                     <div class="footer-logo">
-                        <img src="./images/AboutUs.jpg" alt="KOJU by tronico" class="logo-image" />
+                        <img src="./images/icon.png" alt="KOJU by tronico" class="logo-image" />
                     </div>
                     <div class="footer-links">
-                        <router-link to="/about">About us</router-link>
+                        <router-link to="/aboutUs">About us</router-link>
                         <router-link to="/bookings">Bookings</router-link>
+                    </div>
+                    <div class="copyright">
+                        Room Booking System © 2025
+                    </div>
+                    <div class="contact-mobile">
+                        <a href="mailto:koju@tronico.com.hk">koju@tronico.com.hk</a>
                     </div>
                 </div>
                 
-                <div class="footer-info">
-                    <div class="company-name">Room Booking System © 2025 - Comp4117 Group C Project</div>
-                    
-                    <div class="address-section">
-                        <h4>HK Headquarter</h4>
-                        <p>Unit 219, 2/F, 16 Science Park West Avenue,<br>Shatin, New Territories, Hong Kong</p>
+                <!-- Desktop Footer -->
+                <div class="desktop-footer">
+                    <div class="footer-left">
+                        <div class="footer-logo">
+                            <img src="./images/icon.png" alt="KOJU by tronico" class="logo-image" />
+                        </div>
+                        <div class="copyright">
+                            Room Booking System © 2025 - Comp4117 Group C Project
+                        </div>
                     </div>
                     
-                    <div class="contact-info">
-                        <p>TRONICO TECHNOLOGY CO. LTD. (852) 9667 7650</p>
-                        <p><a href="mailto:koju@tronico.com.hk">koju@tronico.com.hk</a></p>
+                    <div class="footer-middle">
+                        <div class="address-section">
+                            <h4>HK Headquarter</h4>
+                            <p>Unit 219, 2/F, 16 Science Park West Avenue, Shatin, HK</p>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-right">
+                        <div class="footer-links">
+                            <router-link to="/aboutUs">About us</router-link>
+                            <router-link to="/bookings">Bookings</router-link>
+                        </div>
+                        <div class="contact-info">
+                            <p>TRONICO TECHNOLOGY CO. LTD. (852) 9667 7650</p>
+                            <p><a href="mailto:koju@tronico.com.hk">koju@tronico.com.hk</a></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -224,37 +278,107 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Base container styles */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0; /* No margin as footer is now compact */
+}
+
+/* Navbar styles */
 .menubar {
     position: sticky;
-    height: 5rem;
     top: 0;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    height: 5rem; /* Fixed height as requested */
+    padding: 0 1.5rem;
     background-color: #333;
     color: white;
-    flex-wrap: wrap;
 }
 
-.left a {
+/* Left side of navbar with logo and navigation */
+.nav-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    flex: 1;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-right: 1.5rem;
+}
+
+.nav-logo {
+    height: 3.5rem;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    height: 100%;
+    align-items: center;
+}
+
+.nav-links a {
     color: white;
     text-decoration: none;
-    font-weight: bold;
-    font-size: 1.2em;
+    padding: 0 1rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s;
 }
 
-.welcome-mobile {
-    display: none;
+.nav-links a:hover {
+    background-color: #444;
+}
+
+/* Right side with welcome and logout */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+}
+
+.welcome-text {
     font-weight: bold;
     color: white;
 }
 
+.logout-btn {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile elements */
 .hamburger {
     display: none;
     flex-direction: column;
     cursor: pointer;
+    margin-left: 1rem;
 }
 
 .hamburger span {
@@ -266,89 +390,81 @@ onMounted(() => {
     border-radius: 2px;
 }
 
-.right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.right span.welcome-desktop {
-    margin-right: 40px;
+.welcome-mobile {
+    display: none;
+    padding: 1rem;
     font-weight: bold;
-    color: white;
+    background-color: #444;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.right a {
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 5rem; /* Match navbar height */
+    left: 0;
+    width: 100%;
+    height: 0;
+    background-color: #333;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    z-index: 999;
+    flex-direction: column;
+}
+
+.mobile-menu.open {
+    height: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu a {
+    padding: 1rem 1.5rem;
     color: white;
     text-decoration: none;
-    padding: 5px 10px;
-    transition: background-color 0.3s;
-    border-radius: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.right a:hover {
+.mobile-menu a:hover {
     background-color: #444;
 }
 
-/* .page-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
+.mobile-logout {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-top: 0.5rem;
 }
 
-.main-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 0;
-} */
-
-.page-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-.main-content {
-    flex: 1;
-    padding-bottom: 0; 
-    position: relative;
-    z-index: 1;
-    margin-bottom: 1rem; 
-}
-
-/* Footer styles */
+/* Footer styles - Compact Sticky Footer */
 .app-footer {
     background-color: #f5f5f5;
     border-top: 1px solid #e0e0e0;
-    padding: 0.5rem 0.5rem;
     width: 100%;
     position: sticky;
     bottom: 0;
     z-index: 10;
-    clear: both;
+    font-size: 0.85rem;
 }
 
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
 }
 
-.footer-top {
+/* Desktop Footer */
+.desktop-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0.6rem 1rem;
+}
+
+.footer-left, .footer-middle, .footer-right {
+    flex: 1;
 }
 
 .footer-logo {
-    max-width: 150px;
+    max-width: 100px;
+    margin-bottom: 0.5rem;
 }
 
 .logo-image {
@@ -356,9 +472,37 @@ onMounted(() => {
     height: auto;
 }
 
+.copyright {
+    color: #666;
+    font-size: 0.75rem;
+}
+
+.address-section {
+    text-align: center;
+}
+
+.address-section h4 {
+    margin: 0 0 0.3rem 0;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.address-section p {
+    color: #666;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
 .footer-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
+    margin-bottom: 0.3rem;
 }
 
 .footer-links a {
@@ -372,65 +516,14 @@ onMounted(() => {
     color: #4CAF50;
 }
 
-.footer-middle {
-    display: flex;
-    justify-content: center;
-    padding: 0.5rem 0;
-}
-
-.social-links {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.social-links a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #333;
-    color: white;
-    transition: background-color 0.2s;
-}
-
-.social-links a:hover {
-    background-color: #4CAF50;
-}
-
-.footer-info {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.company-name {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.address-section h4 {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    color: #333;
-}
-
-.address-section p {
-    font-size: 0.9rem;
-    color: #666;
-    line-height: 1.5;
-    margin: 0;
-}
-
 .contact-info {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     color: #666;
+    text-align: right;
 }
 
 .contact-info p {
-    margin: 0.3rem 0;
+    margin: 0.1rem 0;
 }
 
 .contact-info a {
@@ -442,153 +535,144 @@ onMounted(() => {
     text-decoration: underline;
 }
 
-/* Responsive styles for navbar */
-@media (max-width: 768px) {
-    .menubar {
-        padding: 10px 15px;
+/* Mobile Footer */
+.mobile-footer {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.mobile-footer .footer-logo {
+    max-width: 80px;
+    margin-bottom: 0.3rem;
+}
+
+.mobile-footer .footer-links {
+    margin: 0.3rem 0;
+}
+
+.mobile-footer .copyright {
+    margin: 0.3rem 0;
+    width: 100%;
+    font-size: 0.7rem;
+}
+
+.contact-mobile {
+    font-size: 0.7rem;
+}
+
+.contact-mobile a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+    .nav-links a {
+        padding: 0 0.8rem;
     }
     
-    .welcome-desktop {
+    .welcome-text {
+        font-size: 0.9rem;
+    }
+    
+    .desktop-footer {
+        padding: 0.5rem;
+    }
+    
+    .footer-logo {
+        max-width: 80px;
+    }
+    
+    .address-section h4 {
+        font-size: 0.8rem;
+    }
+    
+    .address-section p, .contact-info p, .copyright {
+        font-size: 0.7rem;
+    }
+    
+    .footer-links a {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .menubar {
+        padding: 0 1rem;
+    }
+    
+    .nav-links {
         display: none;
     }
     
-    .welcome-mobile {
-        display: block;
-        flex: 1;
-        text-align: center;
+    .nav-right {
+        display: none;
     }
     
     .hamburger {
         display: flex;
     }
     
-    .right {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background-color: #333;
-        padding: 0;
-        gap: 0;
-        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-    }
-    
-    .right.open {
+    .mobile-menu {
         display: flex;
     }
     
-    .right a {
-        width: 100%;
-        padding: 10px 20px;
-        border-bottom: 1px solid #444;
-        text-align: left;
+    .welcome-mobile {
+        display: block;
     }
     
-    .right a:hover {
-        background-color: #444;
-    }
-}
-
-
-/* Responsive footer styles */
-@media (min-width: 769px) {
-    .footer-info {
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: left;
-        align-items: flex-start;
-    }
-    
-    .company-name, .address-section, .contact-info {
+    .nav-left {
         flex: 1;
-        padding: 0 1rem;
+        justify-content: center;
     }
     
-    .address-section {
-        border-left: 1px solid #e0e0e0;
-        border-right: 1px solid #e0e0e0;
-    }
-}
-
-@media (max-width: 768px) {
-    .app-footer {
-        padding: 0.5rem;
+    .logo-link {
+        justify-content: center;
+        padding-right: 0;
     }
     
-    .footer-content {
-        gap: 0.5rem;
+    /* Switch footer styles for mobile */
+    .desktop-footer {
+        display: none;
     }
     
-    /* Collapsed footer for mobile */
-    .footer-top {
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.5rem;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .logo-image {
-        max-width: 80px; /* Smaller logo */
-        height: auto;
-    }
-    
-    .footer-info {
-        font-size: 0.8rem;
+    .mobile-footer {
         display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-    
-    .company-name {
-        font-size: 0.8rem;
-    }
-    
-    .address-section h4 {
-        margin-bottom: 0.2rem;
-        font-size: 0.85rem;
-    }
-    
-    .address-section p, .contact-info p {
-        font-size: 0.75rem;
-        margin: 0;
-        line-height: 1.3;
-    }
-    
-    .footer-collapsible {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .address-section, .contact-info {
-        padding-top: 0.3rem;
-        margin-top: 0.3rem;
     }
 }
 
 @media (max-width: 480px) {
-    .app-footer {
-        padding: 0.3rem;
+    .menubar {
+        padding: 0 0.8rem;
     }
     
-    .footer-content {
-        gap: 0.2rem;
+    .nav-logo {
+        height: 2.8rem;
     }
     
-    .address-section br {
-        display: none; 
+    /* Further simplify mobile footer */
+    .mobile-footer {
+        padding: 0.4rem;
     }
     
-    .address-section p {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
+    .mobile-footer .footer-logo {
+        max-width: 60px;
     }
     
-    .company-name {
-        font-size: 0.7rem;
+    .mobile-footer .footer-links {
+        flex-direction: row;
+        gap: 0.8rem;
+    }
+    
+    .mobile-footer .footer-links a {
+        font-size: 0.75rem;
+    }
+    
+    .mobile-footer .copyright, .contact-mobile {
+        font-size: 0.65rem;
     }
 }
-
 </style>

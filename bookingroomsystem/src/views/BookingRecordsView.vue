@@ -447,24 +447,26 @@ onMounted(() => {
 }
 
 :deep(.p-button-outlined) {
-    background-color: #4CAF50;
-    color: #000000;
-    border-color: #45a049;
+    /* Change initial state */
+    background-color: transparent !important; 
+    color: #346bf6 !important;
+    border-color: #346bf6 !important;
     white-space: nowrap;
     min-width: fit-content;
     padding: 0.5rem 1rem;
 }
 
 :deep(.p-button-outlined:hover) {
-    background-color: #2E7D32;
-    color: #000000;
-    border-color: #1B5E20;
+    /* Change hover state */
+    background-color: #346bf6 !important;
+    color: #ffffff !important;
+    border-color: #346bf6 !important;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 2px 4px rgba(52, 107, 246, 0.2);
 }
 
 :deep(.p-button-outlined:focus) {
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 0 0 2px rgba(52, 107, 246, 0.2);
 }
 
 :deep(.p-inputtext) {
