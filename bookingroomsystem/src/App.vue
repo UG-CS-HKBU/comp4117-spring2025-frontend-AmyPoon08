@@ -226,6 +226,7 @@ onMounted(() => {
 <style scoped>
 .menubar {
     position: sticky;
+    height: 5rem;
     top: 0;
     z-index: 1000;
     display: flex;
@@ -289,7 +290,7 @@ onMounted(() => {
     background-color: #444;
 }
 
-.page-container {
+/* .page-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -300,15 +301,32 @@ onMounted(() => {
     flex: 1;
     overflow-y: auto;
     padding-bottom: 0;
+} */
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding-bottom: 0; 
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1rem; 
 }
 
 /* Footer styles */
 .app-footer {
     background-color: #f5f5f5;
     border-top: 1px solid #e0e0e0;
-    padding: 2rem 1rem;
+    padding: 0.5rem 0.5rem;
     width: 100%;
-    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    clear: both;
 }
 
 .footer-content {
@@ -473,6 +491,7 @@ onMounted(() => {
     }
 }
 
+
 /* Responsive footer styles */
 @media (min-width: 769px) {
     .footer-info {
@@ -495,38 +514,81 @@ onMounted(() => {
 
 @media (max-width: 768px) {
     .app-footer {
-        padding: 1.5rem 1rem;
+        padding: 0.5rem;
     }
     
+    .footer-content {
+        gap: 0.5rem;
+    }
+    
+    /* Collapsed footer for mobile */
     .footer-top {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 1.5rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .logo-image {
+        max-width: 80px; /* Smaller logo */
+        height: auto;
     }
     
     .footer-info {
-        gap: 1.5rem;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .company-name {
+        font-size: 0.8rem;
+    }
+    
+    .address-section h4 {
+        margin-bottom: 0.2rem;
+        font-size: 0.85rem;
+    }
+    
+    .address-section p, .contact-info p {
+        font-size: 0.75rem;
+        margin: 0;
+        line-height: 1.3;
+    }
+    
+    .footer-collapsible {
+        display: flex;
+        flex-direction: column;
     }
     
     .address-section, .contact-info {
-        padding-top: 1rem;
-        border-top: 1px solid #e0e0e0;
+        padding-top: 0.3rem;
+        margin-top: 0.3rem;
     }
 }
 
 @media (max-width: 480px) {
     .app-footer {
-        padding: 1rem;
+        padding: 0.3rem;
     }
     
-    .social-links {
-        gap: 1rem;
+    .footer-content {
+        gap: 0.2rem;
     }
     
-    .social-links a {
-        width: 35px;
-        height: 35px;
+    .address-section br {
+        display: none; 
+    }
+    
+    .address-section p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    
+    .company-name {
+        font-size: 0.7rem;
     }
 }
+
 </style>

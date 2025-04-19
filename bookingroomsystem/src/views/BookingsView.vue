@@ -588,7 +588,7 @@ export default {
                                 <span v-if="getSelectedAvailabilityCount > 0" class="filter-badge">
                                     {{ getSelectedAvailabilityCount }}
                                 </span>
-                            </button>
+                           </button>
                             <ul class="dropdown-menu">
                                 <li v-for="option in availabilityOptions" :key="option.value" class="dropdown-item">
                                     <div class="form-check">
@@ -684,8 +684,43 @@ export default {
     overflow: auto;
 }
 
+.bookings-view {
+    padding-bottom: 120px; /* Add significant padding at the bottom */
+}
+
+.footer-spacer {
+    height: 80px; /* Creates extra space at the bottom */
+    width: 100%;
+}
+
+nav[aria-label="Page navigation"] {
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
 .pagination {
-    margin-bottom: 2rem;
+    margin-bottom: 0;
+    z-index: 1;
+}
+
+.row:last-child {
+    padding-bottom: 50px;
+}
+
+
+.container {
+    margin-bottom: 1rem; 
+}
+
+
+.card {
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.row:last-child {
+    min-height: 50vh;
 }
 
 .page-link {
