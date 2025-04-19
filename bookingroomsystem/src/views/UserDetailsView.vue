@@ -22,7 +22,7 @@ const fetchUser = async () => {
         const userId = route.params.id;
         if (userId){
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/users/${userId}`, {
+            const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/${userId}`, {
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : ''
                 }
@@ -47,7 +47,7 @@ const saveUser = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch(`/api/users/${user.value._id}`, {
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/${user.value._id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

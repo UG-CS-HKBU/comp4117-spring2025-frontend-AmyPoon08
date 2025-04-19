@@ -138,7 +138,7 @@ const fetchBookingRecords = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch('/api/bookings', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

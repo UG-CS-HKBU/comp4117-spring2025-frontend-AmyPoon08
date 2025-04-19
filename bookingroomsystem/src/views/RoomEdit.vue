@@ -32,7 +32,7 @@ const room = ref({
 const fetchRoomDetails = async () => {
   loading.value = true;
   try {
-    const response = await fetch(`/api/rooms/${roomId}`);
+    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomId}`);
     if (!response.ok) throw new Error('Failed to fetch room data');
     
     const data = await response.json();
@@ -78,7 +78,7 @@ const updateRoom = async () => {
 
     formData.append('image', selectedFile.value)
 
-    const response = await fetch(`/api/rooms/${roomId}`, {
+    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomId}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData

@@ -45,7 +45,7 @@ onMounted(async () => {
     }
 
     // First check booking status
-    const statusResponse = await fetch(`/api/bookings/checkStatus/${bookingId.value}`, {
+    const statusResponse = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/checkStatus/${bookingId.value}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -63,7 +63,7 @@ onMounted(async () => {
       return;
     }
 
-    const response = await fetch(`/api/bookings/${bookingId.value}`, {
+    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/${bookingId.value}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -220,7 +220,7 @@ const completeBooking = async () => {
       throw new Error('Booking time has expired');
     }
 
-    const response = await fetch(`/api/bookings/update/${bookingId.value}`, {
+    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/update/${bookingId.value}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -325,7 +325,7 @@ const handleExpiredBooking = async () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`/api/bookings/checkExpired`, {
+    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/checkExpired`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

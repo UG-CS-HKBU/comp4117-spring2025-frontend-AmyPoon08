@@ -56,7 +56,7 @@ const createRoom = async () => {
       }
     });
 
-    const response = await fetch('/api/rooms', {  
+    const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms', {  
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`

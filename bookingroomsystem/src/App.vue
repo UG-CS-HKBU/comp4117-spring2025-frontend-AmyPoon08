@@ -27,7 +27,7 @@ const logout = async () => {
         
         // Only make the logout request if you have a token
         if (token) {
-            const response = await fetch('/api/logout', {
+            const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/logout', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -66,7 +66,7 @@ const fetchName = async () => {
             return; // Exit silently if no token
         }
 
-        const response = await fetch('/api/profile', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

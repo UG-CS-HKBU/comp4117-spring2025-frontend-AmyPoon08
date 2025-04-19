@@ -91,7 +91,7 @@ const handleImageError = (e) => {
 // Fetch room details to get images
 const fetchRoomDetails = async (roomId) => {
     try {
-        const response = await fetch(`/api/rooms/${roomId}`);
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomId}`);
         
         if (!response.ok) {
             throw new Error('Failed to fetch room details');
@@ -113,7 +113,7 @@ const fetchBookingHistory = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch('/api/users/bookingHistory', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/bookingHistory', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

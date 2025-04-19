@@ -53,7 +53,7 @@ const clearFilter = () => {
 
 const fetchRooms = async () => {
     try {
-        const response = await fetch(`/api/rooms`, {
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ const deleteRoom = async () => {
     
     try {
         loading.value = true;
-        const response = await fetch(`/api/rooms/${roomToDelete.value._id}`, {
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomToDelete.value._id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

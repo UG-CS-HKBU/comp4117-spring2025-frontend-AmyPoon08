@@ -20,7 +20,7 @@ const fetchUserDetails = async () => {
         if (!token) {
             throw new Error('No token found. Please log in.');
         }
-        const response = await fetch(`/api/profile`, {
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile`, {
             method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const fetchRoom = async () => {
         const roomId = route.params.id;
         // Check if there's an ID in the route params
         if (roomId) {
-            const response = await fetch(`/api/rooms/${roomId}`);
+            const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomId}`);
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -236,7 +236,7 @@ const bookRoom = async () => {
             status: 'pending payment'
         };
 
-        const response = await fetch('/api/bookings/create', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ const fetchAvailability = async () => {
         if (!selectedDate.value || !room.value._id) return;
         
         const formattedDate = formatDate(selectedDate.value);
-        const response = await fetch(`/api/bookings/availability/${room.value._id}/${formattedDate}`);
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/availability/${room.value._id}/${formattedDate}`);
         if (!response.ok) {
             throw new Error('Failed to fetch availability');
         }

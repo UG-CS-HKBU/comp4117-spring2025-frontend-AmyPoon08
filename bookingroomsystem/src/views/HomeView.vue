@@ -36,7 +36,7 @@ export default {
     // Fetch all rooms
     const fetchRooms = async () => {
       try {
-        const response = await fetch('/api/rooms');
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms');
         if (!response.ok) {
           throw new Error('Failed to fetch rooms');
         }
@@ -50,7 +50,7 @@ export default {
     // Fetch confirmed bookings
     const fetchConfirmedBookings = async () => {
       try {
-        const response = await fetch('/api/bookings');
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings');
         if (!response.ok) {
           throw new Error('Failed to fetch bookings');
         }

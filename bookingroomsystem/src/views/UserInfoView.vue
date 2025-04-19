@@ -34,7 +34,7 @@ const clearFilter = () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await fetch('/api/users', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const deleteUser = async () => {
     
     try {
         loading.value = true;
-        const response = await fetch(`/api/users/${userToDelete.value._id}`, {
+        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/${userToDelete.value._id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
