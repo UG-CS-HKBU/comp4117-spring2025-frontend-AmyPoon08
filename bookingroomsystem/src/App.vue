@@ -66,78 +66,78 @@ const fetchIsAdmin = async () => {
     }
 }
 
-const fetchName = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        throw new Error('No token found');
-    }
-
-    try {
-        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                // Token expired or invalid
-                localStorage.clear();
-                window.location.href = '/login';
-                throw new Error('Session expired, please login again');
-            }
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        if (error.message.includes('Session expired')) {
-            localStorage.clear();
-            window.location.href = '/login';
-        }
-        throw error;
-    }
-};
-
 // const fetchName = async () => {
-//     try {
-//         const token = localStorage.getItem('token');
-//         if (!token) {
-//             return; // Exit silently if no token
-//         }
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         throw new Error('No token found');
+//     }
 
+//     try {
 //         const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
 //             method: 'GET',
 //             headers: {
-//                 'Content-Type': 'application/json',
 //                 'Authorization': `Bearer ${token}`
 //             }
 //         });
 
 //         if (!response.ok) {
 //             if (response.status === 401) {
-//                 console.warn('Unauthorized: Token expired or invalid');
-//                 localStorage.removeItem('token');
-//                 isAuthenticated.value = false;
-//                 router.push('/');
-//                 return;
-//             } else {
-//                 console.warn(`Failed to fetch profile: ${response.status}`);
-//                 return;
+//                 // Token expired or invalid
+//                 localStorage.clear();
+//                 window.location.href = '/login';
+//                 throw new Error('Session expired, please login again');
 //             }
+//             throw new Error(`HTTP error! status: ${response.status}`);
 //         }
 
 //         const data = await response.json();
-//         userName.value = data;
+//         return data;
 //     } catch (error) {
-//         console.warn('Error fetching profile:', error.message);
-//     } finally {
-//         isLoading.value = false;
+//         console.error('Failed to fetch profile:', error);
+//         if (error.message.includes('Session expired')) {
+//             localStorage.clear();
+//             window.location.href = '/login';
+//         }
+//         throw error;
 //     }
 // };
+
+const fetchName = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return; // Exit silently if no token
+        }
+
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.warn('Unauthorized: Token expired or invalid');
+                localStorage.removeItem('token');
+                isAuthenticated.value = false;
+                router.push('/');
+                return;
+            } else {
+                console.warn(`Failed to fetch profile: ${response.status}`);
+                return;
+            }
+        }
+
+        const data = await response.json();
+        userName.value = data;
+    } catch (error) {
+        console.warn('Error fetching profile:', error.message);
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 const showNav = ref(true); // Control nav visibility
 
