@@ -142,7 +142,7 @@ onMounted(() => {
             <!-- Left side with logo and navigation -->
             <div class="nav-left">
                 <a href="/home" class="logo-link">
-                    <img src="@/assets/images/icon.png" alt="KOJU by tronico" class="nav-logo" />
+                    <img src="@/images/Icon.png" alt="KOJU by tronico" class="nav-logo" />
                 </a>
                 <!-- Navigation links on left -->
                 <div class="nav-links">
@@ -182,7 +182,7 @@ onMounted(() => {
             <!-- Left side with logo and navigation -->
             <div class="nav-left">
                 <a href="/home" class="logo-link">
-                    <img src="@/assets/images/icon.png" alt="KOJU by tronico" class="nav-logo" />
+                    <img src="@/images/Icon.png" alt="KOJU by tronico" class="nav-logo" />
                 </a>
                 <!-- Admin navigation links on left -->
                 <div class="nav-links">
@@ -229,7 +229,7 @@ onMounted(() => {
                 <!-- Mobile Footer -->
                 <div class="mobile-footer">
                     <div class="footer-logo">
-                        <img src="@/assets/images/icon.png" alt="KOJU by tronico" class="logo-image" />
+                        <img src="@/images/Icon.png" alt="KOJU by tronico" class="logo-image" />
                     </div>
                     <div class="footer-links">
                         <router-link to="/aboutUs">About us</router-link>
@@ -247,7 +247,7 @@ onMounted(() => {
                 <div class="desktop-footer">
                     <div class="footer-left">
                         <div class="footer-logo">
-                            <img src="@/assets/images/icon.png" alt="KOJU by tronico" class="logo-image" />
+                            <img src="@/images/Icon.png" alt="KOJU by tronico" class="logo-image" />
                         </div>
                         <div class="copyright">
                             Room Booking System © 2025 - Comp4117 Group C Project
