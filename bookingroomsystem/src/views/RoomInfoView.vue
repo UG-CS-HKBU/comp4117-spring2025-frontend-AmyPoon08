@@ -27,11 +27,11 @@ const types = [
 // Category options for filter
 const categories = [
     'Meeting room',
-    'Conference room',
     'Meeting room II',
+    'Meeting room III',
+    'Conference room',
     'Conference Room II',
     'Multimedia Room',
-    'Meeting room III',
 ];
 
 // Initialize filters

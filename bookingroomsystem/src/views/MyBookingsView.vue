@@ -1,15 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import InputText from 'primevue/inputtext';
+import { ref, onMounted, computed, watch } from 'vue';
 import Button from 'primevue/button';
-// import Calendar from 'primevue/calendar';
-import Tag from 'primevue/tag';
+import InputText from 'primevue/inputtext';
+import Paginator from 'primevue/paginator';
 import Select from 'primevue/select';
+import Dropdown from 'primevue/dropdown';
 
 const bookingHistory = ref([]);
 const loading = ref(false);
+
+// Pagination state
+const first = ref(0);
+const rows = ref(3);
+const totalRecords = ref(0);
 
 // Status options for filter
 const statuses = [
@@ -19,23 +22,34 @@ const statuses = [
     'expired'
 ];
 
-// Initialize filters
+// Sorting options
+const sortOptions = [
+    { label: 'Room Name (A-Z)', value: 'roomName-asc' },
+    { label: 'Room Name (Z-A)', value: 'roomName-desc' },
+    { label: 'Booking Date (Newest)', value: 'bookingDate-desc' },
+    { label: 'Booking Date (Oldest)', value: 'bookingDate-asc' },
+    { label: 'Order Date (Newest)', value: 'orderDate-desc' },
+    { label: 'Order Date (Oldest)', value: 'orderDate-asc' },
+    { label: 'Price (High-Low)', value: 'price-desc' },
+    { label: 'Price (Low-High)', value: 'price-asc' }
+];
+
+// Initialize filters and sort
 const filters = ref({
     global: { value: null, matchMode: 'contains' },
-    bookingId: { value: null, matchMode: 'contains' },
-    roomName: { value: null, matchMode: 'contains' },
-    date: { value: null, matchMode: 'equals' },
     status: { value: null, matchMode: 'equals' }
 });
+
+const sortField = ref('bookingDate-desc'); // Default sort
 
 const clearFilter = () => {
     filters.value = {
         global: { value: null, matchMode: 'contains' },
-        bookingId: { value: null, matchMode: 'contains' },
-        roomName: { value: null, matchMode: 'contains' },
-        date: { value: null, matchMode: 'dateIs' },
         status: { value: null, matchMode: 'equals' }
     };
+    sortField.value = 'bookingDate-desc';
+    // Reset pagination
+    first.value = 0;
 };
 
 const formatDate = (dateString) => {
@@ -43,75 +57,51 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-GB');
 };
 
-// const getStartTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-//     return timeslots[0];
-// };
-
-// const getEndTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-//     return timeslots[timeslots.length - 1];
-// };
-
-
-const getStartTime = (timeslots) => {
-    if (!timeslots || timeslots.length === 0) return '-';
-    // Sort timeslots chronologically
-    const sortedSlots = [...timeslots].sort((a, b) => {
-        const [hourA] = a.split(':').map(Number);
-        const [hourB] = b.split(':').map(Number);
-        return hourA - hourB;
-    });
-    return sortedSlots[0];
-}
-
-const getEndTime = (timeslots) => {
-    if (!timeslots || timeslots.length === 0) return '-';
-    
-    // Sort timeslots chronologically
-    const sortedSlots = [...timeslots].sort((a, b) => {
-        const [hourA] = a.split(':').map(Number);
-        const [hourB] = b.split(':').map(Number);
-        return hourA - hourB;
-    });
-    
-    const startTime = sortedSlots[sortedSlots.length - 1]; // Get the last timeslot
-    const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
-    const endTime = new Date();
-    endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
-
-    return endTime.toTimeString().slice(0, 5); // Format as HH:MM
-}
-
-
-const getStatusSeverity = (status) => {
-    switch (status?.toLowerCase()) {
-        case 'pending payment':
-            return 'danger';
-        case 'pending approval':
-            return 'warn';
-        case 'confirmed':
-            return 'success';
-        case 'expired':
-            return 'contrast';
-        default:
-            return null;
-    }
+const formatOrderDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString('en-GB')} ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 };
 
-// Add custom style for confirmed status
-const getStatusStyle = (status) => {
-    switch (status?.toLowerCase()) {
-        case 'pending payment':
-            return 'danger';
-        case 'pending approval':
-            return 'warn'
-        case 'confirmed':
-            return 'success';
-        case 'expired':
-            return 'contrast';
-        default:
-            return {};
+const getTimeRange = (timeslots) => {
+    if (!timeslots || timeslots.length === 0) return '-';
+    
+    // Sort timeslots chronologically
+    const sortedSlots = [...timeslots].sort((a, b) => {
+        const [hourA] = a.split(':').map(Number);
+        const [hourB] = b.split(':').map(Number);
+        return hourA - hourB;
+    });
+    
+    const startTime = sortedSlots[0]; // Get the first timeslot
+    
+    // Calculate end time (last timeslot + 59 minutes)
+    const lastTime = sortedSlots[sortedSlots.length - 1];
+    const [hour, minute] = lastTime.split(':').map(Number);
+    const endTime = new Date();
+    endTime.setHours(hour, minute + 59);
+    
+    return `${startTime} - ${endTime.toTimeString().slice(0, 5)}`;
+};
+
+const handleImageError = (e) => {
+    // Set a fallback image if loading fails
+    e.target.src = '/placeholder-room.jpg';
+};
+
+// Fetch room details to get images
+const fetchRoomDetails = async (roomId) => {
+    try {
+        const response = await fetch(`/api/rooms/${roomId}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch room details');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error('Failed to fetch room details:', err);
+        return null;
     }
 };
 
@@ -136,7 +126,24 @@ const fetchBookingHistory = async () => {
         }
 
         const data = await response.json();
-        bookingHistory.value = data;
+        
+        // Fetch room details for each booking to get the images
+        const bookingsWithRoomDetails = await Promise.all(
+            data.map(async (booking) => {
+                if (booking.roomId) {
+                    const roomDetails = await fetchRoomDetails(booking.roomId);
+                    return {
+                        ...booking,
+                        roomImage: roomDetails?.imageUrl || null,
+                        roomDetails: roomDetails || {}
+                    };
+                }
+                return booking;
+            })
+        );
+        
+        bookingHistory.value = bookingsWithRoomDetails;
+        totalRecords.value = bookingsWithRoomDetails.length;
     } catch (error) {
         console.error('Error:', error);
     } finally {
@@ -144,382 +151,606 @@ const fetchBookingHistory = async () => {
     }
 };
 
+const onPage = (event) => {
+    first.value = event.first;
+    rows.value = event.rows;
+};
+
+// Filter bookings based on global search and status
+const filteredBookings = computed(() => {
+    let filtered = [...bookingHistory.value];
+    
+    // Apply global search filter (searches across multiple fields)
+    if (filters.value.global.value) {
+        const searchTerm = filters.value.global.value.toLowerCase();
+        filtered = filtered.filter(booking => 
+            booking.bookingId?.toLowerCase().includes(searchTerm) ||
+            booking.roomName?.toLowerCase().includes(searchTerm) ||
+            formatDate(booking.date)?.toLowerCase().includes(searchTerm) ||
+            formatOrderDate(booking.createdAt)?.toLowerCase().includes(searchTerm) ||
+            (booking.status?.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    // Apply status filter
+    if (filters.value.status.value) {
+        filtered = filtered.filter(booking => 
+            booking.status?.toLowerCase() === filters.value.status.value.toLowerCase()
+        );
+    }
+    
+    // Apply sorting
+    if (sortField.value) {
+        const [field, direction] = sortField.value.split('-');
+        
+        filtered.sort((a, b) => {
+            let valueA, valueB;
+            
+            // Determine which field to sort by
+            switch(field) {
+                case 'roomName':
+                    valueA = a.roomName?.toLowerCase() || '';
+                    valueB = b.roomName?.toLowerCase() || '';
+                    break;
+                case 'bookingDate':
+                    valueA = new Date(a.date || 0).getTime();
+                    valueB = new Date(b.date || 0).getTime();
+                    break;
+                case 'orderDate':
+                    valueA = new Date(a.createdAt || 0).getTime();
+                    valueB = new Date(b.createdAt || 0).getTime();
+                    break;
+                case 'price':
+                    valueA = parseFloat(a.totalPrice || 0);
+                    valueB = parseFloat(b.totalPrice || 0);
+                    break;
+                default:
+                    valueA = a[field] || '';
+                    valueB = b[field] || '';
+            }
+            
+            // Handle direction
+            if (direction === 'asc') {
+                return valueA > valueB ? 1 : -1;
+            } else {
+                return valueA < valueB ? 1 : -1;
+            }
+        });
+    }
+    
+    totalRecords.value = filtered.length;
+    return filtered;
+});
+
+// Get paginated results
+const paginatedBookings = computed(() => {
+    return filteredBookings.value.slice(first.value, first.value + rows.value);
+});
+
 onMounted(() => {
     fetchBookingHistory();
+});
+
+// Reset pagination when filters change
+watch([filters, sortField], () => {
+    first.value = 0;
 });
 </script>
 
 <template>
-<div class="room-info-container">
-    <div class="card">
-        <div class="header-section">
-            <h1 class="page-title">My Bookings</h1>
-            <p class="page-subtitle">View and manage your booking history</p>
-        </div>
-        <DataTable 
-            v-model:filters="filters" 
-            :value="bookingHistory" 
-            paginator 
-            showGridlines 
-            :rows="10" 
-            dataKey="id"
-            filterDisplay="menu" 
-            :loading="loading"
-            :globalFilterFields="['bookingId', 'roomName']"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
-            class="custom-datatable"
-        >
-            <template #header>
-                <div class="flex items-center gap-4 header-controls">
-                    <div class="left-controls">
-                        <span class="p-input-icon-left search-wrapper">
+    <div class="room-info-container">
+        <div class="card main-card">
+            <div class="header-section">
+                <h1 class="page-title">My Bookings</h1>
+                <p class="page-subtitle">View and manage your booking history</p>
+            </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="search-filter-container">
+                <div class="filter-row">
+                    <!-- Search Input -->
+                    <div class="search-wrapper">
+                        <span class="p-input-icon-left search-icon-wrapper">
                             <i class="pi pi-search" />
-                            <InputText v-model="filters['global'].value" placeholder="Search bookings..." class="search-input"/>
+                            <InputText 
+                                v-model="filters.global.value" 
+                                placeholder="Search..." 
+                                class="search-input"
+                            />
                         </span>
-                        <Button 
-                            type="button" 
-                            label="Clear Filters" 
-                            class="p-button-outlined"
-                            @click="clearFilter()"
+                    </div>
+                    
+                    <!-- Sort Dropdown -->
+                    <div class="sort-wrapper">
+                        <span class="sort-label">Sort by:</span>
+                        <Dropdown 
+                            v-model="sortField" 
+                            :options="sortOptions" 
+                            optionLabel="label" 
+                            optionValue="value"
+                            placeholder="Select" 
+                            class="sort-dropdown"
                         />
                     </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="status-wrapper">
+                        <span class="filter-label">Status:</span>
+                        <Select 
+                            v-model="filters.status.value" 
+                            :options="statuses" 
+                            placeholder="All Statuses" 
+                            class="status-filter" 
+                            :showClear="true"
+                        />
+                    </div>
+                    
+                    <!-- Clear Button -->
+                    <Button 
+                        type="button" 
+                        label="Clear Filters" 
+                        class="clear-button"
+                        @click="clearFilter()"
+                    />
                 </div>
-            </template>
-
-            <template #empty> No booking found. </template>
-            <template #loading> Loading booking records. Please wait. </template>
-
-            <Column field="index" header="No." style="min-width: 5rem">
-                <template #body="{ index }">
-                    {{ index + 1 }}
-                </template>
-            </Column>
-
-            <Column field="bookingId" header="Booking ID" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.bookingId }}
-                </template>
-                <!-- <template #filter="{ filterModel }">
-                    <InputText 
-                        v-model="filterModel.value" 
-                        type="text" 
-                        class="p-2 w-full" 
-                        placeholder="Search booking ID"
-                    />
-                </template> -->
-            </Column>
-
-            <Column field="roomName" header="Room" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.roomName }}
-                </template>
-                <!-- <template #filter="{ filterModel }">
-                    <InputText 
-                        v-model="filterModel.value" 
-                        type="text" 
-                        class="p-2 w-full" 
-                        placeholder="Search room"
-                    />
-                </template> -->
-            </Column>
-
-            <Column field="date" header="Date" sortable dataType="date" style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.date) }}
-                </template>
-                <!-- <template #filter="{ filterModel }">
-                    <Calendar 
-                        v-model="filterModel.value" 
-                        dateFormat="yy-mm-dd" 
-                        placeholder="Select date" 
-                        class="p-2 w-full"
-                    />
-                </template> -->
-            </Column>
-
-            <Column field="timeslots" header="Start Time" style="min-width: 10rem">
-                <template #body="slotProps">
-                    {{ getStartTime(slotProps.data.timeslots) }}
-                </template>
-            </Column>
-
-            <Column field="timeslots" header="End Time" style="min-width: 10rem">
-                <template #body="slotProps">
-                    {{ getEndTime(slotProps.data.timeslots) }}
-                </template>
-            </Column>
+            </div>
             
-            <Column field="status" header="Status" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    <Tag :value="data.status" :severity="getStatusSeverity(data.status)" :style="getStatusStyle(data.status)" />
-                </template>
-                <template #filter="{ filterModel }">
-                    <Select 
-                        v-model="filterModel.value" 
-                        :options="statuses" 
-                        placeholder="Select Status" 
-                        class="p-2 w-full" 
-                        :showClear="true"
-                    >
-                        <template #option="slotProps">
-                            <Tag :value="slotProps.option" :severity="getStatusSeverity(slotProps.option)" :style="getStatusStyle(slotProps.option)" />
-                        </template>
-                    </Select>
-                </template>
-            </Column>
-
-            <Column header="Actions" :exportable="false" style="min-width: 8rem">
-                <template #body="slotProps">
-                    <router-link 
-                        :to="`/bookingHistory/${slotProps.data.bookingId}`" 
-                        class="p-button p-button-primary p-button-sm"
-                    >
-                        View
-                    </router-link>
-                </template>
-            </Column>
-        </DataTable>
+            <!-- Loading State -->
+            <div v-if="loading" class="loading-state">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                <p>Loading your bookings...</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div v-else-if="filteredBookings.length === 0" class="empty-state">
+                <i class="pi pi-calendar-times" style="font-size: 3rem"></i>
+                <p>No bookings found</p>
+                <router-link to="/rooms" class="p-button p-button-primary">Book a Room</router-link>
+            </div>
+            
+            <!-- Booking Cards Container -->
+            <div v-else class="booking-cards">
+                <!-- Individual Booking Cards -->
+                <div v-for="booking in paginatedBookings" :key="booking.bookingId" class="booking-card">
+                    <div class="booking-image-container">
+                        <img 
+                            :src="booking.roomImage || '/placeholder-room.jpg'" 
+                            :alt="booking.roomName" 
+                            @error="handleImageError"
+                            class="room-image"
+                        />
+                    </div>
+                    
+                    <div class="booking-content">
+                        <div class="booking-info">
+                            <h3 class="room-name">{{ booking.roomName }}</h3>
+                            <div class="booking-details">
+                                <div class="detail-item">
+                                    <strong>Date:</strong> {{ formatDate(booking.date) }}
+                                </div>
+                                <div class="detail-item">
+                                    <strong>Time:</strong> {{ getTimeRange(booking.timeslots) }}
+                                </div>
+                                
+                                <div class="status-container">
+                                    <div class="status-badge" :class="booking.status?.toLowerCase().replace(' ', '-')">
+                                        {{ booking.status }}
+                                    </div>
+                                </div>
+                                
+                                <div class="order-date">
+                                    <strong>Order Date:</strong> {{ formatOrderDate(booking.createdAt) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-price-actions">
+                            <div class="price">${{ booking.totalPrice }}</div>
+                            <router-link 
+                                :to="`/bookingHistory/${booking.bookingId}`" 
+                                class="view-details-btn"
+                            >
+                                View Details
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                
+            <!-- Pagination -->
+            <Paginator 
+                v-if="filteredBookings.length > 0"
+                :first="first" 
+                :rows="rows" 
+                :totalRecords="totalRecords" 
+                @page="onPage"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                class="custom-paginator"
+            />
+        </div>
     </div>
-</div>
 </template>
-
+    
 <style scoped>
-.room-info-container {
-    padding: 2rem;
-    background-color: #f8f9fa;
-    min-height: calc(100vh - 200px);
-}
-
-.header-section {
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.page-title {
-    font-size: 2rem;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-.page-subtitle {
-    color: #6c757d;
-    font-size: 1.1rem;
-}
-
-.header-controls {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.left-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.search-wrapper {
-    width: 400px;
-    display: inline-flex;
-}
-
-:deep(.custom-datatable) {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    padding: 1rem;
-}
-
-:deep(.p-datatable) {
-    background-color: white;
-}
-
-:deep(.p-datatable .p-datatable-header) {
-    background-color: white;
-    border: none;
-    padding: 1rem;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-    background-color: white;
-    color: #2c3e50;
-    font-weight: 600;
-    padding: 1rem;
-    border-bottom: 2px solid #e9ecef;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr) {
-    background-color: white;
-    border-bottom: 1px solid #e9ecef;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-    background-color: white;
-    color: #2c3e50;
-    padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
-    background-color: #f8f9fa !important;
-}
-
-
-
-
-:deep(.p-button) {
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
-}
-
-:deep(.p-button-primary) {
-    background-color: #4CAF50;
-    color: #000000;
-    border-color: #45a049;
-    white-space: nowrap;
-    min-width: fit-content;
-    padding: 0.5rem 1rem;
-}
-
-:deep(.p-button-primary:hover) {
-    background-color: #2E7D32;
-    color: #000000;
-    border-color: #1B5E20;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
-}
-
-:deep(.p-button-primary:focus) {
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-:deep(.p-button-primary.p-button-sm) {
-    background-color: #bfe5ff;
-    border-color: #8dd2ff;
-    color: rgb(18, 0, 214);
-    text-decoration: none;
-    padding: 0.4rem 0.8rem;
-}
-
-:deep(.p-button-primary.p-button-sm:hover) {
-    background-color: #40aaf0;
-    border-color: #40aaf0;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
-}
-
-:deep(.p-button-primary.p-button-sm:focus) {
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-:deep(.p-button-outlined) {
-    background-color: #4CAF50;
-    color: #000000;
-    border-color: #45a049;
-    white-space: nowrap;
-    min-width: fit-content;
-    padding: 0.5rem 1rem;
-}
-
-:deep(.p-button-outlined:hover) {
-    background-color: #2E7D32;
-    color: #000000;
-    border-color: #1B5E20;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
-}
-
-:deep(.p-button-outlined:focus) {
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-
-
-
-:deep(.p-inputtext) {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 0.5rem 1rem;
-    background-color: white;
-    color: #2c3e50;
-}
-
-:deep(.p-input-icon-left) {
-    width: 100%;
-    display: inline-flex;
-}
-
-:deep(.p-input-icon-left i) {
-    color: #6c757d;
-    font-size: 1.1rem;
-    margin-top: 2px;
-}
-
-:deep(.p-inputtext:enabled:focus) {
-    border-color: #2c3e50;
-    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
-    background-color: white;
-}
-
-:deep(.p-inputtext:enabled:hover) {
-    border-color: #2c3e50;
-}
-
-:deep(.p-inputtext::placeholder) {
-    color: #6c757d;
-}
-
-:deep(.p-paginator) {
-    background-color: white;
-    border: none;
-    padding: 1rem;
-    color: #000000;
-}
-
-:deep(.p-paginator .p-paginator-pages .p-paginator-page) {
-    color: #000000;
-}
-
-:deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
-    background-color: #4CAF50;
-    color: #000000;
-}
-
-:deep(.p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover) {
-    background-color: #f8f9fa;
-    color: #000000;
-}
-
-:deep(.p-paginator .p-paginator-first),
-:deep(.p-paginator .p-paginator-prev),
-:deep(.p-paginator .p-paginator-next),
-:deep(.p-paginator .p-paginator-last) {
-    color: #000000;
-}
-
-:deep(.p-paginator .p-dropdown-label) {
-    color: #000000;
-}
-
-:deep(.p-paginator .p-paginator-current) {
-    color: #000000;
-}
-
-:deep(.search-input) {
-    width: 100%;
-    min-height: 42px;
-}
+    .room-info-container {
+        padding: 2rem;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 200px);
+    }
+    
+    .main-card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .header-section {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .page-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    
+    /* Search and Filter styles */
+    .search-filter-container {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .search-wrapper {
+        width: 250px;
+    }
+    
+    .search-icon-wrapper {
+        width: 100%;
+        display: inline-flex;
+    }
+    
+    .search-input {
+        width: 100%;
+        border-radius: 6px;
+    }
+    
+    .sort-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 300px;
+    }
+    
+    .sort-label {
+        font-weight: 500;
+        color: #2c3e50;
+        white-space: nowrap;
+    }
+    
+    .sort-dropdown {
+        width: 100%;
+    }
+    
+    .status-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 250px;
+    }
+    
+    .filter-label {
+        font-weight: 500;
+        color: #2c3e50;
+        white-space: nowrap;
+    }
+    
+    .status-filter {
+        width: 100%;
+    }
+    
+    .clear-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-left: auto;
+    }
+    
+    .clear-button:hover {
+        background-color: #388E3C;
+    }
+    
+    /* Card styles */
+    .booking-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .booking-card {
+        display: flex;
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .booking-image-container {
+        width: 250px;
+        min-width: 250px;
+        height: 200px;
+        margin-right: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .room-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .booking-content {
+        flex: 1;
+        display: flex;
+        padding: 0;
+    }
+    
+    .booking-info {
+        flex: 1;
+        padding: 0;
+    }
+    
+    .room-name {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    
+    .booking-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .detail-item {
+        font-size: 1rem;
+        color: #4b5563;
+    }
+    
+    .status-container {
+        margin-top: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        width: fit-content;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    .status-badge.confirmed {
+        background-color: #9dffb0;
+        color: #0f5132;
+    }
+    
+    .status-badge.pending-approval {
+        background-color: #ffdd72;
+        color: #664d03;
+    }
+    
+    .status-badge.pending-payment {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .status-badge.expired {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+    
+    .order-date {
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .booking-price-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-left: 1.5rem;
+        min-width: 170px;
+        gap: 1.5rem;
+    }
+    
+    .price {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+    }
+    
+    .view-details-btn {
+        display: block;
+        text-align: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        background-color: white;
+        color: #0067b8;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 2px solid #0067b8;
+        width: 100%;
+    }
+    
+    .view-details-btn:hover {
+        background-color: #0067b8;
+        color: white;
+    }
+    
+    /* Loading and Empty states */
+    .loading-state, .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 0;
+        color: #6c757d;
+        gap: 1rem;
+    }
+    
+    /* Paginator styles */
+    .custom-paginator {
+        margin-top: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    /* Media queries for responsiveness */
+    @media (max-width: 1200px) {
+        .filter-row {
+            flex-wrap: wrap;
+        }
+        
+        .search-wrapper, .sort-wrapper, .status-wrapper {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .clear-button {
+            margin-left: 0;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .booking-card {
+            flex-direction: column;
+        }
+        
+        .booking-image-container {
+            width: 100%;
+            min-width: 100%;
+            height: 200px;
+            margin-right: 0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .booking-content {
+            flex-direction: column;
+        }
+        
+        .booking-price-actions {
+            width: 100%;
+            min-width: 100%;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0 0 0;
+            margin-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .view-details-btn {
+            width: auto;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .room-info-container {
+            padding: 1rem;
+        }
+        
+        .booking-price-actions {
+            flex-direction: column;
+            padding: 1rem 0 0 0;
+        }
+        
+        .view-details-btn {
+            width: 100%;
+        }
+        
+        .main-card {
+            padding: 1rem;
+        }
+        
+        .search-filter-container {
+            padding: 1rem;
+        }
+        
+        .room-name {
+            font-size: 1.5rem;
+        }
+        
+        .price {
+            font-size: 1.8rem;
+        }
+    }
+    
+    /* PrimeVue component customization */
+    :deep(.p-inputtext) {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    :deep(.p-dropdown) {
+        width: 100%;
+    }
+    
+    :deep(.p-dropdown-label) {
+        font-size: 0.95rem;
+    }
+    
+    :deep(.p-button) {
+        font-weight: 500;
+    }
+    
+    :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
+        background-color: #4CAF50;
+        color: white;
+    }
+    
+    :deep(.p-input-icon-left i) {
+        left: 0.75rem;
+        color: #6c757d;
+    }
+    
+    :deep(.p-input-icon-left input) {
+        padding-left: 2.5rem;
+    }
 </style>
-
-
-
-
-
+    
