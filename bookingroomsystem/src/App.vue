@@ -5,45 +5,57 @@ import { ref, provide, onMounted, watch } from 'vue'
 const router = useRouter();
 const isAuthenticated = ref(false);
 const isAdmin = ref(false);
+const menuOpen = ref(false); // Add this to control mobile menu
+const userName = ref({ username: '' }); // Initialize with empty username
+const isLoading = ref(true); // Add loading state
+
+const toggleMenu = () => {
+    menuOpen.value = !menuOpen.value;
+}
 
 const logout = async () => {
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No token found. Please log in.');
-        }
-        const response = await fetch('/api/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to logout');
-        }
-
-        // Remove the token from local storage
+        
+        // Clear localStorage before making the request
         localStorage.removeItem('token');
-
+        localStorage.removeItem('admin');
+        localStorage.removeItem('userId');
+        
         isAuthenticated.value = false;
+        isAdmin.value = false;
+        
+        // Only make the logout request if you have a token
+        if (token) {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    // Limit headers to only what's needed
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok && response.status !== 431) {
+                console.warn('Logout had issues on server side, but proceeded locally');
+            }
+        }
 
         // Redirect to the login page
         router.push('/');
     } catch (error) {
         console.error('Error during logout:', error.message);
+        // Even if there's an error, clear local state and redirect
+        router.push('/');
     }
 };
-const userName = ref('')
+
+
 
 const fetchIsAdmin = async () => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No token found. Please log in.');
-        }
-        isAdmin.value = localStorage.getItem('admin') === 'on'
-        console.log('Admin: ', isAdmin.value)
+        isAdmin.value = localStorage.getItem('admin') === 'on';
+        console.log('Admin: ', isAdmin.value);
     } catch (error) {
         console.error('Error during fetchIsAdmin:', error.message);
     }
@@ -53,49 +65,47 @@ const fetchName = async () => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            throw new Error('No token found. Please log in.');
+            return; // Exit silently if no token
         }
 
         const response = await fetch('/api/profile', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Pass the token in the Authorization header
+                'Authorization': `Bearer ${token}`
             }
         });
 
         if (!response.ok) {
             if (response.status === 401) {
-                throw new Error('Unauthorized: Please log in again.');
-            } else if (response.status === 403) {
-                throw new Error('Forbidden: Invalid token.');
-            } else if (response.status === 404) {
-                throw new Error('User profile not found.');
+                console.warn('Unauthorized: Token expired or invalid');
+                localStorage.removeItem('token');
+                isAuthenticated.value = false;
+                router.push('/');
+                return;
             } else {
-                throw new Error('Failed to fetch profile. Server responded with status: ' + response.status);
+                console.warn(`Failed to fetch profile: ${response.status}`);
+                return;
             }
         }
 
         const data = await response.json();
         userName.value = data;
     } catch (error) {
-        console.error('Error fetching profile:', error.message);
+        console.warn('Error fetching profile:', error.message);
+    } finally {
+        isLoading.value = false;
     }
 };
 
-//const showMenu = ref(false)
-const showNav = ref(true) // New ref to control nav visibility
-
-// const toggleMenu = () => {
-//   showMenu.value = !showMenu.value
-// }
+const showNav = ref(true); // Control nav visibility
 
 const hideNav = () => {
-    showNav.value = false
+    showNav.value = false;
 }
 
 const showNavBar = () => {
-    showNav.value = true
+    showNav.value = true;
 }
 
 provide('auth', {
@@ -106,18 +116,23 @@ provide('auth', {
 
 watch(isAuthenticated, (newValue) => {
     if (newValue) {
-        showNavBar()
+        showNavBar();
+        fetchName();
+        fetchIsAdmin();
     } else {
-        hideNav()
+        hideNav();
     }
-})
+});
 
 onMounted(() => {
     const token = localStorage.getItem('token');
     isAuthenticated.value = !!token;
+    
     if (isAuthenticated.value) {
         fetchName();
         fetchIsAdmin();
+    } else {
+        isLoading.value = false; // Not authenticated, not loading
     }
 });
 </script>
@@ -125,37 +140,52 @@ onMounted(() => {
 <!-- Users nav bar -->
 <template>
     <div class="page-container">
-        <nav v-if="isAuthenticated && !isAdmin" class="menubar">
+        <nav v-if="isAuthenticated && !isAdmin && !isLoading" class="menubar">
             <div class="left">
-                <a href="/home" @click="goToHome">
+                <a href="/home">
                     <span>&#127968;</span> Room Booking System
                 </a>
             </div>
-            <div class="right">
+            <div class="welcome-mobile">
                 <span>Welcome, {{ userName.username }}</span>
-                <a href="/bookings">Bookings</a>
-                <a href="/myBookings">My Bookings</a>
-                <a href="/profile">Profile</a>
-                <a href="/AboutUs">About us</a>
-                <a href="#" @click="logout">Logout</a>
+            </div>
+            <div class="hamburger" @click="toggleMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="right" :class="{ 'open': menuOpen }">
+                <span class="welcome-desktop">Welcome, {{ userName.username }}</span>
+                <a href="/bookings" @click="menuOpen = false">Bookings</a>
+                <a href="/myBookings" @click="menuOpen = false">My Bookings</a>
+                <a href="/profile" @click="menuOpen = false">Profile</a>
+                <a href="/AboutUs" @click="menuOpen = false">About us</a>
+                <a href="#" @click="logout(); menuOpen = false">Logout</a>
             </div>
         </nav>
+        
         <!-- admin nav bar -->
-        <nav v-if="isAuthenticated && isAdmin" class="menubar">
+        <nav v-if="isAuthenticated && isAdmin && !isLoading" class="menubar">
             <div class="left">
-                <a href="/home" @click="goToHome">
+                <a href="/home">
                     <span>&#127968;</span>Room Booking System</a>
             </div>
-            <div class="right">
+            <div class="welcome-mobile">
                 <span>Welcome, {{ userName.username }}</span>
-                <a href="/rooms">Room Information</a>
-                <a href="/users">User Information</a>
-                <!-- <a href="/bookings">Bookings</a>
-                <a href="/myBookings">My Bookings</a> -->
-                <a href="/BookingRecords">Booking Record</a>
-                <a href="/profile">Profile</a>
-                <a href="/AboutUs">About us</a>
-                <a href="#" @click="logout">Logout</a>
+            </div>
+            <div class="hamburger" @click="toggleMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="right" :class="{ 'open': menuOpen }">
+                <span class="welcome-desktop">Welcome, {{ userName.username }}</span>
+                <a href="/rooms" @click="menuOpen = false">Room Information</a>
+                <a href="/users" @click="menuOpen = false">User Information</a>
+                <a href="/BookingRecords" @click="menuOpen = false">Booking Record</a>
+                <a href="/profile" @click="menuOpen = false">Profile</a>
+                <a href="/AboutUs" @click="menuOpen = false">About us</a>
+                <a href="#" @click="logout(); menuOpen = false">Logout</a>
             </div>
         </nav>
 
@@ -232,9 +262,6 @@ onMounted(() => {
     </div>
 </template>
 
-
-
-
 <style scoped>
 .menubar {
     position: sticky;
@@ -245,9 +272,8 @@ onMounted(() => {
     align-items: center;
     padding: 10px 20px;
     background-color: #333;
-    /* Background color for the navbar */
     color: white;
-    /* Text color */
+    flex-wrap: wrap;
 }
 
 .left a {
@@ -257,15 +283,35 @@ onMounted(() => {
     font-size: 1.2em;
 }
 
+.welcome-mobile {
+    display: none;
+    font-weight: bold;
+    color: white;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 3px 0;
+    background-color: white;
+    border-radius: 2px;
+}
+
 .right {
     display: flex;
     align-items: center;
     gap: 20px;
-    /* Adds space between items */
 }
 
-.right span {
-    margin-right: 40px; /* Add more gap between username and routes */
+.right span.welcome-desktop {
+    margin-right: 40px;
     font-weight: bold;
     color: white;
 }
@@ -273,6 +319,13 @@ onMounted(() => {
 .right a {
     color: white;
     text-decoration: none;
+    padding: 5px 10px;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+}
+
+.right a:hover {
+    background-color: #444;
 }
 
 .page-container {
@@ -285,7 +338,6 @@ onMounted(() => {
 .main-content {
     flex: 1;
     overflow-y: auto;
-    /* padding-bottom: 20px; */
     padding-bottom: 0;
 }
 
@@ -300,11 +352,52 @@ onMounted(() => {
     z-index: 1000;
 }
 
-/* 
-.footer{
-    background-color: #a19f9f;
-    color: rgb(192, 184, 184);
-    padding: 5px;
-    text-align: center;
-} */
+/* Responsive styles */
+@media (max-width: 768px) {
+    .menubar {
+        padding: 10px 15px;
+    }
+    
+    .welcome-desktop {
+        display: none;
+    }
+    
+    .welcome-mobile {
+        display: block;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .hamburger {
+        display: flex;
+    }
+    
+    .right {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 0;
+        gap: 0;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .right.open {
+        display: flex;
+    }
+    
+    .right a {
+        width: 100%;
+        padding: 10px 20px;
+        border-bottom: 1px solid #444;
+        text-align: left;
+    }
+    
+    .right a:hover {
+        background-color: #444;
+    }
+}
 </style>

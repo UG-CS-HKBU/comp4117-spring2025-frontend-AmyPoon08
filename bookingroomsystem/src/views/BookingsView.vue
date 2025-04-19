@@ -107,7 +107,27 @@ export default {
             { label: 'Low Availability', value: 'low_availability', checked: false },
             { label: 'High Availability', value: 'high_availability', checked: false },
         ]);
-
+        
+        // Add computed properties for badge counts
+        const getSelectedRoomTypeCount = computed(() => {
+            return roomOptions.value.filter(option => option.checked && option.value !== 'select_all').length;
+        });
+        
+        const getSelectedCategoryCount = computed(() => {
+            return categoryOptions.value.filter(option => option.checked && option.value !== 'select_all').length;
+        });
+        
+        const getSelectedCapacityCount = computed(() => {
+            return capacityOptions.value.filter(option => option.checked && option.value !== 'select_all').length;
+        });
+        
+        const getSelectedPriceCount = computed(() => {
+            return priceOptions.value.filter(option => option.checked && option.value !== 'select_all').length;
+        });
+        
+        const getSelectedAvailabilityCount = computed(() => {
+            return availabilityOptions.value.filter(option => option.checked && option.value !== 'select_all').length;
+        });
 
         const toggleRoomSelectAll = () => {
             const selectAllOption = roomOptions.value.find(option => option.value === 'select_all');
@@ -397,7 +417,13 @@ export default {
             paginatedRooms,
             totalPages,
             handlePageChange,
-            getPageNumbers
+            getPageNumbers,
+            // Add the computed properties for badge counts
+            getSelectedRoomTypeCount,
+            getSelectedCategoryCount,
+            getSelectedCapacityCount,
+            getSelectedPriceCount,
+            getSelectedAvailabilityCount
         };
     }
 };
@@ -420,14 +446,6 @@ export default {
 
         <div class="row mb-3">
             <!-- Date Range -->
-            <!-- <div class="col-md-6">
-                <div class="d-flex align-items-center">
-                    <input type="date" class="form-control" v-model="dateRange[0]" @change="fetchRoomsByDateRange" :max="new Date().toISOString().split('T')[0]" />
-                    <span class="mx-2">to</span>
-                    <input type="date" class="form-control" v-model="dateRange[1]" @change="fetchRoomsByDateRange" />
-                </div>
-            </div> -->
-
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
                     <input 
@@ -469,98 +487,118 @@ export default {
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-6 col-md-4 col-lg-2">
-            <label class="form-label">Room Type Options:</label>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                {{ roomOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Room Options' }}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
-                    <div class="form-check">
-                    <input type="checkbox" class="form-check-input" :id="option.value"
-                        v-model="option.checked" @change="handleRoomOptionChange(option)">
-                    <label class="form-check-label">{{ option.label }}</label>
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label>Room Type:</label>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Room Type
+                                <span v-if="getSelectedRoomTypeCount > 0" class="filter-badge">
+                                    {{ getSelectedRoomTypeCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="option in roomOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value"
+                                            v-model="option.checked" @change="handleRoomOptionChange(option)">
+                                        <label class="form-check-label">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-3">
-                <label class="form-label">Category Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCategory"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ categoryOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Category Options' }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCategory">
-                        <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleCategoryOptionChange(option)">
-                                <label class="form-check-label">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                    
+                    <div class="filter-item">
+                        <label>Category:</label>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Category
+                                <span v-if="getSelectedCategoryCount > 0" class="filter-badge">
+                                    {{ getSelectedCategoryCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="option in categoryOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value"
+                                            v-model="option.checked" @change="handleCategoryOptionChange(option)">
+                                        <label class="form-check-label">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-            <div class="col-6 col-md-4 col-lg-2">
-                <label class="form-label">Capacity Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCapacity"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ capacityOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Capacity Options' }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCapacity">
-                        <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleCapacityOptionChange(option)">
-                                <label class="form-check-label">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                    <div class="filter-item">
+                        <label>Capacity:</label>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Capacity
+                                <span v-if="getSelectedCapacityCount > 0" class="filter-badge">
+                                    {{ getSelectedCapacityCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="option in capacityOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value"
+                                            v-model="option.checked" @change="handleCapacityOptionChange(option)">
+                                        <label class="form-check-label">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-            <div class="col-6 col-md-4 col-lg-3">
-                <label class="form-label">Price Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPrice"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ priceOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Price Options' }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
-                        <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handlePriceOptionChange(option)">
-                                <label class="form-check-label">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                    <div class="filter-item">
+                        <label>Price:</label>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Price
+                                <span v-if="getSelectedPriceCount > 0" class="filter-badge">
+                                    {{ getSelectedPriceCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="option in priceOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value"
+                                            v-model="option.checked" @change="handlePriceOptionChange(option)">
+                                        <label class="form-check-label">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-            <div class="col-6 col-md-4 col-lg-2">
-                <label class="form-label">Availability Options:</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonAvailability"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ availabilityOptions.filter(option => option.checked && option.value !== 'select_all').map(option => option.label).join(', ') || 'Select Availability Options' }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAvailability">
-                        <li v-for="option in availabilityOptions" :key="option.value" class="dropdown-item">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" :id="option.value"
-                                    v-model="option.checked" @change="handleAvailabilityOptionChange(option)">
-                                <label class="form-check-label">{{ option.label }}</label>
-                            </div>
-                        </li>
-                    </ul>
+                    <div class="filter-item">
+                        <label>Availability:</label>
+                        <div class="filter-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Availability
+                                <span v-if="getSelectedAvailabilityCount > 0" class="filter-badge">
+                                    {{ getSelectedAvailabilityCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="option in availabilityOptions" :key="option.value" class="dropdown-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" :id="option.value"
+                                            v-model="option.checked" @change="handleAvailabilityOptionChange(option)">
+                                        <label class="form-check-label">{{ option.label }}</label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -665,5 +703,89 @@ export default {
     pointer-events: none;
     background-color: #fff;
     border-color: #dee2e6;
+}
+
+/* Filter row styling */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Filter item styling */
+.filter-item {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-item label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Button styling */
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-dropdown button {
+    width: 100%;
+    text-align: left;
+    position: relative;
+}
+
+/* Badge styling */
+.filter-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    text-align: center;
+    line-height: 20px;
+    z-index: 2;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+    width: 100%;
+    z-index: 1030;
+}
+
+.dropdown-item {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .filter-row {
+        gap: 10px;
+    }
+    
+    .filter-item {
+        min-width: 165px;
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-item {
+        width: 100%;
+    }
 }
 </style>
