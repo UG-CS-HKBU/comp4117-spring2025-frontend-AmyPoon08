@@ -63,17 +63,7 @@ const fetchName = async () => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            console.warn('No token found');
-            return;
-        }
-
-        // Check token size
-        if (token.length > 2048) {
-            console.error('Token is too large');
-            localStorage.removeItem('token');
-            isAuthenticated.value = false;
-            router.push('/');
-            return;
+            return; // Exit silently if no token
         }
 
         const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
@@ -85,26 +75,22 @@ const fetchName = async () => {
         });
 
         if (!response.ok) {
-            if (response.status === 431) {
-                console.error('Request Header Fields Too Large');
-                localStorage.removeItem('token');
-                isAuthenticated.value = false;
-                router.push('/');
-            } else if (response.status === 401) {
+            if (response.status === 401) {
                 console.warn('Unauthorized: Token expired or invalid');
                 localStorage.removeItem('token');
                 isAuthenticated.value = false;
                 router.push('/');
+                return;
             } else {
                 console.warn(`Failed to fetch profile: ${response.status}`);
+                return;
             }
-            return;
         }
 
         const data = await response.json();
         userName.value = data;
     } catch (error) {
-        console.error('Error fetching profile:', error.message);
+        console.warn('Error fetching profile:', error.message);
     } finally {
         isLoading.value = false;
     }
