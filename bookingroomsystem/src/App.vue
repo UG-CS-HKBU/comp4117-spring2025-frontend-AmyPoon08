@@ -16,39 +16,46 @@ const toggleMenu = () => {
 const logout = async () => {
     try {
         const token = localStorage.getItem('token');
-        
-        // Clear localStorage before making the request
-        localStorage.removeItem('token');
-        localStorage.removeItem('admin');
-        localStorage.removeItem('userId');
-        
-        isAuthenticated.value = false;
-        isAdmin.value = false;
-        
-        // Only make the logout request if you have a token
-        if (token) {
-            const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    // Limit headers to only what's needed
-                    'Content-Type': 'application/json'
-                }
-            });
+        console.log("Starting logout with token:", token); // Debug log
 
-            if (!response.ok && response.status !== 431) {
-                console.warn('Logout had issues on server side, but proceeded locally');
+        if (token) {
+            try {
+                const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Important for CORS
+                });
+
+                console.log("Logout response:", response); // Debug log
+
+                if (!response.ok) {
+                    console.warn(`Logout request failed with status: ${response.status}`);
+                    const errorText = await response.text();
+                    console.warn('Error details:', errorText);
+                }
+            } catch (fetchError) {
+                console.error('Fetch error during logout:', fetchError);
             }
         }
 
-        // Redirect to the login page
+        // Clear local storage regardless of server response
+        localStorage.clear(); // Clear all items
+        isAuthenticated.value = false;
+        isAdmin.value = false;
+        
+        // Redirect to login page
         router.push('/');
     } catch (error) {
-        console.error('Error during logout:', error.message);
-        // Even if there's an error, clear local state and redirect
+        console.error('Error during logout:', error);
+        // Clear local storage even if there's an error
+        localStorage.clear();
         router.push('/');
     }
 };
+
 
 const fetchIsAdmin = async () => {
     try {
