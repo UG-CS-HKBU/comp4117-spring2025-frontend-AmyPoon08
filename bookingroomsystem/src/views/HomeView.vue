@@ -21,6 +21,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import TopRoomsCarousel from './TopRoomsCarousel.vue';
+import config from '../config';
 
 
 export default {
@@ -36,7 +37,7 @@ export default {
     // Fetch all rooms
     const fetchRooms = async () => {
       try {
-        const response = await fetch('/api/rooms');
+        const response = await fetch(`${config.apiBaseUrl}/rooms`);
         if (!response.ok) {
           throw new Error('Failed to fetch rooms');
         }

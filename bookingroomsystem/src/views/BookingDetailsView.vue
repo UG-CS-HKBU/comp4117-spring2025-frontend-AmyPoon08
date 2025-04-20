@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
+import config from '../config';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
@@ -37,7 +38,7 @@ const fetchDetails = async () => {
         }
 
         // Always use the same endpoint for fetching booking details
-        const response = await fetch(`/api/bookings/${bookingId}`, {
+        const response = await fetch(`${config.apiBaseUrl}/bookings/${bookingId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

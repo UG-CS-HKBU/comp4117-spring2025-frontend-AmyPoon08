@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch} from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import DatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
+import config from '../config';
 
 const route = useRoute();
 const router = useRouter();
@@ -62,7 +63,7 @@ const fetchRoom = async () => {
         const roomId = route.params.id;
         // Check if there's an ID in the route params
         if (roomId) {
-            const response = await fetch(`/api/rooms/${roomId}`);
+            const response = await fetch(`${config.apiBaseUrl}/rooms/${roomId}`);
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');

@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { loadScript } from "@paypal/paypal-js";
 import { useRouter, useRoute } from 'vue-router';
+import config from '../config';
 
 const route = useRoute();
 const router = useRouter();

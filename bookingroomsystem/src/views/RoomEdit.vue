@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import config from '../config';
 
 const route = useRoute();
 const router = useRouter();
@@ -32,7 +33,7 @@ const room = ref({
 const fetchRoomDetails = async () => {
   loading.value = true;
   try {
-    const response = await fetch(`/api/rooms/${roomId}`);
+    const response = await fetch(`${config.apiBaseUrl}/rooms/${roomId}`);
     if (!response.ok) throw new Error('Failed to fetch room data');
     
     const data = await response.json();

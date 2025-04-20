@@ -5,6 +5,7 @@ import InputText from 'primevue/inputtext';
 import Paginator from 'primevue/paginator';
 import Select from 'primevue/select';
 import Dropdown from 'primevue/dropdown';
+import config from '../config';
 
 const bookingHistory = ref([]);
 const loading = ref(false);
@@ -113,7 +114,7 @@ const fetchBookingHistory = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch('/api/users/bookingHistory', {
+        const response = await fetch(`${config.apiBaseUrl}/users/bookingHistory`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

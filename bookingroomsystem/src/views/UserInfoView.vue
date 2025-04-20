@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
+import config from '../config';
 
 const users = ref([]);
 const loading = ref(false);
@@ -34,7 +35,7 @@ const clearFilter = () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await fetch('/api/users', {
+        const response = await fetch(`${config.apiBaseUrl}/users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

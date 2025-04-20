@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import config from '../config';
 
 const router = useRouter();
 const fileInput = ref(null);

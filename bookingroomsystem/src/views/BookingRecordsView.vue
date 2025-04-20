@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import Calendar from 'primevue/calendar';
 import Tag from 'primevue/tag';
 import Select from 'primevue/select';
+import config from '../config';
 
 const bookingRecords = ref([]);
 const loading = ref(false);
@@ -138,7 +139,7 @@ const fetchBookingRecords = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch('/api/bookings', {
+        const response = await fetch(`${config.apiBaseUrl}/bookings`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

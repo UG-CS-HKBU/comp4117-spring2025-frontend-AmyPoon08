@@ -2,6 +2,7 @@
 import Button from 'primevue/button';
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from "vue-router";
+import config from '../config';
 
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +23,7 @@ const fetchUser = async () => {
         const userId = route.params.id;
         if (userId){
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/users/${userId}`, {
+            const response = await fetch(`${config.apiBaseUrl}/users/${userId}`, {
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : ''
                 }

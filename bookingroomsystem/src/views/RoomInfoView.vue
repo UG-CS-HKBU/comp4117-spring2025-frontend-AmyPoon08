@@ -9,6 +9,7 @@ import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
+import config from '../config';
 
 // const searchQuery = ref('');
 
@@ -53,7 +54,7 @@ const clearFilter = () => {
 
 const fetchRooms = async () => {
     try {
-        const response = await fetch(`/api/rooms`, {
+        const response = await fetch(`${config.apiBaseUrl}/rooms`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

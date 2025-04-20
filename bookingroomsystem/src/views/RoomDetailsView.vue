@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import Button from 'primevue/button';
+import config from '../config';
 
 const route = useRoute();
 const router = useRouter();
@@ -13,7 +14,7 @@ const fetchRoom = async () => {
         const roomId = route.params.id;
         // Check if there's an ID in the route params
         if (roomId) {
-            const response = await fetch(`/api/rooms/${roomId}`);
+            const response = await fetch(`${config.apiBaseUrl}/rooms/${roomId}`);
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');

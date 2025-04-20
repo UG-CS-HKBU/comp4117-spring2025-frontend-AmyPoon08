@@ -1,5 +1,6 @@
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
+import config from '../config';
 // import DatePicker from 'vue-datepicker-next';
 
 export default {
@@ -54,7 +55,7 @@ export default {
         const fetchRoomsByDateRange = async () => {
             if (dateRange.value[0] && dateRange.value[1]) {
                 try {
-                    const response = await fetch(`/api/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
+                    const response = await fetch(`${config.apiBaseUrl}/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
                     if (!response.ok) {
                         throw new Error('Failed to fetch rooms');
                     }
