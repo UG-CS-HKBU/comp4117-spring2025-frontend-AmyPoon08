@@ -233,11 +233,13 @@ const bookRoom = async () => {
             userId: userDetails.value._id,
             username: userDetails.value.username,
             userContact: userDetails.value.mobile,
-            userEmail: userDetails.value.email,
-            status: 'pending payment'
+            userEmail: userDetails.value.email
         };
 
-        const response = await fetch(`${config.apiBaseUrl}/bookings/create`, {
+        // Log the request details for debugging
+        console.log('Creating booking with data:', bookingData);
+
+        const response = await fetch(`${config.apiBaseUrl}/bookings/create`, { // Updated to match backend endpoint
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -246,21 +248,30 @@ const bookRoom = async () => {
             body: JSON.stringify(bookingData)
         });
 
+        // Log the response status for debugging
+        console.log('Booking response status:', response.status);
+
         if (!response.ok) {
-            throw new Error('Failed to create booking');
+            const errorData = await response.json();
+            console.error('Booking error response:', errorData);
+            throw new Error(errorData.message || 'Failed to create booking');
         }
 
-        const { booking } = await response.json();
+        const data = await response.json();
+        console.log('Booking created successfully:', data);
 
-        // Start timer
-        localStorage.setItem(`booking_timer_${booking._id}`, Date.now().toString());
-
-        // Navigate to payment
-        router.push(`/payment/${booking._id}`);
+        // Start timer using the timerExpiry from the response
+        if (data.booking && data.booking._id) {
+            localStorage.setItem(`booking_timer_${data.booking._id}`, Date.now().toString());
+            // Navigate to payment
+            router.push(`/payment/${data.booking._id}`);
+        } else {
+            throw new Error('Invalid booking response');
+        }
 
     } catch (error) {
         console.error('Error creating booking:', error);
-        alert(error.message);
+        alert(error.message || 'Failed to create booking');
     }
 };
 
