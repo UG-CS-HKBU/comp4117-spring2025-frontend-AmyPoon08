@@ -37,7 +37,7 @@ const fetchDetails = async () => {
         }
 
         // Always use the same endpoint for fetching booking details
-        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/${bookingId}`, {
+        const response = await fetch(`/api/bookings/${bookingId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -152,7 +152,7 @@ const uploadPaymentProof = async () => {
         const formData = new FormData()
         formData.append('paymentProof', selectedFile.value)
 
-        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/bookingHistory/${details.value.bookingId}/uploadPaymentProof`, {
+        const response = await fetch(`/api/users/bookingHistory/${details.value.bookingId}/uploadPaymentProof`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -190,7 +190,7 @@ const updateStatus = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/bookings/${route.params.id}`, {
+        const response = await fetch(`/api/bookings/${route.params.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

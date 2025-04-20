@@ -34,7 +34,7 @@ const clearFilter = () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users', {
+        const response = await fetch('/api/users', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -18,7 +18,7 @@
                 throw new Error('No token found. Please log in.');
             }
 
-            const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
+            const response = await fetch('/api/profile', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +53,7 @@
                 throw new Error('No token found. Please log in.');
             }
 
-            const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/users/${profile.value._id}`, {
+            const response = await fetch(`/api/users/${profile.value._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

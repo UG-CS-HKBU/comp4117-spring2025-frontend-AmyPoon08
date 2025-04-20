@@ -13,7 +13,7 @@ const fetchRoom = async () => {
         const roomId = route.params.id;
         // Check if there's an ID in the route params
         if (roomId) {
-            const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/${roomId}`);
+            const response = await fetch(`/api/rooms/${roomId}`);
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');

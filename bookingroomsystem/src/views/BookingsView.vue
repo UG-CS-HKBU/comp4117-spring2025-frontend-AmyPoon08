@@ -54,7 +54,7 @@ export default {
         const fetchRoomsByDateRange = async () => {
             if (dateRange.value[0] && dateRange.value[1]) {
                 try {
-                    const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
+                    const response = await fetch(`/api/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
                     if (!response.ok) {
                         throw new Error('Failed to fetch rooms');
                     }
@@ -235,7 +235,7 @@ export default {
 
         const fetchRooms = async (query = '') => {
             try {
-                const response = await fetch(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms${query}`);
+                const response = await fetch(`/api/rooms${query}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch rooms');
                 }

@@ -29,7 +29,7 @@ module.exports = async function (context, req) {
     
     try {
         const parsedUrl = new URL(req.url);
-        const url = new URL(`https://xxx.azurewebsites.net${parsedUrl.pathname}${parsedUrl.search}`);
+        const url = new URL(`https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/${parsedUrl.pathname}${parsedUrl.search}`);
 
         const options = {
             method: req.method,
