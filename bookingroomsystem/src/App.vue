@@ -60,12 +60,23 @@ const logout = async () => {
 
 const fetchIsAdmin = async () => {
     try {
-        isAdmin.value = localStorage.getItem('admin') === 'on' || localStorage.getItem('admin') === true;
-        console.log('Admin: ', isAdmin.value);
+        const adminStatus = localStorage.getItem('admin');
+        // Parse the stored value back to boolean if it's a boolean string
+        if (adminStatus === 'true' || adminStatus === 'false') {
+            isAdmin.value = JSON.parse(adminStatus);
+        } else {
+            // Handle 'on' string case
+            isAdmin.value = adminStatus === 'on';
+        }
+        console.log('Admin status:', {
+            rawValue: adminStatus,
+            isAdmin: isAdmin.value
+        });
     } catch (error) {
         console.error('Error during fetchIsAdmin:', error.message);
+        isAdmin.value = false;
     }
-}
+};
 
 // const fetchName = async () => {
 //     const token = localStorage.getItem('token');

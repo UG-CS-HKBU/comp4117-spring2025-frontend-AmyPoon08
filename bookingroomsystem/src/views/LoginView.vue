@@ -65,12 +65,16 @@ const login = async () => {
         }
 
         const data = await response.json();
-        console.log('Login successful:', data); // Add logging
+        console.log('Login response:', data);
 
+        // Store token and userId
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.userId);
-        localStorage.setItem('admin', data.admin);
         
+        // Store the boolean value as a string
+        localStorage.setItem('admin', data.isAdmin.toString());
+        console.log('Admin status set to:', data.isAdmin);
+
         isAuthenticated.value = true;
         await router.push('/home');
         

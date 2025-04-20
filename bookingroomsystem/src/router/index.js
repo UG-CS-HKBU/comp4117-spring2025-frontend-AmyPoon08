@@ -25,8 +25,19 @@ function isAuthenticated() {
 
 function isAdmin() {
   const adminStatus = localStorage.getItem('admin');
-  console.log('Admin check in router:', adminStatus);
-  return adminStatus === 'on' || adminStatus === true;
+  // Parse the stored value back to boolean if it's a boolean string
+  if (adminStatus === 'true' || adminStatus === 'false') {
+    return JSON.parse(adminStatus);
+  }
+  // Handle 'on' string case
+  if (adminStatus === 'on') {
+    return true;
+  }
+  // Handle empty string case
+  if (adminStatus === '') {
+    return false;
+  }
+  return false; // Default case
 }
 
 const router = createRouter({
@@ -147,18 +158,16 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
-  const isAdmin = localStorage.getItem('admin') === 'on';
+  const token = localStorage.getItem('token');
 
-  // Add more detailed logging
   console.log('Navigation guard:', {
     to: to.path,
     requiresAuth,
     requiresAdmin,
     hasToken: !!token,
-    isAdmin
+    isAdmin: isAdmin()
   });
 
   if (requiresAuth && !token) {
@@ -169,7 +178,8 @@ router.beforeEach((to, from, next) => {
     return;
   }
 
-  if (requiresAdmin && !isAdmin) {
+  if (requiresAdmin && !isAdmin()) {
+    console.log('Access denied: Admin required');
     next('/home');
     return;
   }
