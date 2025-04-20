@@ -1,50 +1,4 @@
-# name: Azure Static Web Apps CI/CD
-
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     types: [opened, synchronize, reopened, closed]
-#     branches:
-#       - main
-
-# jobs:
-#   build_and_deploy_job:
-#     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-#     runs-on: ubuntu-latest
-#     name: Build and Deploy Job
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           submodules: true
-#           lfs: false
-#       - name: Build And Deploy
-#         id: builddeploy
-#         uses: Azure/static-web-apps-deploy@v1
-#         with:
-#           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_BAY_03DD73D00 }}
-#           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-#           action: "upload"
-#           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-#           app_location: "bookingroomsystem" # Path to your frontend project
-#           api_location: "" # Leave empty if no backend is used
-#           output_location: "dist" # Built app content directory
-#           ###### End of Repository/Build Configurations ######
-          
-#   close_pull_request_job:
-#     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-#     runs-on: ubuntu-latest
-#     name: Close Pull Request Job
-#     steps:
-#       - name: Close Pull Request
-#         id: closepullrequest
-#         uses: Azure/static-web-apps-deploy@v1
-#         with:
-#           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_BAY_03DD73D00 }}
-#           action: "close"
-
-name: Azure Static Web Apps and Backend CI/CD
+name: Azure Static Web Apps CI/CD
 
 on:
   push:
@@ -56,10 +10,10 @@ on:
       - main
 
 jobs:
-  build_and_deploy_frontend:
+  build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Frontend
+    name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v3
         with:
@@ -70,38 +24,13 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_BAY_03DD73D00 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          app_location: "bookingroomsystem"
-          api_location: ""
-          output_location: "dist"
-  
-  build_and_deploy_backend:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    name: Build and Deploy Backend
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          
-      - name: npm install and build
-        run: |
-          cd backend  # Change to your backend directory
-          npm ci
-          # Increase Node.js memory limit for build
-          export NODE_OPTIONS="--max_old_space_size=4096"
-          npm run build --if-present
-      
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'RoomBookingSystem'  # Replace with your App Service name
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: './backend'  # Adjust to your backend directory
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          app_location: "bookingroomsystem" # Path to your frontend project
+          api_location: "" # Leave empty if no backend is used
+          output_location: "dist" # Built app content directory
+          ###### End of Repository/Build Configurations ######
           
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
