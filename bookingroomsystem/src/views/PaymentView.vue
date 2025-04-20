@@ -183,7 +183,10 @@ const renderPayPalButton = async () => {
 
 const processPayment = async () => {
   if (paymentMethod.value === 'paypal') {
-    // PayPal is handled by the PayPal button itself
+    renderPayPalButton();
+    return;
+  }
+  if (!validateForm()) {
     return;
   }
 
@@ -214,8 +217,8 @@ const processPayment = async () => {
       throw new Error(error.message || 'Failed to update booking');
     }
 
-    // Clear timer
-    clearInterval(timer.value);
+    // Clear the pending booking details
+    localStorage.removeItem('pendingBookingDetails');
 
     // Show success message and redirect
     alert('Please upload your payment proof in the booking details page.');
