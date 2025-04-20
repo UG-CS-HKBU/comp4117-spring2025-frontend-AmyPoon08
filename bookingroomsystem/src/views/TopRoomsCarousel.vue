@@ -40,7 +40,7 @@ export default {
   methods: {
     async fetchTopRooms() {
       try {
-        const res = await axios.get('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/rooms/top');
+        const res = await axios.get('/api/rooms/top');
         this.topRooms = res.data.topRooms;
       } catch (err) {
         console.error('Failed to load top rooms:', err);
@@ -53,7 +53,7 @@ export default {
           throw new Error('No token found');
         }
         
-        const res = await axios.get('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
+        const res = await axios.get('/api/profile', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
