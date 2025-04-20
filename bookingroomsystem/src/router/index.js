@@ -150,7 +150,7 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
-  const isAdmin = localStorage.getItem('admin') === 'on';
+  const isAdmin = localStorage.getItem('admin') === 'on' || localStorage.getItem('admin') === 'true';
 
   // Add more detailed logging
   console.log('Navigation guard:', {
