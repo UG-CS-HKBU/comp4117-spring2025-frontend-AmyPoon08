@@ -71,9 +71,9 @@ const login = async () => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.userId);
         
-        // Store the boolean value as a string
-        localStorage.setItem('admin', data.isAdmin.toString());
-        console.log('Admin status set to:', data.isAdmin);
+        // Store admin status - using 'admin' instead of 'isAdmin'
+        localStorage.setItem('admin', data.admin); // Changed from data.isAdmin to data.admin
+        console.log('Admin status set to:', data.admin);
 
         isAuthenticated.value = true;
         await router.push('/home');
