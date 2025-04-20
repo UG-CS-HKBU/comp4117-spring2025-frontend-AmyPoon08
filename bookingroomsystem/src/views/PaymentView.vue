@@ -177,8 +177,7 @@ const renderPayPalButton = async () => {
             body: JSON.stringify({
               paymentMethod: 'paypal',
               paymentProof: null
-            }),
-            credentials: 'include'  // Include credentials for CORS
+            })
           });
 
           if (!response.ok) {
@@ -242,9 +241,8 @@ const processPayment = async () => {
       },
       body: JSON.stringify({
         paymentMethod: 'others',
-        paymentProof: null  // Initially no proof
-      }),
-      credentials: 'include'  // Include credentials for CORS
+        paymentProof: null
+      })
     });
 
     if (!response.ok) {
@@ -253,7 +251,7 @@ const processPayment = async () => {
     }
 
     const result = await response.json();
-    console.log('Payment update result:', result); // Debug log
+    console.log('Payment update result:', result);
 
     // Clear timer
     if (timer.value) {

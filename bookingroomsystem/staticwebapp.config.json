@@ -12,18 +12,16 @@
             "allowedRoles": ["anonymous", "authenticated"],
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
             "headers": {
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "https://happy-bay-03dd73d00.6.azurestaticapps.net",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Credentials": "true"
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
             }
         }
     ],
     "globalHeaders": {
         "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.paypal.com *.azurewebsites.net; img-src 'self' data: https: blob:; connect-src 'self' *.paypal.com *.azurewebsites.net",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://happy-bay-03dd73d00.6.azurestaticapps.net",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true"
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
     }
 }
