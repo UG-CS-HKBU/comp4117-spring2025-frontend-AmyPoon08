@@ -221,7 +221,7 @@ const completeBooking = async () => {
       throw new Error('Booking time has expired');
     }
 
-    const response = await fetch(`/api/bookings/update/${bookingId.value}`, {
+    const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -326,7 +326,7 @@ const handleExpiredBooking = async () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`/api/bookings/checkExpired`, {
+    const response = await fetch(`${config.apiBaseUrl}/bookings/checkExpired`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
