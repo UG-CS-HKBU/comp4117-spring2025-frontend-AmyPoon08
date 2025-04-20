@@ -237,7 +237,7 @@ const bookRoom = async () => {
             status: 'pending payment'
         };
 
-        const response = await fetch('/api/bookings/create', {
+        const response = await fetch(`${config.apiBaseUrl}/bookings/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -271,7 +271,7 @@ const fetchAvailability = async () => {
         if (!selectedDate.value || !room.value._id) return;
         
         const formattedDate = formatDate(selectedDate.value);
-        const response = await fetch(`/api/bookings/availability/${room.value._id}/${formattedDate}`);
+        const response = await fetch(`${config.apiBaseUrl}/bookings/availability/${room.value._id}/${formattedDate}`);
         if (!response.ok) {
             throw new Error('Failed to fetch availability');
         }
