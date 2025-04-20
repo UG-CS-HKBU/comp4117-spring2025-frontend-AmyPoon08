@@ -48,7 +48,7 @@ const saveUser = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch(`/api/users/${user.value._id}`, {
+        const response = await fetch(`${config.apiBaseUrl}/users/${user.value._id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

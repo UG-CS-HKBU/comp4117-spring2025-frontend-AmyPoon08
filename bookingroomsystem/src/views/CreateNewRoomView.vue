@@ -57,7 +57,7 @@ const createRoom = async () => {
       }
     });
 
-    const response = await fetch('/api/rooms', {  
+    const response = await fetch(`${config.apiBaseUrl}/rooms`, {  
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`

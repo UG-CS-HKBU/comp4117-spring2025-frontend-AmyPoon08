@@ -79,7 +79,7 @@ const updateRoom = async () => {
 
     formData.append('image', selectedFile.value)
 
-    const response = await fetch(`/api/rooms/${roomId}`, {
+    const response = await fetch(`${config.apiBaseUrl}/rooms/${roomId}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData

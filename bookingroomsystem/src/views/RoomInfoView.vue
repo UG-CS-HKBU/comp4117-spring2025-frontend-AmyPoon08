@@ -84,7 +84,7 @@ const deleteRoom = async () => {
     
     try {
         loading.value = true;
-        const response = await fetch(`/api/rooms/${roomToDelete.value._id}`, {
+        const response = await fetch(`${config.apiBaseUrl}/rooms/${roomToDelete.value._id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
