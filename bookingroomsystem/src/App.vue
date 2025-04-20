@@ -60,7 +60,7 @@ const logout = async () => {
 
 const fetchIsAdmin = async () => {
     try {
-        isAdmin.value = localStorage.getItem('admin') === 'on';
+        isAdmin.value = localStorage.getItem('admin') === 'on' || localStorage.getItem('admin') === true;
         console.log('Admin: ', isAdmin.value);
     } catch (error) {
         console.error('Error during fetchIsAdmin:', error.message);

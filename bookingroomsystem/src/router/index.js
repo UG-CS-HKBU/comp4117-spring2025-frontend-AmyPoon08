@@ -26,7 +26,7 @@ function isAuthenticated() {
 function isAdmin() {
   const adminStatus = localStorage.getItem('admin');
   console.log('Admin check in router:', adminStatus);
-  return adminStatus === 'on';
+  return adminStatus === 'on' || adminStatus === true;
 }
 
 const router = createRouter({
