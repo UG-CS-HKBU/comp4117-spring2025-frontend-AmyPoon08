@@ -16,39 +16,46 @@ const toggleMenu = () => {
 const logout = async () => {
     try {
         const token = localStorage.getItem('token');
-        
-        // Clear localStorage before making the request
-        localStorage.removeItem('token');
-        localStorage.removeItem('admin');
-        localStorage.removeItem('userId');
-        
-        isAuthenticated.value = false;
-        isAdmin.value = false;
-        
-        // Only make the logout request if you have a token
-        if (token) {
-            const response = await fetch('/api/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    // Limit headers to only what's needed
-                    'Content-Type': 'application/json'
-                }
-            });
+        console.log("Starting logout with token:", token); // Debug log
 
-            if (!response.ok && response.status !== 431) {
-                console.warn('Logout had issues on server side, but proceeded locally');
+        if (token) {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Important for CORS
+                });
+
+                console.log("Logout response:", response); // Debug log
+
+                if (!response.ok) {
+                    console.warn(`Logout request failed with status: ${response.status}`);
+                    const errorText = await response.text();
+                    console.warn('Error details:', errorText);
+                }
+            } catch (fetchError) {
+                console.error('Fetch error during logout:', fetchError);
             }
         }
 
-        // Redirect to the login page
+        // Clear local storage regardless of server response
+        localStorage.clear(); // Clear all items
+        isAuthenticated.value = false;
+        isAdmin.value = false;
+        
+        // Redirect to login page
         router.push('/');
     } catch (error) {
-        console.error('Error during logout:', error.message);
-        // Even if there's an error, clear local state and redirect
+        console.error('Error during logout:', error);
+        // Clear local storage even if there's an error
+        localStorage.clear();
         router.push('/');
     }
 };
+
 
 const fetchIsAdmin = async () => {
     try {
@@ -59,6 +66,42 @@ const fetchIsAdmin = async () => {
     }
 }
 
+// const fetchName = async () => {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         throw new Error('No token found');
+//     }
+
+//     try {
+//         const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${token}`
+//             }
+//         });
+
+//         if (!response.ok) {
+//             if (response.status === 401) {
+//                 // Token expired or invalid
+//                 localStorage.clear();
+//                 window.location.href = '/login';
+//                 throw new Error('Session expired, please login again');
+//             }
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error('Failed to fetch profile:', error);
+//         if (error.message.includes('Session expired')) {
+//             localStorage.clear();
+//             window.location.href = '/login';
+//         }
+//         throw error;
+//     }
+// };
+
 const fetchName = async () => {
     try {
         const token = localStorage.getItem('token');
@@ -66,7 +109,7 @@ const fetchName = async () => {
             return; // Exit silently if no token
         }
 
-        const response = await fetch('/api/profile', {
+        const response = await fetch('/api/name', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -142,7 +185,7 @@ onMounted(() => {
             <!-- Left side with logo and navigation -->
             <div class="nav-left">
                 <a href="/home" class="logo-link">
-                    <img src="./images/icon.png" alt="KOJU by tronico" class="nav-logo" />
+                    <img src="./images/AboutUs.jpg" alt="KOJU by tronico" class="nav-logo" />
                 </a>
                 <!-- Navigation links on left -->
                 <div class="nav-links">
@@ -182,7 +225,7 @@ onMounted(() => {
             <!-- Left side with logo and navigation -->
             <div class="nav-left">
                 <a href="/home" class="logo-link">
-                    <img src="./images/icon.png" alt="KOJU by tronico" class="nav-logo" />
+                    <img src="./images/AboutUs.jpg" alt="KOJU by tronico" class="nav-logo" />
                 </a>
                 <!-- Admin navigation links on left -->
                 <div class="nav-links">
@@ -229,7 +272,7 @@ onMounted(() => {
                 <!-- Mobile Footer -->
                 <div class="mobile-footer">
                     <div class="footer-logo">
-                        <img src="./images/icon.png" alt="KOJU by tronico" class="logo-image" />
+                        <img src="./images/AboutUs.jpg" alt="KOJU by tronico" class="logo-image" />
                     </div>
                     <div class="footer-links">
                         <router-link to="/aboutUs">About us</router-link>
@@ -247,7 +290,7 @@ onMounted(() => {
                 <div class="desktop-footer">
                     <div class="footer-left">
                         <div class="footer-logo">
-                            <img src="./images/icon.png" alt="KOJU by tronico" class="logo-image" />
+                            <img src="./images/AboutUs.jpg" alt="KOJU by tronico" class="logo-image" />
                         </div>
                         <div class="copyright">
                             Room Booking System © 2025 - Comp4117 Group C Project
