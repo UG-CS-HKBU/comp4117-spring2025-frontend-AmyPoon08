@@ -9,7 +9,7 @@
     "routes": [
         {
             "route": "/api/*",
-            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
             "allowedRoles": ["anonymous"],
             "rewrite": "https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/{rest}"
         },
