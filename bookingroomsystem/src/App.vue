@@ -18,8 +18,31 @@ const logout = async () => {
     try {
         const token = localStorage.getItem('token');
         console.log('Starting logout process');
-        
-        // Clear localStorage first to ensure user is logged out locally
+
+        if (token) {
+            try {
+                // Call logout API first
+                const response = await fetch(`${config.apiBaseUrl}/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Logout API failed:', response.status);
+                    throw new Error('Logout failed');
+                }
+
+                console.log('Backend logout successful');
+            } catch (apiError) {
+                console.error('Error calling logout API:', apiError);
+                throw apiError; // Rethrow to handle in outer catch
+            }
+        }
+
+        // Only clear local storage after successful API call
         localStorage.removeItem('token');
         localStorage.removeItem('admin');
         localStorage.removeItem('userId');
@@ -27,28 +50,12 @@ const logout = async () => {
         // Update local state
         isAuthenticated.value = false;
         isAdmin.value = false;
-        
-        // Try to call logout API, but don't wait for it
-        if (token) {
-            try {
-                await fetch(`${config.apiBaseUrl}/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include' // Remove this line if not needed
-                });
-            } catch (apiError) {
-                console.warn('Logout API call failed, but proceeded with local logout:', apiError);
-            }
-        }
 
-        // Always redirect to login page
+        // Redirect to login page
         router.push('/');
     } catch (error) {
         console.error('Error during logout:', error);
-        // Even if there's an error, ensure user is logged out locally
+        // On error, still clear local storage to prevent being stuck
         localStorage.clear();
         isAuthenticated.value = false;
         isAdmin.value = false;
