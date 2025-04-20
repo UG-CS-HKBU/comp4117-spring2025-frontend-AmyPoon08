@@ -21,7 +21,7 @@ const logout = async () => {
 
         if (token) {
             try {
-                const response = await fetch('/api/logout', {
+                const response = await fetch(`${config.apiBaseUrl}/logout`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
