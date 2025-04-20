@@ -109,7 +109,7 @@ const fetchName = async () => {
             return; // Exit silently if no token
         }
 
-        const response = await fetch('/api/name', {
+        const response = await fetch('/api/profile', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
