@@ -140,6 +140,7 @@ const renderPayPalButton = async () => {
     return;
   }
 
+  
   try {
     const buttons = paypal.Buttons({
       style: {
