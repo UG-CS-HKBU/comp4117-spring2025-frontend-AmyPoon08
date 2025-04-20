@@ -46,7 +46,7 @@ onMounted(async () => {
     }
 
     // First check booking status
-    const statusResponse = await fetch(`/api/bookings/checkStatus/${bookingId.value}`, {
+    const statusResponse = await fetch(`${config.apiBaseUrl}/bookings/checkStatus/${bookingId.value}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -64,7 +64,7 @@ onMounted(async () => {
       return;
     }
 
-    const response = await fetch(`/api/bookings/${bookingId.value}`, {
+    const response = await fetch(`${config.apiBaseUrl}/bookings/${bookingId.value}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

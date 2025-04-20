@@ -92,7 +92,7 @@ const handleImageError = (e) => {
 // Fetch room details to get images
 const fetchRoomDetails = async (roomId) => {
     try {
-        const response = await fetch(`/api/rooms/${roomId}`);
+        const response = await fetch(`${config.apiBaseUrl}/rooms/${roomId}`);
         
         if (!response.ok) {
             throw new Error('Failed to fetch room details');
