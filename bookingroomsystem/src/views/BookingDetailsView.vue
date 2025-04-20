@@ -153,7 +153,7 @@ const uploadPaymentProof = async () => {
         const formData = new FormData()
         formData.append('paymentProof', selectedFile.value)
 
-        const response = await fetch(`/api/users/bookingHistory/${details.value.bookingId}/uploadPaymentProof`, {
+        const response = await fetch(`${config.apiBaseUrl}/users/bookingHistory/${details.value.bookingId}/uploadPaymentProof`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -191,7 +191,7 @@ const updateStatus = async () => {
             throw new Error('No token found. Please log in.');
         }
 
-        const response = await fetch(`/api/bookings/${route.params.id}`, {
+        const response = await fetch(`${config.apiBaseUrl}/bookings/${route.params.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

@@ -51,7 +51,7 @@ export default {
     // Fetch confirmed bookings
     const fetchConfirmedBookings = async () => {
       try {
-        const response = await fetch('/api/bookings');
+        const response = await fetch(`${config.apiBaseUrl}/bookings`);
         if (!response.ok) {
           throw new Error('Failed to fetch bookings');
         }

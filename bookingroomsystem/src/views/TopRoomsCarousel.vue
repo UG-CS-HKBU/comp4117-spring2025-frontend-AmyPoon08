@@ -41,7 +41,7 @@ export default {
   methods: {
     async fetchTopRooms() {
       try {
-        const res = await axios.get('/api/rooms/top');
+        const res = await axios.get(`${config.apiBaseUrl}/rooms/top`);
         this.topRooms = res.data.topRooms;
       } catch (err) {
         console.error('Failed to load top rooms:', err);
