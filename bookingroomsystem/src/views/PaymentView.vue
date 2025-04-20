@@ -136,11 +136,10 @@ const validateForm = () => {
 
 const renderPayPalButton = async () => {
   if (!paypal || !bookingDetails.value.totalPrice) {
-    console.log('Cannot render PayPal - missing requirements');
+    console.error('PayPal not initialized or missing total price');
     return;
   }
 
-  
   try {
     const buttons = paypal.Buttons({
       style: {
@@ -153,6 +152,7 @@ const renderPayPalButton = async () => {
         return actions.order.create({
           purchase_units: [{
             amount: {
+              currency_code: "HKD",
               value: bookingDetails.value.totalPrice.toString()
             }
           }]
@@ -164,8 +164,10 @@ const renderPayPalButton = async () => {
           const order = await actions.order.capture();
           console.log('PayPal payment successful:', order);
           
-          // Update booking with PayPal payment info
           const token = localStorage.getItem('token');
+          if (!token) throw new Error('No token found');
+
+          // Update booking with PayPal payment info
           const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
             method: 'PATCH',
             headers: {
@@ -175,18 +177,28 @@ const renderPayPalButton = async () => {
             body: JSON.stringify({
               paymentMethod: 'paypal',
               paymentProof: null
-            })
+            }),
+            credentials: 'include'  // Include credentials for CORS
           });
 
           if (!response.ok) {
-            throw new Error('Failed to update booking status');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update booking status');
+          }
+
+          const result = await response.json();
+          console.log('PayPal booking update result:', result); // Debug log
+
+          // Clear timer if it exists
+          if (timer.value) {
+            clearInterval(timer.value);
           }
 
           alert('Payment successful! Your booking has been confirmed.');
           router.push('/myBookings');
         } catch (error) {
-          console.error('Payment failed:', error);
-          alert('Payment failed. Please try again.');
+          console.error('Payment processing error:', error);
+          alert(error.message || 'Payment failed. Please try again.');
         }
       },
       onError: (err) => {
@@ -199,7 +211,7 @@ const renderPayPalButton = async () => {
       await buttons.render('#paypal-button-container');
       console.log('PayPal button rendered successfully');
     } else {
-      console.log('PayPal Buttons are not eligible');
+      console.error('PayPal Buttons are not eligible');
     }
   } catch (error) {
     console.error('Error rendering PayPal button:', error);
@@ -222,7 +234,6 @@ const processPayment = async () => {
     }
 
     // For other payment methods (Alipay, PayMe, Bank Deposit)
-    // FIXED: Set paymentMethod but keep status as 'pending payment'
     const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
       method: 'PATCH',
       headers: {
@@ -231,19 +242,23 @@ const processPayment = async () => {
       },
       body: JSON.stringify({
         paymentMethod: 'others',
-        paymentProof: null,
-        // Don't include status as it should remain 'pending payment'
-        // The backend should not change it to 'pending approval' yet
-      })
+        paymentProof: null  // Initially no proof
+      }),
+      credentials: 'include'  // Include credentials for CORS
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update booking');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update booking');
     }
 
+    const result = await response.json();
+    console.log('Payment update result:', result); // Debug log
+
     // Clear timer
-    clearInterval(timer.value);
+    if (timer.value) {
+      clearInterval(timer.value);
+    }
 
     // Show success message and redirect
     alert('Please upload your payment proof in the booking details page.');

@@ -8,15 +8,19 @@
     },
     "routes": [
         {
+            "route": "/api/*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Credentials": "true"
+            }
+        },
+        {
             "route": "/api/logout",
             "methods": ["POST", "OPTIONS"],
             "rewrite": "https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/logout",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/api/*",
-            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-            "rewrite": "https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/{rest}",
             "allowedRoles": ["anonymous"]
         },
         {
