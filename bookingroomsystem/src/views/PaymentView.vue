@@ -183,30 +183,47 @@ const renderPayPalButton = async () => {
 
 const processPayment = async () => {
   if (paymentMethod.value === 'paypal') {
-    renderPayPalButton();
+    // PayPal is handled by the PayPal button itself
     return;
   }
-  if (!validateForm()) {
-    return;
-  }
-
-  isProcessing.value = true;
 
   try {
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    isProcessing.value = true;
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
 
-    // After successful payment, proceed with the booking
-    await completeBooking();
+    if (timeLeft.value <= 0) {
+      throw new Error('Booking time has expired');
+    }
 
-    // Clear the pending booking details
-    localStorage.removeItem('pendingBookingDetails');
+    // For other payment methods, just update the booking status to 'pending payment'
+    const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        status: 'pending payment',
+        paymentMethod: paymentMethod.value
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update booking');
+    }
+
+    // Clear timer
+    clearInterval(timer.value);
 
     // Show success message and redirect
-    alert('Payment successful! Your room has been booked.');
-    router.push('/bookings');
+    alert('Please upload your payment proof in the booking details page.');
+    router.push(`/bookingHistory/${bookingId.value}`);
+
   } catch (error) {
-    alert(`Payment failed: ${error.message}`);
+    console.error('Error processing payment:', error);
+    alert(error.message || 'Payment processing failed');
   } finally {
     isProcessing.value = false;
   }
@@ -228,8 +245,9 @@ const completeBooking = async () => {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        paymentMethod: paymentMethod.value,
-        paymentProof: null // For PayPal, no proof needed
+        status: 'pending approval', // PayPal payments go directly to pending approval
+        paymentMethod: 'paypal',
+        paymentProof: null // PayPal payments don't need proof
       })
     });
 
