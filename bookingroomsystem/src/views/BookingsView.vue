@@ -236,7 +236,7 @@ export default {
 
         const fetchRooms = async (query = '') => {
             try {
-                const response = await fetch(`/api/rooms${query}`);
+                const response = await fetch(`${config.apiBaseUrl}/rooms${query}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch rooms');
                 }
