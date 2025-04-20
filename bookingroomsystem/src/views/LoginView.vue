@@ -32,26 +32,41 @@ onBeforeMount(() => {
 const login = async () => {
     try {
         errorMessage.value = '';
+        console.log('Attempting login to:', `${config.apiBaseUrl}/login`); // Add logging
 
         const response = await fetch(`${config.apiBaseUrl}/login`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' // Add this line
             },
             body: JSON.stringify(credentials.value)
         });
 
-        // Add more detailed error logging
+        // Add detailed error logging
         if (!response.ok) {
             console.error('Login failed:', {
                 status: response.status,
-                statusText: response.statusText
+                statusText: response.statusText,
+                url: response.url
             });
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Login failed');
+
+            // Try to read error message
+            let errorMessage;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message;
+            } catch (e) {
+                errorMessage = await response.text(); // Fallback to reading raw text
+                console.log('Raw error response:', errorMessage);
+            }
+
+            throw new Error(errorMessage || 'Login failed');
         }
 
         const data = await response.json();
+        console.log('Login successful:', data); // Add logging
+
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('admin', data.admin);
