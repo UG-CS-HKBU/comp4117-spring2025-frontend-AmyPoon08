@@ -103,19 +103,7 @@ onMounted(async () => {
   } catch (error) {
     console.error("failed to load the PayPal JS SDK script", error);
   }
-
 });
-
-// // Get booking details from route params
-// onMounted(() => {
-//   const details = JSON.parse(localStorage.getItem('pendingBookingDetails'));
-//   if (details) {
-//     bookingDetails.value = details;
-//   } else {
-//     alert('No booking details found!');
-//     router.push('/bookings');
-//   }
-// });
 
 const validateForm = () => {
   errors.value = {};
@@ -147,46 +135,79 @@ const validateForm = () => {
 };
 
 const renderPayPalButton = async () => {
-  if (!paypal || !bookingDetails.value.totalPrice) return;
+  if (!paypal || !bookingDetails.value.totalPrice) {
+    console.log('Cannot render PayPal - missing requirements');
+    return;
+  }
 
-  await paypal.Buttons({
-    createOrder: (data, actions) => {
-      return actions.order.create({
-        purchase_units: [{
-          amount: {
-            value: bookingDetails.value.totalPrice.toString()
+  try {
+    const buttons = paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'paypal'
+      },
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: bookingDetails.value.totalPrice.toString()
+            }
+          }]
+        });
+      },
+      onApprove: async (data, actions) => {
+        try {
+          // Capture the PayPal payment
+          const order = await actions.order.capture();
+          console.log('PayPal payment successful:', order);
+          
+          // Update booking with PayPal payment info
+          const token = localStorage.getItem('token');
+          const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              paymentMethod: 'paypal',
+              paymentProof: null
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to update booking status');
           }
-        }]
-      });
-    },
-    onApprove: async (data, actions) => {
-      try {
-        const order = await actions.order.capture();
-        console.log('PayPal Order:', order);
 
-        await completeBooking();
-
-        alert('Payment successful! Your booking has been confirmed.');
-        router.push('/myBookings');
-      } catch (error) {
-        console.error('PayPal payment error:', error);
+          alert('Payment successful! Your booking has been confirmed.');
+          router.push('/myBookings');
+        } catch (error) {
+          console.error('Payment failed:', error);
+          alert('Payment failed. Please try again.');
+        }
+      },
+      onError: (err) => {
+        console.error('PayPal Checkout error:', err);
         alert('Payment failed. Please try again.');
       }
-    },
-    onError: (err) => {
-      console.error('PayPal Checkout error:', err);
-      alert('Payment failed. Please try again.');
-    }
-  }).render('#paypal-button-container');
-};
+    });
 
+    if (buttons.isEligible()) {
+      await buttons.render('#paypal-button-container');
+      console.log('PayPal button rendered successfully');
+    } else {
+      console.log('PayPal Buttons are not eligible');
+    }
+  } catch (error) {
+    console.error('Error rendering PayPal button:', error);
+  }
+};
 
 const processPayment = async () => {
   if (paymentMethod.value === 'paypal') {
     renderPayPalButton();
-    return;
-  }
-  if (!validateForm()) {
     return;
   }
 
@@ -199,7 +220,8 @@ const processPayment = async () => {
       throw new Error('Booking time has expired');
     }
 
-    // For other payment methods, just update the booking status to 'pending payment'
+    // For other payment methods (Alipay, PayMe, Bank Deposit)
+    // FIXED: Set paymentMethod but keep status as 'pending payment'
     const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
       method: 'PATCH',
       headers: {
@@ -207,8 +229,10 @@ const processPayment = async () => {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        status: 'pending payment',
-        paymentMethod: paymentMethod.value
+        paymentMethod: 'others',
+        paymentProof: null,
+        // Don't include status as it should remain 'pending payment'
+        // The backend should not change it to 'pending approval' yet
       })
     });
 
@@ -217,8 +241,8 @@ const processPayment = async () => {
       throw new Error(error.message || 'Failed to update booking');
     }
 
-    // Clear the pending booking details
-    localStorage.removeItem('pendingBookingDetails');
+    // Clear timer
+    clearInterval(timer.value);
 
     // Show success message and redirect
     alert('Please upload your payment proof in the booking details page.');
@@ -229,42 +253,6 @@ const processPayment = async () => {
     alert(error.message || 'Payment processing failed');
   } finally {
     isProcessing.value = false;
-  }
-};
-
-const completeBooking = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    if (timeLeft.value <= 0) {
-      throw new Error('Booking time has expired');
-    }
-
-    const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        status: 'pending approval', // PayPal payments go directly to pending approval
-        paymentMethod: 'paypal',
-        paymentProof: null // PayPal payments don't need proof
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to complete booking');
-    }
-
-    clearInterval(timer.value);
-    return await response.json();
-
-  } catch (error) {
-    console.error('Error completing booking:', error);
-    throw error;
   }
 };
 
@@ -279,20 +267,11 @@ const formatTimeslots = (timeslots) => {
 
   let endTime = timeslots[timeslots.length - 1];
 
-  // if timeslots = {0: '04:00', 1: '05:00', 2: '06:00'}
-  // startTime = 04:00
-  // endTime = 07:00
-  // if timeslots = {0: '04:00'}
-  // endTime = 05:00
-
   if (timeslots.length > 0) {
     const lastTime = timeslots[timeslots.length - 1];
     const lastHour = parseInt(lastTime.split(':')[0], 10);
     const lastMinute = parseInt(lastTime.split(':')[1], 10);
 
-    // The last timeslot is at the end of the hour, add 1 hour to the last hour
-    // e.g. 04:00, 05:00, 06:00 -> endTime = 07:00
-    // e.g. 04:00 -> endTime = 05:00
     if (lastMinute === 0) {
       endTime = `${lastHour + 1}:00`;
     } else {
@@ -309,7 +288,6 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-
 const timeLeft = ref(900); //15 mins
 const timer = ref(null);
 
@@ -318,7 +296,6 @@ const formattedTimeLeft = computed(() => {
   const seconds = timeLeft.value % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
-
 
 const startTimer = () => {
   // Clear any existing timer
@@ -371,14 +348,11 @@ const handleExpiredBooking = async () => {
   }
 };
 
-
 onUnmounted(() => {
   if (timer.value) {
     clearInterval(timer.value);
   }
 });
-
-
 </script>
 
 <template>
@@ -421,12 +395,12 @@ onUnmounted(() => {
       <div class="payment-options">
         <div class="payment-option">
           <input type="radio" id="paypalRadio" value="paypal" v-model="paymentMethod">
-          <label for="paypal">PayPal</label>
+          <label for="paypalRadio">PayPal</label>
         </div>
 
         <div class="payment-option">
           <input type="radio" id="othersRadio" value="others" v-model="paymentMethod">
-          <label for="paypal">Alipay / Payme / Bank Deposit</label>
+          <label for="othersRadio">Alipay / Payme / Bank Deposit</label>
         </div>
       </div>
     </div>
@@ -434,12 +408,12 @@ onUnmounted(() => {
     <div v-if="paymentMethod === 'others'">
       <div class="row alipay">
         <p>Alipay: </p>
-        <img src="@/images/Alipay.jpg" alt="Alipay_Code" style="height: 100px; width: 120px;" />
+        <img src="../images/Alipay.jpg" alt="Alipay_Code" style="height: 100px; width: 120px;" />
       </div>
 
       <div class="row payme">
         <p>Payme: </p>
-        <img src="@/images/Payme.jpg" :alt="Payme_Code" style="height: 100px; width: 120px;" />
+        <img src="../images/Payme.jpg" alt="Payme_Code" style="height: 100px; width: 120px;" />
       </div>
 
       <div class="row bankDeposit">
@@ -449,9 +423,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-
-
-
     <div v-if="paymentMethod === 'paypal'" class="paypal-info">
       <div v-if="paypalLoaded">
         <div id="paypal-button-container"></div>
@@ -460,7 +431,6 @@ onUnmounted(() => {
         <p>Loading PayPal...</p>
       </div>
     </div>
-
 
     <div class="payment-actions">
       <button class="btn-back" @click="router.go(-1)">
@@ -668,6 +638,78 @@ h2 {
 
   100% {
     opacity: 1;
+  }
+}
+
+/* Make payment methods section responsive */
+@media (max-width: 768px) {
+  .payment-container {
+    padding: 1.5rem;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  .booking-summary {
+    padding: 1rem;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .payment-option {
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .payment-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .btn-back, .btn-pay {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-container {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .timer {
+    font-size: 1rem;
+  }
+  
+  .summary-row {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .summary-row .label {
+    font-weight: bold;
+  }
+  
+  .row.alipay, .row.payme, .row.bankDeposit {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .row img {
+    margin-top: 0.5rem;
   }
 }
 </style>
