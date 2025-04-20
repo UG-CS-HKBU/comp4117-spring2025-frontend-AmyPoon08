@@ -21,7 +21,7 @@ const fetchUserDetails = async () => {
         if (!token) {
             throw new Error('No token found. Please log in.');
         }
-        const response = await fetch(`/api/profile`, {
+        const response = await fetch(`${config.apiBaseUrl}/profile`, {
             method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
