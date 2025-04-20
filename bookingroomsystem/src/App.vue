@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
 import { ref, provide, onMounted, watch } from 'vue'
+import config from './config'
 
 const router = useRouter();
 const isAuthenticated = ref(false);
@@ -106,10 +107,10 @@ const fetchName = async () => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            return; // Exit silently if no token
+            return;
         }
 
-        const response = await fetch('/api/profile', {
+        const response = await fetch(`${config.apiBaseUrl}/profile`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

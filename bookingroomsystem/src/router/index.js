@@ -30,7 +30,7 @@ function isAdmin() {
 }
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path:'/',
@@ -146,18 +146,22 @@ const router = createRouter({
   ]
 });
 
-
 router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token');
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
+  const isAdmin = localStorage.getItem('admin') === 'on';
 
-  console.log('Route requires auth:', requiresAuth);
-  console.log('Route requires admin:', requiresAdmin);
-  console.log('Is authenticated:', isAuthenticated());
-  console.log('Is admin:', isAdmin());
+  // Add more detailed logging
+  console.log('Navigation guard:', {
+    to: to.path,
+    requiresAuth,
+    requiresAdmin,
+    hasToken: !!token,
+    isAdmin
+  });
 
-  if (requiresAuth && !isAuthenticated()) {
-    console.log('Redirecting to login - not authenticated');
+  if (requiresAuth && !token) {
     next({
       path: '/',
       query: { redirect: to.fullPath }
@@ -165,13 +169,11 @@ router.beforeEach((to, from, next) => {
     return;
   }
 
-  if (requiresAdmin && !isAdmin()) {
-    console.log('Redirecting to home - not admin');
+  if (requiresAdmin && !isAdmin) {
     next('/home');
     return;
   }
 
-  console.log('Proceeding to route:', to.path);
   next();
 });
 

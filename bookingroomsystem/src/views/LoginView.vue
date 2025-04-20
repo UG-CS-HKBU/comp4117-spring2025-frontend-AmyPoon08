@@ -2,6 +2,7 @@
 // imports
 import { ref, inject, onMounted, onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router';
+import config from '../config';
 
 const router = useRouter();
 
@@ -30,11 +31,9 @@ onBeforeMount(() => {
 // methods
 const login = async () => {
     try {
-        // Reset error message
         errorMessage.value = '';
 
-        // fetch
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${config.apiBaseUrl}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -42,49 +41,27 @@ const login = async () => {
             body: JSON.stringify(credentials.value)
         });
 
-        console.log('Response:', response);
-        console.log('Response Text:', await response.clone().text());
-
-        // response
-        if (response.status === 204 || response.headers.get('Content-Length') === '0') {
-          console.warn('Empty response from server');
-          localStorage.setItem('token', ''); 
-          console.log(localStorage.getItem('token'))
-          isAuthenticated.value = true;
-          router.push('/home');
-        //   window.location.href = '/home';
-          return;
-        }
-    
-        const text = await response.text();
-        if (!text) {
-            console.warn('Empty response body');
-            localStorage.setItem('token', ''); // Assuming token is empty
-            isAuthenticated.value = true;
-            return;
-        }
-
-        const data = JSON.parse(text);
-
+        // Add more detailed error logging
         if (!response.ok) {
-            console.log("login failed");
-            errorMessage.value = data.message || 'Invalid email or password'; // Set error message
-            throw new Error(data.message);
+            console.error('Login failed:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Login failed');
         }
 
-        // save token to local storage
+        const data = await response.json();
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userId', data.userId); 
+        localStorage.setItem('userId', data.userId);
         localStorage.setItem('admin', data.admin);
-
+        
         isAuthenticated.value = true;
-        router.push('/home');
-        // window.location.href = '/home';
+        await router.push('/home');
+        
     } catch (error) {
-        if (!errorMessage.value) {
-            errorMessage.value = 'An unexpected error occurred'; // Fallback error message
-        }
-        console.error(error);
+        console.error('Login error:', error);
+        errorMessage.value = error.message || 'An unexpected error occurred';
     }
 };
 
