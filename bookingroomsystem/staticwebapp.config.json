@@ -1,7 +1,7 @@
 {
     "navigationFallback": {
         "rewrite": "/index.html",
-        "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]
+        "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/js/*"]
     },
     "mimeTypes": {
         ".json": "text/json"
@@ -9,6 +9,7 @@
     "routes": [
         {
             "route": "/api/*",
+            "allowedRoles": ["anonymous", "authenticated"],
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
@@ -16,21 +17,11 @@
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
                 "Access-Control-Allow-Credentials": "true"
             }
-        },
-        {
-            "route": "/api/logout",
-            "methods": ["POST", "OPTIONS"],
-            "rewrite": "https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/logout",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/*",
-            "serve": "/index.html",
-            "statusCode": 200
         }
     ],
     "globalHeaders": {
-        "Access-Control-Allow-Origin": "https://happy-bay-03dd73d00.6.azurestaticapps.net",
+        "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.paypal.com *.azurewebsites.net; img-src 'self' data: https: blob:; connect-src 'self' *.paypal.com *.azurewebsites.net",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Credentials": "true"
