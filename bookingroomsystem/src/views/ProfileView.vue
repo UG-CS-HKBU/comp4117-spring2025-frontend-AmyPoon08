@@ -54,7 +54,7 @@
                 throw new Error('No token found. Please log in.');
             }
 
-            const response = await fetch(`/api/users/${profile.value._id}`, {
+            const response = await fetch(`${config.apiBaseUrl}/users/${profile.value._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
