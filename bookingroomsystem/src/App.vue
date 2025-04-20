@@ -109,7 +109,7 @@ const fetchName = async () => {
             return; // Exit silently if no token
         }
 
-        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/profile', {
+        const response = await fetch('https://roombookingsystem-etc7bfeeg8hndfbc.eastasia-01.azurewebsites.net/api/name', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
