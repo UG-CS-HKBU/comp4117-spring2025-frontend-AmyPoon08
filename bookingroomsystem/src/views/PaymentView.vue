@@ -182,7 +182,7 @@ const renderPayPalButton = async () => {
             body: JSON.stringify({
               paymentMethod: 'paypal',
               paymentProof: null,
-              status: 'confirmed', // Set status to confirmed
+              status: 'confirmed',
               paypalOrderId: order.id
             })
           });
@@ -199,14 +199,17 @@ const renderPayPalButton = async () => {
           // Show success message
           alert('Payment successful! Your booking has been confirmed.');
 
-          // Force navigation to booking history
-          window.location.href = '/myBookings';
+          // Use the full URL path for redirection
+          const baseUrl = window.location.origin;
+          window.location.href = `${baseUrl}/myBookings`;
           
         } catch (error) {
           console.error('Payment processing error:', error);
           alert('Payment was successful but there was an error updating the booking. Please contact support.');
-          // Still redirect to bookings page
-          window.location.href = '/myBookings';
+          
+          // Also use full URL path here
+          const baseUrl = window.location.origin;
+          window.location.href = `${baseUrl}/myBookings`;
         }
       },
       onCancel: () => {
