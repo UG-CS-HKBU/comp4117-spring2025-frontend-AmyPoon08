@@ -142,7 +142,6 @@ const renderPayPalButton = async () => {
   }
 
   try {
-    // Clear existing PayPal button container
     const container = document.getElementById('paypal-button-container');
     if (container) {
       container.innerHTML = '';
@@ -173,7 +172,7 @@ const renderPayPalButton = async () => {
           const token = localStorage.getItem('token');
           if (!token) throw new Error('No token found');
 
-          // Update booking with PayPal payment info
+          // Update booking status
           const response = await fetch(`${config.apiBaseUrl}/bookings/update/${bookingId.value}`, {
             method: 'PATCH',
             headers: {
@@ -182,46 +181,58 @@ const renderPayPalButton = async () => {
             },
             body: JSON.stringify({
               paymentMethod: 'paypal',
-              paymentProof: null
+              paymentProof: null,
+              status: 'confirmed', // Set status to confirmed
+              paypalOrderId: order.id
             })
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update booking status');
+            throw new Error('Failed to update booking status');
           }
-
-          const result = await response.json();
-          console.log('PayPal booking update result:', result); // Debug log
 
           // Clear timer if it exists
           if (timer.value) {
             clearInterval(timer.value);
           }
 
+          // Show success message
           alert('Payment successful! Your booking has been confirmed.');
-          router.push('/myBookings');
+
+          // Force navigation to booking history
+          window.location.href = '/myBookings';
+          
         } catch (error) {
           console.error('Payment processing error:', error);
-          alert(error.message || 'Payment failed. Please try again.');
+          alert('Payment was successful but there was an error updating the booking. Please contact support.');
+          // Still redirect to bookings page
+          window.location.href = '/myBookings';
         }
+      },
+      onCancel: () => {
+        console.log('PayPal payment cancelled');
+        isPaypalRendered.value = false;
+        alert('Payment was cancelled. Please try again.');
       },
       onError: (err) => {
         console.error('PayPal Checkout error:', err);
-        alert('Payment failed. Please try again.');
+        isPaypalRendered.value = false;
+        alert('There was an error processing your payment. Please try again.');
       }
     });
 
-    if (buttons.isEligible()) {
+    if (await buttons.isEligible()) {
       await buttons.render('#paypal-button-container');
       console.log('PayPal button rendered successfully');
       isPaypalRendered.value = true;
     } else {
-      console.error('PayPal Buttons are not eligible');
+      throw new Error('PayPal Buttons are not eligible');
     }
+
   } catch (error) {
     console.error('Error rendering PayPal button:', error);
     isPaypalRendered.value = false;
+    alert('Failed to initialize PayPal. Please try again.');
   }
 };
 
