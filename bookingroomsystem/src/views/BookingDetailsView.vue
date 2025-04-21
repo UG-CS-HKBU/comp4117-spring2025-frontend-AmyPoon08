@@ -185,7 +185,7 @@ const statusOptions = [
 ];
 
 const updateStatus = async () => {
-    try{
+    try {
         const token = localStorage.getItem('token');
         if (!token) {
             throw new Error('No token found. Please log in.');
@@ -206,17 +206,29 @@ const updateStatus = async () => {
             } else if (response.status === 403) {
                 throw new Error('Forbidden: Invalid token.');
             } else {
-                throw new Error('Failed to save user. Server responded with status: ' + response.status);
+                throw new Error('Failed to update status. Server responded with status: ' + response.status);
             }
         }
 
-        const data = await response.json();
-        details.value.status = data.status; 
-        selectedStatus.value = data.status;
+        // Show success alert
+        alert('Status updated successfully');
+
+        // Immediately update local state for UI feedback
+        details.value.status = selectedStatus.value;
+
+        // Force a refresh of booking details
+        await fetchDetails();
+
+        // Reset loading state if needed
+        isLoading.value = false;
+
     } catch (error) {
         console.error('Error updating status:', error.message);
+        alert('Failed to update status: ' + error.message);
+        // Refresh details anyway in case of error to ensure UI is in sync
+        await fetchDetails();
     }
-}
+};
 
 const canReturnToPayment = computed(() => {
     // Get current user's ID from localStorage or wherever you store it
@@ -420,6 +432,7 @@ onMounted(() => {
                                     label="Update"
                                     severity="success"
                                     class="status-btn"
+                                    :loading="isLoading"
                                 />
                             </form>
                         </div>
