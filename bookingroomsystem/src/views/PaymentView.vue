@@ -21,7 +21,7 @@ const bookingDetails = ref({
   userEmail: '',
 });
 
-const paymentMethod = ref('credit_card');
+const paymentMethod = ref('');
 const cardNumber = ref('');
 const cardholderName = ref('');
 const expiryDate = ref('');
@@ -450,11 +450,19 @@ onUnmounted(() => {
       <button class="btn-back" @click="router.go(-1)">
         Back
       </button>
-      <button class="btn-pay" @click="processPayment" :disabled="isProcessing">
+      <button class="btn-pay" @click="processPayment" :disabled="isProcessing || !paymentMethod">
         <span v-if="isProcessing">Processing...</span>
         <span v-else>Pay Now</span>
       </button>
     </div>
+
+    <button 
+      v-if="!paymentMethod" 
+      class="pay-now-button disabled"
+      disabled
+    >
+      Please Select a Payment Method
+    </button>
   </div>
 </template>
 
@@ -725,5 +733,37 @@ h2 {
   .row img {
     margin-top: 0.5rem;
   }
+}
+
+.pay-now-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.pay-now-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.pay-now-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.pay-now-button.disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Add loading spinner styles if needed */
+.loading-spinner {
+  /* Add your spinner styles here */
 }
 </style>

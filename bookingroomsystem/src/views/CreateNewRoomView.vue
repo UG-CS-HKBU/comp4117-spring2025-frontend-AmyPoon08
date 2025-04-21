@@ -17,11 +17,9 @@ const initialRoomState = {
   capacity: '',
   additional_price_per_participant: '',
   location: '',
-  availability: true,
   under_maintenance: false,
   price: '',
   description: '',
-  highlight: false,
   image: null,
 };
 
@@ -167,16 +165,8 @@ const createRoom = async () => {
 
         <div class="form-row checkbox-row">
           <div class="form-group checkbox-group">
-            <input id="availability" type="checkbox" v-model="room.availability" />
-            <label for="availability">Available</label>
-          </div>
-          <div class="form-group checkbox-group">
             <input id="maintenance" type="checkbox" v-model="room.under_maintenance" />
             <label for="maintenance">Under Maintenance</label>
-          </div>
-          <div class="form-group checkbox-group">
-            <input id="highlight" type="checkbox" v-model="room.highlight" />
-            <label for="highlight">Highlight</label>
           </div>
         </div>
 

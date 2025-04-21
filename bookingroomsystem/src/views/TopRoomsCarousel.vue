@@ -42,7 +42,9 @@ export default {
     async fetchTopRooms() {
       try {
         const res = await axios.get(`${config.apiBaseUrl}/rooms/top`);
-        this.topRooms = res.data.topRooms;
+        this.topRooms = res.data.topRooms.filter(room => 
+          !room.roomDetails.under_maintenance
+        );
       } catch (err) {
         console.error('Failed to load top rooms:', err);
       }

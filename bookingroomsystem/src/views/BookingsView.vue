@@ -53,16 +53,16 @@ export default {
         };
 
         const fetchRoomsByDateRange = async () => {
-            if (dateRange.value[0] && dateRange.value[1]) {
-                try {
-                    const response = await fetch(`${config.apiBaseUrl}/rooms?startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`);
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch rooms');
-                    }
-                    rooms.value = await response.json();
-                } catch (error) {
-                    console.error('Error fetching rooms:', error.message);
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/rooms`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch rooms');
                 }
+                const data = await response.json();
+                // Filter out rooms under maintenance
+                rooms.value = data.filter(room => !room.under_maintenance);
+            } catch (error) {
+                console.error('Error fetching rooms:', error);
             }
         };
         
@@ -248,6 +248,11 @@ export default {
 
         const filteredRooms = computed(() => {
             return rooms.value.filter(room => {
+                // First check if room is under maintenance
+                if (room.under_maintenance) {
+                    return false;
+                }
+
                 // Get selected options (excluding 'select_all')
                 const selectedRoomTypes = roomOptions.value
                     .filter(opt => opt.checked && opt.value !== 'select_all')
