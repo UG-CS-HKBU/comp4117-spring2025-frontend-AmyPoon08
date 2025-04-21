@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { loadScript } from "@paypal/paypal-js";
 import { useRouter, useRoute } from 'vue-router';
 import config from '../config';
@@ -29,6 +29,7 @@ const cvv = ref('');
 const isProcessing = ref(false);
 const errors = ref({});
 const paypalLoaded = ref(false);
+const isPaypalRendered = ref(false);
 let paypal;
 
 onMounted(async () => {
@@ -141,6 +142,12 @@ const renderPayPalButton = async () => {
   }
 
   try {
+    // Clear existing PayPal button container
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '';
+    }
+
     const buttons = paypal.Buttons({
       style: {
         layout: 'vertical',
@@ -152,7 +159,6 @@ const renderPayPalButton = async () => {
         return actions.order.create({
           purchase_units: [{
             amount: {
-              currency_code: "HKD",
               value: bookingDetails.value.totalPrice.toString()
             }
           }]
@@ -209,11 +215,13 @@ const renderPayPalButton = async () => {
     if (buttons.isEligible()) {
       await buttons.render('#paypal-button-container');
       console.log('PayPal button rendered successfully');
+      isPaypalRendered.value = true;
     } else {
       console.error('PayPal Buttons are not eligible');
     }
   } catch (error) {
     console.error('Error rendering PayPal button:', error);
+    isPaypalRendered.value = false;
   }
 };
 
@@ -367,6 +375,14 @@ onUnmounted(() => {
     clearInterval(timer.value);
   }
 });
+
+// Add a watch for paymentMethod
+watch(paymentMethod, (newValue) => {
+  // Reset PayPal rendered state when switching payment methods
+  if (newValue !== 'paypal') {
+    isPaypalRendered.value = false;
+  }
+});
 </script>
 
 <template>
@@ -417,8 +433,26 @@ onUnmounted(() => {
           <label for="othersRadio">Alipay / Payme / Bank Deposit</label>
         </div>
       </div>
+
+      <!-- Instruction box moved inside payment-methods div -->
+      <div v-if="paymentMethod === 'paypal' && !isPaypalRendered" class="paypal-instructions">
+        <div class="instruction-box">
+          Click "Pay Now" to proceed with PayPal payment
+        </div>
+      </div>
     </div>
 
+    <!-- PayPal button section moved above payment actions -->
+    <div v-if="paymentMethod === 'paypal'" class="paypal-info">
+      <div v-if="paypalLoaded">
+        <div id="paypal-button-container"></div>
+      </div>
+      <div v-else>
+        <p>Loading PayPal...</p>
+      </div>
+    </div>
+
+    <!-- Other payment methods info -->
     <div v-if="paymentMethod === 'others'">
       <div class="row alipay">
         <p>Alipay: </p>
@@ -437,32 +471,21 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div v-if="paymentMethod === 'paypal'" class="paypal-info">
-      <div v-if="paypalLoaded">
-        <div id="paypal-button-container"></div>
-      </div>
-      <div v-else>
-        <p>Loading PayPal...</p>
-      </div>
-    </div>
-
+    <!-- Payment actions at the bottom -->
     <div class="payment-actions">
       <button class="btn-back" @click="router.go(-1)">
         Back
       </button>
-      <button class="btn-pay" @click="processPayment" :disabled="isProcessing || !paymentMethod">
+      <button 
+        v-show="!isPaypalRendered" 
+        class="btn-pay" 
+        @click="processPayment" 
+        :disabled="isProcessing || !paymentMethod"
+      >
         <span v-if="isProcessing">Processing...</span>
         <span v-else>Pay Now</span>
       </button>
     </div>
-
-    <button 
-      v-if="!paymentMethod" 
-      class="pay-now-button disabled"
-      disabled
-    >
-      Please Select a Payment Method
-    </button>
   </div>
 </template>
 
@@ -527,7 +550,7 @@ h2 {
 .payment-options {
   display: flex;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .payment-option {
@@ -582,9 +605,10 @@ h2 {
 }
 
 .payment-actions {
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
-  margin-top: 2rem;
+  gap: 20px;
 }
 
 .btn-back,
@@ -618,16 +642,17 @@ h2 {
 }
 
 .btn-pay:disabled {
-  background-color: #6c757d;
+  background-color: #a8e0aa;
   cursor: not-allowed;
 }
 
-.paypal-info,
-.apple-pay-info {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 2rem;
+.paypal-info {
+  margin: 20px 0;
+}
+
+#paypal-button-container {
+  min-height: 150px;
+  margin-bottom: 20px;
 }
 
 .timer-container {
@@ -766,4 +791,19 @@ h2 {
 .loading-spinner {
   /* Add your spinner styles here */
 }
+
+.paypal-instructions {
+  margin-top: 1rem;
+}
+
+.instruction-box {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  color: #2d2d2d;
+  font-size: 1.1rem;
+}
 </style>
+
