@@ -21,20 +21,20 @@ const statuses = [
 
 // Initialize filters
 const filters = ref({
-    global: { value: null, matchMode: 'contains', operator: 'and' },
-    bookingId: { value: null, matchMode: 'contains', operator: 'and' },
-    roomName: { value: null, matchMode: 'contains', operator: 'and' },
-    date: { value: null, matchMode: 'dateIs', operator: 'and' },
-    status: { value: null, matchMode: 'equals', operator: 'and' }
+    global: { value: null, matchMode: 'contains' },
+    bookingId: { value: null, matchMode: 'contains' },
+    roomName: { value: null, matchMode: 'contains' },
+    date: { value: null, matchMode: 'dateIs' },
+    status: { value: null, matchMode: 'equals' }
 });
 
 const clearFilter = () => {
     filters.value = {
-        global: { value: null, matchMode: 'contains', operator: 'and' },
-        bookingId: { value: null, matchMode: 'contains', operator: 'and' },
-        roomName: { value: null, matchMode: 'contains', operator: 'and' },
-        date: { value: null, matchMode: 'dateIs', operator: 'and' },
-        status: { value: null, matchMode: 'equals', operator: 'and' }
+        global: { value: null, matchMode: 'contains' },
+        bookingId: { value: null, matchMode: 'contains' },
+        roomName: { value: null, matchMode: 'contains' },
+        date: { value: null, matchMode: 'dateIs' },
+        status: { value: null, matchMode: 'equals' }
     };
 };
 
