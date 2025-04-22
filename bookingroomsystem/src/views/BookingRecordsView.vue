@@ -67,19 +67,19 @@ const getStartTime = (timeslots) => {
 const getEndTime = (timeslots) => {
     if (!timeslots || timeslots.length === 0) return '-';
     
-    // Sort timeslots chronologically
     const sortedSlots = [...timeslots].sort((a, b) => {
-        const [hourA] = a.split(':').map(Number);
-        const [hourB] = b.split(':').map(Number);
-        return hourA - hourB;
+        const [hourA, minA] = a.split(':').map(Number);
+        const [hourB, minB] = b.split(':').map(Number);
+        return hourA * 60 + minA - (hourB * 60 + minB);
     });
     
-    const startTime = sortedSlots[sortedSlots.length - 1]; // Get the last timeslot
-    const [hour, minute] = startTime.split(':').map(Number); // Split the time into hour and minute
-    const endTime = new Date();
-    endTime.setHours(hour, minute + 59); // Add 59 minutes to the start time
-
-    return endTime.toTimeString().slice(0, 5); // Format as HH:MM
+    // Add 59 minutes to the last time slot
+    const lastSlot = sortedSlots[sortedSlots.length - 1];
+    const [hour, minute] = lastSlot.split(':').map(Number);
+    const endHour = Math.floor((minute + 59) / 60) + hour;
+    const endMinute = (minute + 59) % 60;
+    
+    return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
 }
 
 
@@ -181,7 +181,7 @@ onMounted(() => {
             dataKey="id"
             filterDisplay="menu" 
             :loading="loading"
-            :globalFilterFields="['bookingId', 'username', 'roomName','date']"
+            :globalFilterFields="['_id', 'userName', 'roomName','date']"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[5, 10, 25]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
