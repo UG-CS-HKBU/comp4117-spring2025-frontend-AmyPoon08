@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import config from '../config';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
@@ -11,6 +13,7 @@ const route = useRoute();
 const router = useRouter();
 const isAdmin = computed(() => localStorage.getItem('admin') === 'on');
 const isLoading = ref(true);
+const toast = useToast();
 
 const details = ref({
     bookingId: '',
@@ -200,33 +203,31 @@ const updateStatus = async () => {
             body: JSON.stringify({ status: selectedStatus.value })
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Unauthorized: Please log in again.');
-            } else if (response.status === 403) {
-                throw new Error('Forbidden: Invalid token.');
-            } else {
-                throw new Error('Failed to update status. Server responded with status: ' + response.status);
-            }
-        }
-
-        // Show success alert
-        alert('Status updated successfully');
-
-        // Immediately update local state for UI feedback
-        details.value.status = selectedStatus.value;
-
-        // Force a refresh of booking details
+        // Fetch the latest booking details to verify the update
         await fetchDetails();
-
-        // Reset loading state if needed
-        isLoading.value = false;
+        
+        // Check if the status was actually updated by comparing with selectedStatus
+        if (details.value.status === selectedStatus.value) {
+            // Status was updated successfully
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Status updated successfully',
+                life: 3000
+            });
+        } else {
+            // Status update failed
+            throw new Error('Failed to update status. Please try again.');
+        }
 
     } catch (error) {
         console.error('Error updating status:', error.message);
-        alert('Failed to update status: ' + error.message);
-        // Refresh details anyway in case of error to ensure UI is in sync
-        await fetchDetails();
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Failed to update status: ${error.message}`,
+            life: 3000
+        });
     }
 };
 
@@ -339,6 +340,7 @@ onMounted(() => {
 
 <template>
     <div class="booking-details-container">
+        <Toast position="top-right" />
         <div class="booking-header">
             <h1>Booking Details</h1>
             <div class="booking-id">ID: {{ details.bookingId }}</div>

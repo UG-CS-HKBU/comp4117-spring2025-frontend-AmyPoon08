@@ -801,11 +801,6 @@ h2 {
   cursor: not-allowed;
 }
 
-/* Add loading spinner styles if needed */
-.loading-spinner {
-  /* Add your spinner styles here */
-}
-
 .paypal-instructions {
   margin-top: 1rem;
 }
