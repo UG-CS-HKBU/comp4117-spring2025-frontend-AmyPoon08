@@ -261,7 +261,7 @@ onMounted(() => {
                 <template #filter="{ filterModel }">
                     <Calendar 
                         v-model="filterModel.value" 
-                        dateFormat="dd-mm-yy" 
+                        dateFormat="dd/mm/yy" 
                         placeholder="Select date" 
                         class="p-2 w-full"
                     />
