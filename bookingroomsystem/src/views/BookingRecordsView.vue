@@ -13,6 +13,52 @@ const bookingRecords = ref([]);
 const loading = ref(false);
 const dt = ref(null);
 
+const registerCustomDateFilter = () => {
+    // Register a custom date filter function to handle your specific case
+    FilterService.register('customDate', (value, filter) => {
+        if (!filter) return true;
+        if (!value) return false;
+        
+        try {
+            // Log values for debugging
+            console.log('Filtering date:', { value, filter });
+            
+            // Convert filter (from Calendar) to YYYY-MM-DD format for comparison
+            let filterDate;
+            if (filter instanceof Date) {
+                // Format date to YYYY-MM-DD string
+                const year = filter.getFullYear();
+                const month = String(filter.getMonth() + 1).padStart(2, '0');
+                const day = String(filter.getDate()).padStart(2, '0');
+                filterDate = `${year}-${month}-${day}`;
+            } else if (typeof filter === 'string') {
+                // If it's already a string, try to normalize it
+                const dateParts = filter.split('/');
+                if (dateParts.length === 3) {
+                    // Convert from DD/MM/YYYY to YYYY-MM-DD
+                    filterDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                } else {
+                    filterDate = filter;
+                }
+            } else {
+                return false;
+            }
+            
+            // Log the comparison
+            console.log('Comparing:', { originalValue: value, filterDate });
+            
+            // Compare the strings directly
+            return value === filterDate;
+        } catch (error) {
+            console.error('Date filter error:', error);
+            return false;
+        }
+    });
+};
+
+// Call the registration function
+registerCustomDateFilter();
+
 // Status options for filter
 const statuses = [
     'pending payment',
@@ -25,23 +71,22 @@ const filters = ref({
     _id: { value: null, matchMode: 'contains'},
     username: { value: null, matchMode: 'contains' }, 
     roomName: { value: null, matchMode: 'contains'},
-    date: { value: null, matchMode: 'equals'},
+    date: { value: null, matchMode: 'customDate'},
     status: { value: null, matchMode: 'equals'}
 });
 
-// Custom filter function for case-insensitive filtering
-const filterCaseInsensitive = (value, filter) => {
-    if (filter === undefined || filter === null || filter.trim() === '') {
-        return true;
-    }
+// // Custom filter function for case-insensitive filtering
+// const filterCaseInsensitive = (value, filter) => {
+//     if (filter === undefined || filter === null || filter.trim() === '') {
+//         return true;
+//     }
     
-    if (value === undefined || value === null) {
-        return false;
-    }
+//     if (value === undefined || value === null) {
+//         return false;
+//     }
     
-    return String(value).toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
-};
-
+//     return String(value).toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
+// };
 
 
 const clearFilter = () => {
@@ -50,9 +95,30 @@ const clearFilter = () => {
         _id: { value: null, matchMode: 'contains'},
         username: { value: null, matchMode: 'contains' }, 
         roomName: { value: null, matchMode: 'contains'},
-        date: { value: null, matchMode: 'equals'},
+        date: { value: null, matchMode: 'customDate'},
         status: { value: null, matchMode: 'equals'}
     };
+};
+
+
+const applyDateFilter = (event, filterCallback) => {
+    console.log('Date selected:', event);
+    
+    // Ensure date is in the right format
+    if (event && event instanceof Date) {
+        const year = event.getFullYear();
+        const month = String(event.getMonth() + 1).padStart(2, '0');
+        const day = String(event.getDate()).padStart(2, '0');
+        
+        // Format date in the same format as stored in database (YYYY-MM-DD)
+        const formattedDate = `${year}-${month}-${day}`;
+        console.log('Formatted for filter:', formattedDate);
+    }
+    
+    // Apply the filter
+    if (filterCallback) {
+        filterCallback();
+    }
 };
 
 
@@ -258,12 +324,14 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ formatDate(data.date) }}
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <Calendar 
                         v-model="filterModel.value" 
                         dateFormat="dd/mm/yy" 
                         placeholder="Select date" 
                         class="p-2 w-full"
+                        @date-select="(event) => applyDateFilter(event, filterCallback)"
+                        @clear="filterCallback"
                     />
                 </template>
             </Column>
