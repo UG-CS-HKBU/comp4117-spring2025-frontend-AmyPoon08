@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
@@ -11,6 +11,7 @@ import config from '../config';
 
 const bookingRecords = ref([]);
 const loading = ref(false);
+const dt = ref(null);
 
 // Status options for filter
 const statuses = [
@@ -19,97 +20,105 @@ const statuses = [
     'confirmed'
 ];
 
-// Initialize filters
 const filters = ref({
     global: { value: null, matchMode: 'contains'},
     _id: { value: null, matchMode: 'contains'},
-    userName: { value: null, matchMode: 'contains' },
+    username: { value: null, matchMode: 'contains' }, 
     roomName: { value: null, matchMode: 'contains'},
     date: { value: null, matchMode: 'dateIs'},
     status: { value: null, matchMode: 'equals'}
 });
 
+// Custom filter function for case-insensitive filtering
+const filterCaseInsensitive = (value, filter) => {
+    if (filter === undefined || filter === null || filter.trim() === '') {
+        return true;
+    }
+    
+    if (value === undefined || value === null) {
+        return false;
+    }
+    
+    return String(value).toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
+};
+
+const registerDateFilter = () => {
+    if (window.PrimeVue && window.PrimeVue.config.filterService) {
+        window.PrimeVue.config.filterService.register('dateIs', (value, filter) => {
+            if (filter === undefined || filter === null) {
+                return true;
+            }
+            
+            if (value === undefined || value === null) {
+                return false;
+            }
+            
+            try {
+                let valueDate = new Date(value);
+                let filterDate = new Date(filter);
+                
+                if (isNaN(valueDate.getTime())) {
+                    // Try parsing as DD/MM/YYYY
+                    if (typeof value === 'string' && value.includes('/')) {
+                        const [day, month, year] = value.split('/').map(Number);
+                        valueDate = new Date(year, month - 1, day);
+                    }
+                }
+                
+                if (isNaN(filterDate.getTime())) {
+                    if (filter instanceof Date) {
+                        filterDate = filter;
+                    }
+                }
+                
+                if (isNaN(valueDate.getTime()) || isNaN(filterDate.getTime())) {
+                    console.warn('Invalid date in comparison:', { value, filter });
+                    return false;
+                }
+                
+                return valueDate.getFullYear() === filterDate.getFullYear() &&
+                       valueDate.getMonth() === filterDate.getMonth() &&
+                       valueDate.getDate() === filterDate.getDate();
+            } catch (error) {
+                console.error('Date comparison error:', error);
+                return false;
+            }
+        });
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateString);
+            return dateString;
+        }
+        
+        // Format as DD/MM/YYYY
+        return `${date.getDate().toString().padStart(2, '0')}/${
+            (date.getMonth() + 1).toString().padStart(2, '0')}/${
+            date.getFullYear()}`;
+    } catch (error) {
+        console.error('Date formatting error:', error);
+        return dateString;
+    }
+};
+
 const clearFilter = () => {
     filters.value = {
         global: { value: null, matchMode: 'contains'},
         _id: { value: null, matchMode: 'contains'},
-        userName: { value: null, matchMode: 'contains' },
+        username: { value: null, matchMode: 'contains' }, 
         roomName: { value: null, matchMode: 'contains'},
         date: { value: null, matchMode: 'dateIs'},
         status: { value: null, matchMode: 'equals'}
     };
 };
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB');
-};
-
-// const getStartTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-//     return timeslots[0];
-// };
-
-// const getEndTime = (timeslots) => {
-//     if (!timeslots || timeslots.length === 0) return '-';
-//     return timeslots[timeslots.length - 1];
-// };
-
-const getStartTime = (timeslots) => {
-    if (!timeslots || timeslots.length === 0) return '-';
-    // Sort timeslots chronologically
-    const sortedSlots = [...timeslots].sort((a, b) => {
-        const [hourA] = a.split(':').map(Number);
-        const [hourB] = b.split(':').map(Number);
-        return hourA - hourB;
-    });
-    return sortedSlots[0];
-}
-
-const getEndTime = (timeslots) => {
-    if (!timeslots || timeslots.length === 0) return '-';
-    
-    const sortedSlots = [...timeslots].sort((a, b) => {
-        const [hourA, minA] = a.split(':').map(Number);
-        const [hourB, minB] = b.split(':').map(Number);
-        return hourA * 60 + minA - (hourB * 60 + minB);
-    });
-    
-    // Add 59 minutes to the last time slot
-    const lastSlot = sortedSlots[sortedSlots.length - 1];
-    const [hour, minute] = lastSlot.split(':').map(Number);
-    const endHour = Math.floor((minute + 59) / 60) + hour;
-    const endMinute = (minute + 59) % 60;
-    
-    return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
-}
-
-
-const getStatusSeverity = (status) => {
-    switch (status?.toLowerCase()) {
-        case 'pending payment':
-            return 'danger';
-        case 'pending approval':
-            return 'warn';
-        case 'confirmed':
-            return 'success';
-        default:
-            return null;
-    }
-};
-
-const getStatusStyle = (status) => {
-    switch (status?.toLowerCase()) {
-        case 'pending payment':
-            return 'danger';
-        case 'pending approval':
-            return 'warn'
-        case 'confirmed':
-            return 'success';
-        default:
-            return {};
-    }
-};
 
 const fetchBookingRecords = async () => {
     try {
@@ -132,7 +141,12 @@ const fetchBookingRecords = async () => {
         }
 
         const data = await response.json();
-        bookingRecords.value = data;
+        bookingRecords.value = data.map(booking => ({
+            ...booking,
+            dateObject: booking.date ? new Date(booking.date) : null
+        }));
+        
+        console.log('Fetched booking records:', bookingRecords.value);
     } catch (error) {
         console.error('Error:', error);
     } finally {
@@ -140,8 +154,16 @@ const fetchBookingRecords = async () => {
     }
 };
 
+
+const applyDateFilter = () => {
+    if (dt.value) {
+        dt.value.filter();
+    }
+};
+
 onMounted(() => {
     fetchBookingRecords();
+    registerDateFilter();
 });
 </script>
 
@@ -153,15 +175,16 @@ onMounted(() => {
             <p class="page-subtitle">View and manage all booking records</p>
         </div>
         <DataTable 
+            ref="dt"
             v-model:filters="filters" 
             :value="bookingRecords" 
             paginator 
             showGridlines 
             :rows="10" 
-            dataKey="id"
+            dataKey="_id"
             filterDisplay="menu" 
             :loading="loading"
-            :globalFilterFields="['_id', 'userName', 'roomName','date']"
+            :globalFilterFields="['_id', 'username', 'roomName', 'date']"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[5, 10, 25]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
@@ -197,26 +220,28 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ data._id }}
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <InputText 
                         v-model="filterModel.value" 
                         type="text" 
                         class="p-2 w-full" 
                         placeholder="Search booking ID"
+                        @input="filterCallback()"
                     />
                 </template>
             </Column>
 
-            <Column field="userName" header="Username" sortable style="min-width: 12rem">
+            <Column field="username" header="Username" sortable style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ data.username }}
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <InputText 
                         v-model="filterModel.value" 
                         type="text" 
                         class="p-2 w-full" 
                         placeholder="Search username"
+                        @input="filterCallback()"
                     />
                 </template>
             </Column>
@@ -225,26 +250,29 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ data.roomName }}
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <InputText 
                         v-model="filterModel.value" 
                         type="text" 
                         class="p-2 w-full" 
                         placeholder="Search room"
+                        @input="filterCallback()"
                     />
                 </template>
             </Column>
 
-            <Column field="date" header="Date" sortable dataType="date" style="min-width: 12rem">
+            <Column field="date" header="Date" sortable style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ formatDate(data.date) }}
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <Calendar 
                         v-model="filterModel.value" 
                         dateFormat="dd/mm/yy" 
                         placeholder="Select date" 
                         class="p-2 w-full"
+                        @date-select="applyDateFilter"
+                        @clear="filterCallback()"
                     />
                 </template>
             </Column>
@@ -265,13 +293,14 @@ onMounted(() => {
                 <template #body="{ data }">
                     <Tag :value="data.status" :severity="getStatusSeverity(data.status)" :style="getStatusStyle(data.status)" />
                 </template>
-                <template #filter="{ filterModel }">
+                <template #filter="{ filterModel, filterCallback }">
                     <Select 
                         v-model="filterModel.value" 
                         :options="statuses" 
                         placeholder="Select Status" 
                         class="p-2 w-full" 
                         :showClear="true"
+                        @change="filterCallback()"
                     >
                         <template #option="slotProps">
                             <Tag :value="slotProps.option" :severity="getStatusSeverity(slotProps.option)" :style="getStatusStyle(slotProps.option)" />
