@@ -25,7 +25,7 @@ const filters = ref({
     _id: { value: null, matchMode: 'contains'},
     username: { value: null, matchMode: 'contains' }, 
     roomName: { value: null, matchMode: 'contains'},
-    date: { value: null, matchMode: 'dateIs'},
+    date: { value: null, matchMode: 'equals'},
     status: { value: null, matchMode: 'equals'}
 });
 
@@ -42,71 +42,7 @@ const filterCaseInsensitive = (value, filter) => {
     return String(value).toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
 };
 
-const registerDateFilter = () => {
-    if (window.PrimeVue && window.PrimeVue.config.filterService) {
-        window.PrimeVue.config.filterService.register('dateIs', (value, filter) => {
-            if (filter === undefined || filter === null) {
-                return true;
-            }
-            
-            if (value === undefined || value === null) {
-                return false;
-            }
-            
-            try {
-                let valueDate = new Date(value);
-                let filterDate = new Date(filter);
-                
-                if (isNaN(valueDate.getTime())) {
-                    // Try parsing as DD/MM/YYYY
-                    if (typeof value === 'string' && value.includes('/')) {
-                        const [day, month, year] = value.split('/').map(Number);
-                        valueDate = new Date(year, month - 1, day);
-                    }
-                }
-                
-                if (isNaN(filterDate.getTime())) {
-                    if (filter instanceof Date) {
-                        filterDate = filter;
-                    }
-                }
-                
-                if (isNaN(valueDate.getTime()) || isNaN(filterDate.getTime())) {
-                    console.warn('Invalid date in comparison:', { value, filter });
-                    return false;
-                }
-                
-                return valueDate.getFullYear() === filterDate.getFullYear() &&
-                       valueDate.getMonth() === filterDate.getMonth() &&
-                       valueDate.getDate() === filterDate.getDate();
-            } catch (error) {
-                console.error('Date comparison error:', error);
-                return false;
-            }
-        });
-    }
-};
 
-const formatDate = (dateString) => {
-    if (!dateString) return '';
-    
-    try {
-        const date = new Date(dateString);
-        
-        if (isNaN(date.getTime())) {
-            console.warn('Invalid date:', dateString);
-            return dateString;
-        }
-        
-        // Format as DD/MM/YYYY
-        return `${date.getDate().toString().padStart(2, '0')}/${
-            (date.getMonth() + 1).toString().padStart(2, '0')}/${
-            date.getFullYear()}`;
-    } catch (error) {
-        console.error('Date formatting error:', error);
-        return dateString;
-    }
-};
 
 const clearFilter = () => {
     filters.value = {
@@ -114,7 +50,7 @@ const clearFilter = () => {
         _id: { value: null, matchMode: 'contains'},
         username: { value: null, matchMode: 'contains' }, 
         roomName: { value: null, matchMode: 'contains'},
-        date: { value: null, matchMode: 'dateIs'},
+        date: { value: null, matchMode: 'equals'},
         status: { value: null, matchMode: 'equals'}
     };
 };
@@ -155,16 +91,11 @@ const fetchBookingRecords = async () => {
 };
 
 
-const applyDateFilter = () => {
-    if (dt.value) {
-        dt.value.filter();
-    }
-};
 
-// const formatDate = (dateString) => {
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString('en-GB');
-// };
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB');
+};
 
 
 const getStartTime = (timeslots) => {
@@ -327,14 +258,12 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ formatDate(data.date) }}
                 </template>
-                <template #filter="{ filterModel, filterCallback }">
+                <template #filter="{ filterModel }">
                     <Calendar 
                         v-model="filterModel.value" 
-                        dateFormat="dd/mm/yy" 
+                        dateFormat="dd-mm-yy" 
                         placeholder="Select date" 
                         class="p-2 w-full"
-                        @date-select="applyDateFilter"
-                        @clear="filterCallback()"
                     />
                 </template>
             </Column>
