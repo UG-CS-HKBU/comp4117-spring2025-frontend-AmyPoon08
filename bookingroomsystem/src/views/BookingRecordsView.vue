@@ -68,12 +68,12 @@ const statuses = [
 ];
 
 const filters = ref({
-    global: { value: null, FilterMatchModeatchMode: 'contains'},
-    _id: { value: null, FilterMatchModeatchMode: 'contains'},
-    username: { value: null, FilterMatchModeatchMode: 'contains' }, 
-    roomName: { value: null, FilterMatchModeatchMode: 'contains'},
-    date: { value: null, FilterMatchModeatchMode: 'customDate'},
-    status: { value: null, FilterMatchModeatchMode: 'equals'}
+    global: { value: null, FilterMatchMode: 'contains'},
+    _id: { value: null, FilterMatchMode: 'contains'},
+    username: { value: null, FilterMatchMode: 'contains' }, 
+    roomName: { value: null, FilterMatchMode: 'contains'},
+    date: { value: null, FilterMatchMode: 'customDate'},
+    status: { value: null, FilterMatchMode: 'equals'}
 });
 
 // // Custom filter function for case-insensitive filtering
@@ -92,12 +92,12 @@ const filters = ref({
 
 const clearFilter = () => {
     filters.value = {
-        global: { value: null, FilterMatchModeatchMode: 'contains'},
-        _id: { value: null, FilterMatchModeatchMode: 'contains'},
-        username: { value: null, FilterMatchModeatchMode: 'contains' }, 
-        roomName: { value: null, FilterMatchModeatchMode: 'contains'},
-        date: { value: null, FilterMatchModeatchMode: 'customDate'},
-        status: { value: null, FilterMatchModeatchMode: 'equals'}
+        global: { value: null, FilterMatchMode: 'contains'},
+        _id: { value: null, FilterMatchMode: 'contains'},
+        username: { value: null, FilterMatchMode: 'contains' }, 
+        roomName: { value: null, FilterMatchMode: 'contains'},
+        date: { value: null, FilterMatchMode: 'customDate'},
+        status: { value: null, FilterMatchMode: 'equals'}
     };
 };
 
