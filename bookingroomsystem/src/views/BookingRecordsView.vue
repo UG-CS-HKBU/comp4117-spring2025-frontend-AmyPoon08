@@ -8,6 +8,7 @@ import Calendar from 'primevue/calendar';
 import Tag from 'primevue/tag';
 import Select from 'primevue/select';
 import config from '../config';
+import { FilterMatchMode, FilterService } from 'primevue/api'; 
 
 const bookingRecords = ref([]);
 const loading = ref(false);
@@ -67,12 +68,12 @@ const statuses = [
 ];
 
 const filters = ref({
-    global: { value: null, matchMode: 'contains'},
-    _id: { value: null, matchMode: 'contains'},
-    username: { value: null, matchMode: 'contains' }, 
-    roomName: { value: null, matchMode: 'contains'},
-    date: { value: null, matchMode: 'customDate'},
-    status: { value: null, matchMode: 'equals'}
+    global: { value: null, FilterMatchModeatchMode: 'contains'},
+    _id: { value: null, FilterMatchModeatchMode: 'contains'},
+    username: { value: null, FilterMatchModeatchMode: 'contains' }, 
+    roomName: { value: null, FilterMatchModeatchMode: 'contains'},
+    date: { value: null, FilterMatchModeatchMode: 'customDate'},
+    status: { value: null, FilterMatchModeatchMode: 'equals'}
 });
 
 // // Custom filter function for case-insensitive filtering
@@ -91,12 +92,12 @@ const filters = ref({
 
 const clearFilter = () => {
     filters.value = {
-        global: { value: null, matchMode: 'contains'},
-        _id: { value: null, matchMode: 'contains'},
-        username: { value: null, matchMode: 'contains' }, 
-        roomName: { value: null, matchMode: 'contains'},
-        date: { value: null, matchMode: 'customDate'},
-        status: { value: null, matchMode: 'equals'}
+        global: { value: null, FilterMatchModeatchMode: 'contains'},
+        _id: { value: null, FilterMatchModeatchMode: 'contains'},
+        username: { value: null, FilterMatchModeatchMode: 'contains' }, 
+        roomName: { value: null, FilterMatchModeatchMode: 'contains'},
+        date: { value: null, FilterMatchModeatchMode: 'customDate'},
+        status: { value: null, FilterMatchModeatchMode: 'equals'}
     };
 };
 
