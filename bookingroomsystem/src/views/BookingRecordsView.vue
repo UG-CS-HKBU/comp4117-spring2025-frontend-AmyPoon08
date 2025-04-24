@@ -21,20 +21,22 @@ const statuses = [
 
 // Initialize filters
 const filters = ref({
-    global: { value: null, matchMode: 'contains', operator: 'and' },
-    bookingId: { value: null, matchMode: 'contains', operator: 'and' },
-    roomName: { value: null, matchMode: 'contains', operator: 'and' },
-    date: { value: null, matchMode: 'dateIs', operator: 'and' },
-    status: { value: null, matchMode: 'equals', operator: 'and' }
+    global: { value: null, matchMode: 'contains'},
+    _id: { value: null, matchMode: 'contains'},
+    userName: { value: null, matchMode: 'contains' },
+    roomName: { value: null, matchMode: 'contains'},
+    date: { value: null, matchMode: 'dateIs'},
+    status: { value: null, matchMode: 'equals'}
 });
 
 const clearFilter = () => {
     filters.value = {
-        global: { value: null, matchMode: 'contains', operator: 'and' },
-        bookingId: { value: null, matchMode: 'contains', operator: 'and' },
-        roomName: { value: null, matchMode: 'contains', operator: 'and' },
-        date: { value: null, matchMode: 'dateIs', operator: 'and' },
-        status: { value: null, matchMode: 'equals', operator: 'and' }
+        global: { value: null, matchMode: 'contains'},
+        _id: { value: null, matchMode: 'contains'},
+        userName: { value: null, matchMode: 'contains' },
+        roomName: { value: null, matchMode: 'contains'},
+        date: { value: null, matchMode: 'dateIs'},
+        status: { value: null, matchMode: 'equals'}
     };
 };
 
@@ -95,28 +97,6 @@ const getStatusSeverity = (status) => {
             return null;
     }
 };
-
-// const getStatusStyle = (status) => {
-//     switch (status?.toLowerCase()) {
-//         case 'pending payment':
-//             return {
-//                 backgroundColor: '#B71C1C', // Darker red color for pending payment
-//                 color: '#ffffff'
-//             };
-//         case 'pending approval':
-//             return {
-//                 backgroundColor: '#FFA000', // Darker yellow color for pending approval
-//                 color: '#ffffff'
-//             };
-//         case 'confirmed':
-//             return {
-//                 backgroundColor: '#1B5E20', // Dark green color for confirmed
-//                 color: '#ffffff'
-//             };
-//         default:
-//             return {};
-//     }
-// };
 
 const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
