@@ -161,6 +161,68 @@ const applyDateFilter = () => {
     }
 };
 
+// const formatDate = (dateString) => {
+//     const date = new Date(dateString);
+//     return date.toLocaleDateString('en-GB');
+// };
+
+
+const getStartTime = (timeslots) => {
+    if (!timeslots || timeslots.length === 0) return '-';
+    // Sort timeslots chronologically
+    const sortedSlots = [...timeslots].sort((a, b) => {
+        const [hourA] = a.split(':').map(Number);
+        const [hourB] = b.split(':').map(Number);
+        return hourA - hourB;
+    });
+    return sortedSlots[0];
+}
+
+const getEndTime = (timeslots) => {
+    if (!timeslots || timeslots.length === 0) return '-';
+    
+    const sortedSlots = [...timeslots].sort((a, b) => {
+        const [hourA, minA] = a.split(':').map(Number);
+        const [hourB, minB] = b.split(':').map(Number);
+        return hourA * 60 + minA - (hourB * 60 + minB);
+    });
+    
+    // Add 59 minutes to the last time slot
+    const lastSlot = sortedSlots[sortedSlots.length - 1];
+    const [hour, minute] = lastSlot.split(':').map(Number);
+    const endHour = Math.floor((minute + 59) / 60) + hour;
+    const endMinute = (minute + 59) % 60;
+    
+    return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+}
+
+
+const getStatusSeverity = (status) => {
+    switch (status?.toLowerCase()) {
+        case 'pending payment':
+            return 'danger';
+        case 'pending approval':
+            return 'warn';
+        case 'confirmed':
+            return 'success';
+        default:
+            return null;
+    }
+};
+
+const getStatusStyle = (status) => {
+    switch (status?.toLowerCase()) {
+        case 'pending payment':
+            return 'danger';
+        case 'pending approval':
+            return 'warn'
+        case 'confirmed':
+            return 'success';
+        default:
+            return {};
+    }
+};
+
 onMounted(() => {
     fetchBookingRecords();
     registerDateFilter();
