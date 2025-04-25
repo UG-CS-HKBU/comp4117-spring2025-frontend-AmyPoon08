@@ -12,53 +12,7 @@ import config from '../config';
 const bookingRecords = ref([]);
 const loading = ref(false);
 const dt = ref(null);
-const dateTemp = ref(null);
 
-const registerCustomDateFilter = () => {
-    // Register a custom date filter function to handle your specific case
-    FilterService.register('customDate', (value, filter) => {
-        if (!filter) return true;
-        if (!value) return false;
-        
-        try {
-            // Log values for debugging
-            console.log('Filtering date:', { value, filter });
-            
-            // Convert filter (from Calendar) to YYYY-MM-DD format for comparison
-            let filterDate;
-            if (filter instanceof Date) {
-                // Format date to YYYY-MM-DD string
-                const year = filter.getFullYear();
-                const month = String(filter.getMonth() + 1).padStart(2, '0');
-                const day = String(filter.getDate()).padStart(2, '0');
-                filterDate = `${year}-${month}-${day}`;
-            } else if (typeof filter === 'string') {
-                // If it's already a string, try to normalize it
-                const dateParts = filter.split('/');
-                if (dateParts.length === 3) {
-                    // Convert from DD/MM/YYYY to YYYY-MM-DD
-                    filterDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                } else {
-                    filterDate = filter;
-                }
-            } else {
-                return false;
-            }
-            
-            // Log the comparison
-            console.log('Comparing:', { originalValue: value, filterDate });
-            
-            // Compare the strings directly
-            return value === filterDate;
-        } catch (error) {
-            console.error('Date filter error:', error);
-            return false;
-        }
-    });
-};
-
-// Call the registration function
-registerCustomDateFilter();
 
 // Status options for filter
 const statuses = [
@@ -72,22 +26,9 @@ const filters = ref({
     _id: { value: null, matchMode: 'contains'},
     username: { value: null, matchMode: 'contains' }, 
     roomName: { value: null, matchMode: 'contains'},
-    date: { value: null, matchMode: 'customDate'},
+    // date: { value: null, matchMode: 'equals'},
     status: { value: null, matchMode: 'equals'}
 });
-
-// // Custom filter function for case-insensitive filtering
-// const filterCaseInsensitive = (value, filter) => {
-//     if (filter === undefined || filter === null || filter.trim() === '') {
-//         return true;
-//     }
-    
-//     if (value === undefined || value === null) {
-//         return false;
-//     }
-    
-//     return String(value).toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
-// };
 
 
 const clearFilter = () => {
@@ -96,7 +37,7 @@ const clearFilter = () => {
         _id: { value: null, matchMode: 'contains'},
         username: { value: null, matchMode: 'contains' }, 
         roomName: { value: null, matchMode: 'contains'},
-        date: { value: null, matchMode: 'customDate'},
+        // date: { value: null, matchMode: 'customDate'},
         status: { value: null, matchMode: 'equals'}
     };
 };
@@ -140,62 +81,10 @@ const fetchBookingRecords = async () => {
 
 
 const formatDate = (dateString) => {
-    if (!dateString) return '';
-    
-    try {
-        // Parse from YYYY-MM-DD to a Date object
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            return dateString; // Return original if parsing fails
-        }
-        
-        // Format as DD/MM/YYYY
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        
-        return `${day}/${month}/${year}`;
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return dateString;
-    }
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB');
 };
 
-
-const formatDateForDb = (date) => {
-    if (!date) return null;
-    
-    try {
-        if (date instanceof Date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-        return date; // Return as is if not a Date object
-    } catch (error) {
-        console.error('Error formatting date for DB:', error);
-        return null;
-    }
-};
-
-
-const onDateSelect = (value, filterModel, filterCallback) => {
-    // Convert selected date to YYYY-MM-DD format
-    const formattedDate = formatDateForDb(value);
-    console.log('Converting date for filter:', { 
-        original: value, 
-        formatted: formattedDate 
-    });
-    
-    // Update the filter model with the formatted date
-    filterModel.value = formattedDate;
-    
-    // Apply filter
-    if (filterCallback) {
-        filterCallback();
-    }
-};
 
 
 const getStartTime = (timeslots) => {
@@ -256,7 +145,6 @@ const getStatusStyle = (status) => {
 
 onMounted(() => {
     fetchBookingRecords();
-    registerDateFilter();
 });
 </script>
 
@@ -277,7 +165,7 @@ onMounted(() => {
             dataKey="_id"
             filterDisplay="menu" 
             :loading="loading"
-            :globalFilterFields="['_id', 'username', 'roomName', 'date']"
+            :globalFilterFields="['_id', 'username', 'roomName']"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[5, 10, 25]"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
@@ -358,7 +246,7 @@ onMounted(() => {
                 <template #body="{ data }">
                     {{ formatDate(data.date) }}
                 </template>
-                <template #filter="{ filterModel, filterCallback }">
+                <!-- <template #filter="{ filterModel, filterCallback }">
                     <Calendar 
                         v-model="dateTemp"
                         dateFormat="dd/mm/yy" 
@@ -367,7 +255,7 @@ onMounted(() => {
                         @date-select="(e) => onDateSelect(e.value, filterModel, filterCallback)"
                         @clear="() => { filterModel.value = null; filterCallback(); }"
                     />
-                </template>
+                </template> -->
             </Column>
 
             <Column field="timeslots" header="Start Time" style="min-width: 10rem">
