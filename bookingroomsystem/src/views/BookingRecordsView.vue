@@ -399,7 +399,6 @@ onMounted(() => {
 :deep(.p-button) {
     border-radius: 6px;
     padding: 0.5rem 1rem;
-    font-weight: 500;
 }
 
 :deep(.p-button-primary) {
@@ -537,6 +536,41 @@ onMounted(() => {
 :deep(.search-input) {
     width: 100%;
     min-height: 42px;
+}
+
+/* Responsive adjustments */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .room-info-container {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .left-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-wrapper {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
 }
 </style>
 
