@@ -155,152 +155,157 @@ onMounted(() => {
             <h1 class="page-title">Booking Records</h1>
             <p class="page-subtitle">View and manage all booking records</p>
         </div>
-        <DataTable 
-            ref="dt"
-            v-model:filters="filters" 
-            :value="bookingRecords" 
-            paginator 
-            showGridlines 
-            :rows="10" 
-            dataKey="_id"
-            filterDisplay="menu" 
-            :loading="loading"
-            :globalFilterFields="['_id', 'username', 'roomName']"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
-            class="custom-datatable"
-        >
-            <template #header>
-                <div class="flex items-center gap-4 header-controls">
-                    <div class="left-controls">
-                        <span class="p-input-icon-left search-wrapper">
-                            <i class="pi pi-search" />
-                            <InputText v-model="filters['global'].value" placeholder="Search bookings..." class="search-input"/>
-                        </span>
-                        <Button 
-                            type="button" 
-                            label="Clear Filters" 
-                            class="p-button-outlined"
-                            @click="clearFilter()"
-                        />
+        <div class="table-responsive">
+            <DataTable
+                scrollable
+                responsiveLayout="scroll"
+                :breakpoints="{ '960px': 'stack', '640px': 'stack' }"
+                ref="dt"
+                v-model:filters="filters" 
+                :value="bookingRecords" 
+                paginator 
+                showGridlines 
+                :rows="10" 
+                dataKey="_id"
+                filterDisplay="menu" 
+                :loading="loading"
+                :globalFilterFields="['_id', 'username', 'roomName']"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[5, 10, 25]"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings"
+                class="custom-datatable"
+            >
+                <template #header>
+                    <div class="flex items-center gap-4 header-controls">
+                        <div class="left-controls">
+                            <span class="p-input-icon-left search-wrapper">
+                                <i class="pi pi-search" />
+                                <InputText v-model="filters['global'].value" placeholder="Search bookings..." class="search-input"/>
+                            </span>
+                            <Button 
+                                type="button" 
+                                label="Clear Filters" 
+                                class="p-button-outlined"
+                                @click="clearFilter()"
+                            />
+                        </div>
                     </div>
-                </div>
-            </template>
+                </template>
 
-            <template #empty> No booking found. </template>
-            <template #loading> Loading booking records. Please wait. </template>
+                <template #empty> No booking found. </template>
+                <template #loading> Loading booking records. Please wait. </template>
 
-            <Column field="index" header="No." style="min-width: 5rem">
-                <template #body="{ index }">
-                    {{ index + 1 }}
-                </template>
-            </Column>
+                <Column field="index" header="No." style="min-width: 5rem">
+                    <template #body="{ index }">
+                        {{ index + 1 }}
+                    </template>
+                </Column>
 
-            <Column field="_id" header="Booking ID" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data._id }}
-                </template>
-                <template #filter="{ filterModel, filterCallback }">
-                    <InputText 
-                        v-model="filterModel.value" 
-                        type="text" 
-                        class="p-2 w-full" 
-                        placeholder="Search booking ID"
-                        @input="filterCallback()"
-                    />
-                </template>
-            </Column>
+                <Column field="_id" header="Booking ID" sortable style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data._id }}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText 
+                            v-model="filterModel.value" 
+                            type="text" 
+                            class="p-2 w-full" 
+                            placeholder="Search booking ID"
+                            @input="filterCallback()"
+                        />
+                    </template>
+                </Column>
 
-            <Column field="username" header="Username" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.username }}
-                </template>
-                <template #filter="{ filterModel, filterCallback }">
-                    <InputText 
-                        v-model="filterModel.value" 
-                        type="text" 
-                        class="p-2 w-full" 
-                        placeholder="Search username"
-                        @input="filterCallback()"
-                    />
-                </template>
-            </Column>
+                <Column field="username" header="Username" sortable style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.username }}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText 
+                            v-model="filterModel.value" 
+                            type="text" 
+                            class="p-2 w-full" 
+                            placeholder="Search username"
+                            @input="filterCallback()"
+                        />
+                    </template>
+                </Column>
 
-            <Column field="roomName" header="Room" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.roomName }}
-                </template>
-                <template #filter="{ filterModel, filterCallback }">
-                    <InputText 
-                        v-model="filterModel.value" 
-                        type="text" 
-                        class="p-2 w-full" 
-                        placeholder="Search room"
-                        @input="filterCallback()"
-                    />
-                </template>
-            </Column>
+                <Column field="roomName" header="Room" sortable style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.roomName }}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText 
+                            v-model="filterModel.value" 
+                            type="text" 
+                            class="p-2 w-full" 
+                            placeholder="Search room"
+                            @input="filterCallback()"
+                        />
+                    </template>
+                </Column>
 
-            <Column field="date" header="Date" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.date) }}
-                </template>
-                <!-- <template #filter="{ filterModel, filterCallback }">
-                    <Calendar 
-                        v-model="dateTemp"
-                        dateFormat="dd/mm/yy" 
-                        placeholder="Select date" 
-                        class="p-2 w-full"
-                        @date-select="(e) => onDateSelect(e.value, filterModel, filterCallback)"
-                        @clear="() => { filterModel.value = null; filterCallback(); }"
-                    />
-                </template> -->
-            </Column>
+                <Column field="date" header="Date" sortable style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.date) }}
+                    </template>
+                    <!-- <template #filter="{ filterModel, filterCallback }">
+                        <Calendar 
+                            v-model="dateTemp"
+                            dateFormat="dd/mm/yy" 
+                            placeholder="Select date" 
+                            class="p-2 w-full"
+                            @date-select="(e) => onDateSelect(e.value, filterModel, filterCallback)"
+                            @clear="() => { filterModel.value = null; filterCallback(); }"
+                        />
+                    </template> -->
+                </Column>
 
-            <Column field="timeslots" header="Start Time" style="min-width: 10rem">
-                <template #body="slotProps">
-                    {{ getStartTime(slotProps.data.timeslots) }}
-                </template>
-            </Column>
+                <Column field="timeslots" header="Start Time" style="min-width: 10rem">
+                    <template #body="slotProps">
+                        {{ getStartTime(slotProps.data.timeslots) }}
+                    </template>
+                </Column>
 
-            <Column field="timeslots" header="End Time" style="min-width: 10rem">
-                <template #body="slotProps">
-                    {{ getEndTime(slotProps.data.timeslots) }}
-                </template>
-            </Column>
-            
-            <Column field="status" header="Status" sortable style="min-width: 12rem">
-                <template #body="{ data }">
-                    <Tag :value="data.status" :severity="getStatusSeverity(data.status)" :style="getStatusStyle(data.status)" />
-                </template>
-                <template #filter="{ filterModel, filterCallback }">
-                    <Select 
-                        v-model="filterModel.value" 
-                        :options="statuses" 
-                        placeholder="Select Status" 
-                        class="p-2 w-full" 
-                        :showClear="true"
-                        @change="filterCallback()"
-                    >
-                        <template #option="slotProps">
-                            <Tag :value="slotProps.option" :severity="getStatusSeverity(slotProps.option)" :style="getStatusStyle(slotProps.option)" />
-                        </template>
-                    </Select>
-                </template>
-            </Column>
+                <Column field="timeslots" header="End Time" style="min-width: 10rem">
+                    <template #body="slotProps">
+                        {{ getEndTime(slotProps.data.timeslots) }}
+                    </template>
+                </Column>
+                
+                <Column field="status" header="Status" sortable style="min-width: 12rem">
+                    <template #body="{ data }">
+                        <Tag :value="data.status" :severity="getStatusSeverity(data.status)" :style="getStatusStyle(data.status)" />
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <Select 
+                            v-model="filterModel.value" 
+                            :options="statuses" 
+                            placeholder="Select Status" 
+                            class="p-2 w-full" 
+                            :showClear="true"
+                            @change="filterCallback()"
+                        >
+                            <template #option="slotProps">
+                                <Tag :value="slotProps.option" :severity="getStatusSeverity(slotProps.option)" :style="getStatusStyle(slotProps.option)" />
+                            </template>
+                        </Select>
+                    </template>
+                </Column>
 
-            <Column header="Actions" :exportable="false" style="min-width: 8rem">
-                <template #body="slotProps">
-                    <router-link 
-                        :to="`/bookingHistory/${slotProps.data._id}`" 
-                        class="p-button p-button-primary p-button-sm"
-                    >
-                        View
-                    </router-link>
-                </template>
-            </Column>
-        </DataTable>
+                <Column header="Actions" :exportable="false" style="min-width: 8rem">
+                    <template #body="slotProps">
+                        <router-link 
+                            :to="`/bookingHistory/${slotProps.data._id}`" 
+                            class="p-button p-button-primary p-button-sm"
+                        >
+                            View
+                        </router-link>
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </div>
 </template>
